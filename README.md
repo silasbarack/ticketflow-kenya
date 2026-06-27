@@ -143,15 +143,46 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
 - **Adding another payment provider**: see `backend/README.md` → "Adding another payment
   provider".
 
-## Deployment notes (next steps after local development)
+## Deploying to Render
 
-- **Backend → Render**: create a PostgreSQL instance + a Web Service pointing at `backend/`,
-  set the same env vars as `.env.example`, run `npx prisma migrate deploy` as a release
-  command, set `ENABLE_MOCK_PAYMENTS=false`, and point `MPESA_CALLBACK_URL` at the deployed
-  HTTPS URL.
-- **Frontend → Vercel**: import `frontend/`, set `NEXT_PUBLIC_API_URL` to the deployed backend
-  URL.
-- Update `FRONTEND_URL` in the backend env to the deployed frontend origin (used for CORS).
+This repo includes a [`render.yaml`](render.yaml) Blueprint that provisions everything in one
+go: a free PostgreSQL database, the NestJS backend, and the Next.js frontend, all as Render
+services connected to this GitHub repo.
+
+1. Push this repo to GitHub (already done if you're reading this on
+   `github.com/silasbarack/ticketflow-kenya`).
+2. In the Render dashboard, click **New +** → **Blueprint**, and connect this GitHub repo.
+   Render will detect `render.yaml` and show three resources to create: `ticketflow-db`,
+   `ticketflow-backend`, `ticketflow-frontend`.
+3. Click **Apply**. `DATABASE_URL` and `JWT_SECRET` are wired up automatically (Render
+   generates a secure random `JWT_SECRET` for you, and injects the database's internal
+   connection string).
+4. The backend's first deploy runs `npx prisma migrate deploy` automatically as part of its
+   start command, so the schema is applied before the app starts. Seed data is **not** run
+   automatically — see "Seeding the production database" below if you want sample data there.
+5. Once both services are live, fill in the env vars marked `sync: false` in the Render
+   dashboard (these can't be set in the Blueprint itself since they depend on URLs Render
+   assigns at creation time):
+   - On `ticketflow-frontend`: set `NEXT_PUBLIC_API_URL` to
+     `https://<your-backend-service>.onrender.com/api`.
+   - On `ticketflow-backend`: set `FRONTEND_URL` to `https://<your-frontend-service>.onrender.com`
+     (used for CORS), and `MPESA_CALLBACK_URL` to
+     `https://<your-backend-service>.onrender.com/api/payments/mpesa/callback`.
+   - If you have real Daraja sandbox/production credentials, also set `MPESA_CONSUMER_KEY`,
+     `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE`, `MPESA_PASSKEY` on the backend.
+6. Trigger a manual redeploy of both services after setting those so the new env vars take
+   effect.
+
+**Free tier caveats**: Render's free Postgres databases expire after a fixed period and free web
+services spin down when idle (so the first request after idling will be slow). Upgrade the plan
+in `render.yaml` (or directly in the dashboard) when you're ready for production traffic.
+
+### Seeding the production database
+
+The Blueprint intentionally does **not** run `npm run seed` automatically — seeding should be a
+deliberate one-off action, not something that re-runs on every deploy. To seed the deployed
+database once: in the Render dashboard, open the `ticketflow-backend` service → **Shell**, and
+run `npm run seed`.
 
 ## What's complete vs. what to do next
 

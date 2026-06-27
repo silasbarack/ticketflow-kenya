@@ -4,6 +4,9 @@
   "description": "TicketFlow Kenya - Ticket Sales & Event Management API",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
