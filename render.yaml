@@ -1,6 +1,7 @@
 databases:
   - name: ticketflow-db
     plan: free
+    region: oregon
     databaseName: ticketflow_kenya
     user: ticketflow_user
 
@@ -9,6 +10,7 @@ services:
     name: ticketflow-backend
     runtime: node
     plan: free
+    region: oregon
     rootDir: backend
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && npm run start:prod
@@ -48,6 +50,7 @@ services:
     name: ticketflow-frontend
     runtime: node
     plan: free
+    region: oregon
     rootDir: frontend
     buildCommand: npm install && npm run build
     startCommand: npm run start
