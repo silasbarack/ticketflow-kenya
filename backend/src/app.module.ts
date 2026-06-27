@@ -18,10 +18,9 @@ import { CheckinsModule } from './checkins/checkins.module';
 import { AdminModule } from './admin/admin.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { HealthController } from './health/health.controller';
-import { SeedOnceController } from './health/seed-once.controller';
 
 @Module({
-  controllers: [HealthController, SeedOnceController],
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
