@@ -149,6 +149,14 @@ This repo includes a [`render.yaml`](render.yaml) Blueprint that provisions ever
 go: a free PostgreSQL database, the NestJS backend, and the Next.js frontend, all as Render
 services connected to this GitHub repo.
 
+**Live deployment**:
+- Frontend: https://ticketflow-frontend-w47s.onrender.com
+- Backend API: https://ticketflow-backend-k1a9.onrender.com/api (health check at `/api/health`)
+
+Both services are on Render's free tier, so they spin down when idle — the first request after
+a period of inactivity will be slow while the instance wakes up. The production database is not
+seeded by default; see "Seeding the production database" below.
+
 1. Push this repo to GitHub (already done if you're reading this on
    `github.com/silasbarack/ticketflow-kenya`).
 2. In the Render dashboard, click **New +** → **Blueprint**, and connect this GitHub repo.
