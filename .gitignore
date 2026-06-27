@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables (contain secrets — never commit)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Backend (NestJS)
+backend/dist/
+backend/node_modules/
+
+# Frontend (Next.js)
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+frontend/build/
+frontend/next-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Prisma local dev artifacts
+backend/prisma/dev.db
+
+# TypeScript build info
+*.tsbuildinfo

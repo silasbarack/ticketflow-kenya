@@ -1,0 +1,215 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { api, getApiErrorMessage } from '@/lib/api';
+import RequireRole from '@/components/RequireRole';
+import DashboardLayout from '@/components/DashboardLayout';
+import { EventCategory } from '@/types';
+
+const NAV = [
+  { label: 'Overview', href: '/organizer/dashboard', icon: '\u{1F4CA}' },
+  { label: 'Create Event', href: '/organizer/events/create', icon: '➕' },
+  { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
+];
+
+const CATEGORY_IMAGE_KEYWORDS: Record<string, string> = {
+  'music & concerts': 'concert,music,crowd,stage',
+  'tech & business': 'conference,technology,startup,meeting',
+  sports: 'sports,stadium,athlete,game',
+  'arts & theatre': 'theatre,stage,performance,actor',
+  festivals: 'festival,africa,culture,market',
+};
+
+// Deterministic, lightweight hash so the same event title always maps to the same stock photo.
+function hashToLock(value: string): number {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) % 1000;
+  }
+  return hash + 1;
+}
+
+function buildFallbackPosterUrl(title: string, categoryName?: string) {
+  const keywords = (categoryName && CATEGORY_IMAGE_KEYWORDS[categoryName.toLowerCase()]) || 'event,crowd,celebration';
+  return `https://loremflickr.com/800/500/${keywords}?lock=${hashToLock(title || 'ticketflow-event')}`;
+}
+
+function CreateEventContent() {
+  const router = useRouter();
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    categoryId: '',
+    posterUrl: '',
+    venue: '',
+    city: '',
+    address: '',
+    startDateTime: '',
+    endDateTime: '',
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data } = await api.get('/categories');
+      return data as EventCategory[];
+    },
+  });
+
+  const createEvent = useMutation({
+    mutationFn: async () => {
+      const selectedCategory = categories?.find((c) => c.id === form.categoryId);
+      const { data } = await api.post('/events', {
+        ...form,
+        posterUrl: form.posterUrl || buildFallbackPosterUrl(form.title, selectedCategory?.name),
+        startDateTime: new Date(form.startDateTime).toISOString(),
+        endDateTime: new Date(form.endDateTime).toISOString(),
+      });
+      return data;
+    },
+    onSuccess: (event) => {
+      toast.success('Event created as draft. Add ticket types next.');
+      router.push(`/organizer/events/${event.id}`);
+    },
+    onError: (error) => toast.error(getApiErrorMessage(error)),
+  });
+
+  function update<K extends keyof typeof form>(key: K, value: string) {
+    setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  return (
+    <DashboardLayout items={NAV}>
+      <h1 className="text-2xl font-bold text-gray-900">Create Event</h1>
+      <p className="mt-1 text-gray-500">Events start as drafts. Submit for approval once ready.</p>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          createEvent.mutate();
+        }}
+        className="mt-6 max-w-2xl space-y-4 rounded-2xl border border-gray-200 bg-white p-6"
+      >
+        <Field label="Event title">
+          <input
+            required
+            value={form.title}
+            onChange={(e) => update('title', e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+        </Field>
+
+        <Field label="Description">
+          <textarea
+            required
+            rows={4}
+            value={form.description}
+            onChange={(e) => update('description', e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+        </Field>
+
+        <Field label="Category">
+          <select
+            required
+            value={form.categoryId}
+            onChange={(e) => update('categoryId', e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          >
+            <option value="">Select category</option>
+            {categories?.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Poster image URL (optional — placeholder used if blank)">
+          <input
+            value={form.posterUrl}
+            onChange={(e) => update('posterUrl', e.target.value)}
+            placeholder="https://..."
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Venue">
+            <input
+              required
+              value={form.venue}
+              onChange={(e) => update('venue', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
+          </Field>
+          <Field label="City">
+            <input
+              required
+              value={form.city}
+              onChange={(e) => update('city', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
+          </Field>
+        </div>
+
+        <Field label="Address (optional)">
+          <input
+            value={form.address}
+            onChange={(e) => update('address', e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Start date & time">
+            <input
+              required
+              type="datetime-local"
+              value={form.startDateTime}
+              onChange={(e) => update('startDateTime', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
+          </Field>
+          <Field label="End date & time">
+            <input
+              required
+              type="datetime-local"
+              value={form.endDateTime}
+              onChange={(e) => update('endDateTime', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            />
+          </Field>
+        </div>
+
+        <button
+          type="submit"
+          disabled={createEvent.isPending}
+          className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+        >
+          {createEvent.isPending ? 'Creating...' : 'Create Event'}
+        </button>
+      </form>
+    </DashboardLayout>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <div className="mt-1">{children}</div>
+    </div>
+  );
+}
+
+export default function CreateEventPage() {
+  return (
+    <RequireRole roles={['ORGANIZER']}>
+      <CreateEventContent />
+    </RequireRole>
+  );
+}

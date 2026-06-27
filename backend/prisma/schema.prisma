@@ -1,0 +1,296 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- ENUMS ----------
+
+enum UserRole {
+  CUSTOMER
+  ORGANIZER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PENDING_APPROVAL
+  PUBLISHED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum TicketTypeCategory {
+  REGULAR
+  VIP
+  VVIP
+  STUDENT
+  EARLY_BIRD
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum PaymentProvider {
+  MPESA
+  CARD
+  FLUTTERWAVE
+  PAYSTACK
+  MOCK
+}
+
+enum TicketStatus {
+  ACTIVE
+  USED
+  CANCELLED
+  REFUNDED
+}
+
+// ---------- MODELS ----------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  phone        String?  @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole @default(CUSTOMER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organizerProfile    OrganizerProfile?
+  orders              Order[]
+  tickets             Ticket[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+  checkInsPerformed   CheckIn[]             @relation("CheckInScannedBy")
+
+  @@map("users")
+}
+
+model OrganizerProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName  String
+  description  String?
+  phone        String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events Event[]
+
+  @@map("organizer_profiles")
+}
+
+model EventCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  events Event[]
+
+  @@map("event_categories")
+}
+
+model Event {
+  id              String      @id @default(uuid())
+  organizerId     String
+  organizer       OrganizerProfile @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  categoryId      String
+  category        EventCategory @relation(fields: [categoryId], references: [id])
+  title           String
+  slug            String      @unique
+  description     String
+  posterUrl       String?
+  venue           String
+  city            String
+  address         String?
+  startDateTime   DateTime
+  endDateTime     DateTime
+  status          EventStatus @default(DRAFT)
+  rejectionReason String?
+  isFeatured      Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  ticketTypes TicketType[]
+  orders      Order[]
+  checkIns    CheckIn[]
+
+  @@index([status])
+  @@index([city])
+  @@index([startDateTime])
+  @@map("events")
+}
+
+model TicketType {
+  id          String             @id @default(uuid())
+  eventId     String
+  event       Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  category    TicketTypeCategory @default(REGULAR)
+  price       Decimal            @db.Decimal(10, 2)
+  quantity    Int
+  quantitySold Int               @default(0)
+  description String?
+  salesStart  DateTime?
+  salesEnd    DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  orderItems OrderItem[]
+  tickets    Ticket[]
+
+  @@map("ticket_types")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  eventId         String
+  event           Event       @relation(fields: [eventId], references: [id])
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  platformFee     Decimal     @db.Decimal(10, 2)
+  organizerEarning Decimal    @db.Decimal(10, 2)
+  customerPhone   String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items    OrderItem[]
+  tickets  Ticket[]
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String     @id @default(uuid())
+  orderId      String
+  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ticketTypeId String
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+  quantity     Int
+  unitPrice    Decimal    @db.Decimal(10, 2)
+  subtotal     Decimal    @db.Decimal(10, 2)
+
+  @@map("order_items")
+}
+
+model Payment {
+  id              String          @id @default(uuid())
+  orderId         String
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider        PaymentProvider @default(MPESA)
+  status          PaymentStatus   @default(PENDING)
+  amount          Decimal         @db.Decimal(10, 2)
+  phone           String?
+  merchantRequestId String?
+  checkoutRequestId String?
+  mpesaReceiptNumber String?
+  resultCode      String?
+  resultDesc      String?
+  rawCallback     Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([orderId])
+  @@index([checkoutRequestId])
+  @@map("payments")
+}
+
+model Ticket {
+  id           String       @id @default(uuid())
+  ticketCode   String       @unique
+  qrCodeData   String
+  orderId      String
+  order        Order        @relation(fields: [orderId], references: [id])
+  ticketTypeId String
+  ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id])
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  status       TicketStatus @default(ACTIVE)
+  attendeeName String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  checkIn CheckIn?
+
+  @@index([ticketCode])
+  @@index([userId])
+  @@map("tickets")
+}
+
+model CheckIn {
+  id           String   @id @default(uuid())
+  ticketId     String   @unique
+  ticket       Ticket   @relation(fields: [ticketId], references: [id])
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id])
+  scannedById  String
+  scannedBy    User     @relation("CheckInScannedBy", fields: [scannedById], references: [id])
+  method       String   @default("QR")
+  checkedInAt  DateTime @default(now())
+
+  @@map("check_ins")
+}
+
+model PlatformCommission {
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  percentApplied  Decimal  @db.Decimal(5, 2)
+  amount          Decimal  @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+
+  @@map("platform_commissions")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

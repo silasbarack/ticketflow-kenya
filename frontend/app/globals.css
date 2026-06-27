@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background-color: #f9fafb;
+}
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.prose-legal h2 {
+  margin-top: 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.prose-legal h3 {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.prose-legal p {
+  color: #374151;
+}
+
+.prose-legal ul,
+.prose-legal ol {
+  margin-top: 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.prose-legal ul {
+  list-style-type: disc;
+}
+
+.prose-legal ol {
+  list-style-type: decimal;
+}
+
+.prose-legal li {
+  margin-top: 0.25rem;
+}
+
+.prose-legal a {
+  color: #ea580c;
+  text-decoration: underline;
+}
+
+.prose-legal strong {
+  color: #111827;
+}
