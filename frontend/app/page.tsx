@@ -71,7 +71,7 @@ export default function LandingPage() {
       <section className="relative overflow-hidden text-white">
         <div className="absolute inset-0">
           <Image
-            src="https://loremflickr.com/1600/900/concert,night,crowd,stage?lock=120"
+            src="https://loremflickr.com/1600/900/conference,business,auditorium,audience?lock=120"
             alt=""
             fill
             priority
