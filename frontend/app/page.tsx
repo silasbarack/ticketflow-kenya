@@ -68,8 +68,19 @@ export default function LandingPage() {
   return (
     <main className="overflow-x-hidden">
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-brand-700 via-brand-600 to-orange-500 text-white">
-        <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:28px_28px]" />
+      <section className="relative overflow-hidden text-white">
+        <div className="absolute inset-0">
+          <Image
+            src="https://loremflickr.com/1600/900/concert,crowd,festival,stage,lights?lock=99"
+            alt=""
+            fill
+            priority
+            unoptimized
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-brand-900/92 via-brand-700/85 to-orange-600/70" />
+          <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:28px_28px]" />
+        </div>
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24 lg:px-8">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
