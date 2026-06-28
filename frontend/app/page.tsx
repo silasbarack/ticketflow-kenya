@@ -71,14 +71,14 @@ export default function LandingPage() {
       <section className="relative overflow-hidden text-white">
         <div className="absolute inset-0">
           <Image
-            src="https://loremflickr.com/1600/900/concert,crowd,festival,stage,lights?lock=99"
+            src="https://loremflickr.com/1600/900/concert,night,crowd,stage?lock=120"
             alt=""
             fill
             priority
             unoptimized
-            className="object-cover"
+            className="object-cover brightness-[0.45]"
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-900/92 via-brand-700/85 to-orange-600/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-brand-900/70 to-brand-800/55" />
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:28px_28px]" />
         </div>
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24 lg:px-8">
@@ -86,10 +86,10 @@ export default function LandingPage() {
             <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
               {'\u{1F1F0}\u{1F1EA}'} Built for Kenya
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-tight sm:text-5xl">
+            <h1 className="mt-5 text-4xl font-bold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl">
               Sell tickets. Scan gates. <span className="text-orange-100">Get paid via M-Pesa.</span>
             </h1>
-            <p className="mt-4 max-w-xl text-lg text-brand-50">
+            <p className="mt-4 max-w-xl text-lg text-brand-50 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
               TicketFlow Kenya is the all-in-one platform for event organizers to publish events,
               sell tickets with QR-code entry, and track sales in real time.
             </p>
