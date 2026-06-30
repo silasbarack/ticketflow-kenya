@@ -59,9 +59,10 @@ export class EmailService {
 
     const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
 
-    // Use pre-rendered PNG (converted from SVG on startup via Resvg/WASM).
-    // PNG data URIs work in all email clients; SVG data URIs are blocked by Gmail.
-    const logoBase64 = this.logoPngBase64;
+    // Logo served from the deployed frontend URL — avoids base64 bloat that
+    // causes Gmail to clip the email at ~102 KB and hide the body message.
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'https://ticketflow-frontend-w47s.onrender.com';
+    const logoUrl = `${frontendUrl}/logo.png`;
 
     const html = `
 <!DOCTYPE html>
@@ -74,22 +75,22 @@ export class EmailService {
              style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <!-- Header -->
         <tr>
-          <td style="background:#be123c;padding:24px 32px;">
+          <td style="background:#be123c;padding:20px 28px;">
             <table cellpadding="0" cellspacing="0">
               <tr>
-                <td style="vertical-align:middle;padding-right:18px;">
-                  <img src="data:image/png;base64,${logoBase64}"
-                       width="110" height="115" alt="TicketFlow Kenya"
-                       style="display:block;" />
+                <td style="vertical-align:middle;padding-right:16px;">
+                  <img src="${logoUrl}" width="72" height="75"
+                       alt="TicketFlow Kenya Logo"
+                       style="display:block;border-radius:8px;" />
                 </td>
                 <td style="vertical-align:middle;">
-                  <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:900;
-                             font-style:italic;line-height:1.2;letter-spacing:-0.5px;">
+                  <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:900;
+                             font-style:italic;line-height:1.1;letter-spacing:-0.5px;">
                     TICKETFLOW</h1>
-                  <p style="color:#fda4af;margin:2px 0 0;font-size:13px;font-weight:700;
-                            letter-spacing:4px;">KENYA</p>
-                  <p style="color:#fecdd3;margin:6px 0 0;font-size:12px;">
-                    Your ticket is ready</p>
+                  <p style="color:#fda4af;margin:3px 0 0;font-size:12px;font-weight:700;
+                            letter-spacing:5px;">KENYA</p>
+                  <p style="color:#fecdd3;margin:8px 0 0;font-size:11px;">
+                    Your ticket is ready &#8594;</p>
                 </td>
               </tr>
             </table>
