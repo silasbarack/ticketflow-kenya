@@ -8,10 +8,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const PDFDocument: new (opts?: PDFKit.PDFDocumentOptions) => PDFKit.PDFDocument = require('pdfkit');
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const PDFDocument: new (opts?: PDFKit.PDFDocumentOptions) => PDFKit.PDFDocument = require('pdfkit');
 
 @Injectable()
 export class TicketsService {
