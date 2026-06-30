@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { Resvg } from '@resvg/resvg-js';
 
 export interface TicketEmailPayload {
   to: string;
@@ -13,10 +14,13 @@ export interface TicketEmailPayload {
   pdfBuffer: Buffer;
 }
 
+const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#c2410c"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#g)"/><rect x="9" y="15" width="30" height="18" rx="3" fill="white"/><circle cx="9" cy="24" r="3.5" fill="url(#g)"/><circle cx="39" cy="24" r="3.5" fill="url(#g)"/><line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#fdba74" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round"/><path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
+  private logoPngBase64 = '';
 
   constructor(private configService: ConfigService) {
     const host = this.configService.get<string>('SMTP_HOST');
@@ -33,6 +37,16 @@ export class EmailService {
     }
   }
 
+  onModuleInit() {
+    try {
+      const resvg = new Resvg(LOGO_SVG, { fitTo: { mode: 'width', value: 96 } });
+      this.logoPngBase64 = resvg.render().asPng().toString('base64');
+      this.logger.log('Logo PNG rendered for email');
+    } catch (err: any) {
+      this.logger.warn(`Logo PNG render failed: ${err?.message}`);
+    }
+  }
+
   async sendTicketEmail(payload: TicketEmailPayload): Promise<boolean> {
     if (!this.transporter) {
       this.logger.warn('SMTP not configured — skipping ticket email for ' + payload.to);
@@ -41,9 +55,9 @@ export class EmailService {
 
     const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
 
-    // Logo SVG embedded as base64 — works in Gmail, Outlook, Apple Mail, etc.
-    const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="eg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#c2410c"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#eg)"/><rect x="9" y="15" width="30" height="18" rx="3" fill="white"/><circle cx="9" cy="24" r="3.5" fill="url(#eg)"/><circle cx="39" cy="24" r="3.5" fill="url(#eg)"/><line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#fdba74" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round"/><path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const logoBase64 = Buffer.from(logoSvg).toString('base64');
+    // Use pre-rendered PNG (converted from SVG on startup via Resvg/WASM).
+    // PNG data URIs work in all email clients; SVG data URIs are blocked by Gmail.
+    const logoBase64 = this.logoPngBase64;
 
     const html = `
 <!DOCTYPE html>
@@ -60,7 +74,7 @@ export class EmailService {
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td style="vertical-align:middle;padding-right:14px;">
-                  <img src="data:image/svg+xml;base64,${logoBase64}"
+                  <img src="data:image/png;base64,${logoBase64}"
                        width="48" height="48" alt="TicketFlow Kenya Logo"
                        style="display:block;border-radius:10px;" />
                 </td>
