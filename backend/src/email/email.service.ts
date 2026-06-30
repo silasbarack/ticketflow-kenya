@@ -1,7 +1,8 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Resvg } from '@resvg/resvg-js';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface TicketEmailPayload {
   to: string;
@@ -14,13 +15,21 @@ export interface TicketEmailPayload {
   pdfBuffer: Buffer;
 }
 
-const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e11d48"/><stop offset="1" stop-color="#881337"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#g)"/><rect x="9" y="15" width="30" height="18" rx="3" fill="white"/><circle cx="9" cy="24" r="3.5" fill="url(#g)"/><circle cx="39" cy="24" r="3.5" fill="url(#g)"/><line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#fda4af" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round"/><path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#881337" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Load the full Kenya-map + card logo PNG from disk (assets/logo.png)
+function loadLogoPng(): string {
+  try {
+    const logoPath = path.join(__dirname, '..', '..', 'assets', 'logo.png');
+    return fs.readFileSync(logoPath).toString('base64');
+  } catch {
+    return '';
+  }
+}
 
 @Injectable()
-export class EmailService implements OnModuleInit {
+export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
-  private logoPngBase64 = '';
+  private readonly logoPngBase64 = loadLogoPng();
 
   constructor(private configService: ConfigService) {
     const host = this.configService.get<string>('SMTP_HOST');
@@ -35,15 +44,10 @@ export class EmailService implements OnModuleInit {
         },
       });
     }
-  }
-
-  onModuleInit() {
-    try {
-      const resvg = new Resvg(LOGO_SVG, { fitTo: { mode: 'width', value: 96 } });
-      this.logoPngBase64 = resvg.render().asPng().toString('base64');
-      this.logger.log('Logo PNG rendered for email');
-    } catch (err: any) {
-      this.logger.warn(`Logo PNG render failed: ${err?.message}`);
+    if (this.logoPngBase64) {
+      this.logger.log('Logo PNG loaded for email');
+    } else {
+      this.logger.warn('assets/logo.png not found — email will show text logo');
     }
   }
 
@@ -73,15 +77,19 @@ export class EmailService implements OnModuleInit {
           <td style="background:#be123c;padding:24px 32px;">
             <table cellpadding="0" cellspacing="0">
               <tr>
-                <td style="vertical-align:middle;padding-right:14px;">
+                <td style="vertical-align:middle;padding-right:18px;">
                   <img src="data:image/png;base64,${logoBase64}"
-                       width="48" height="48" alt="TicketFlow Kenya Logo"
-                       style="display:block;border-radius:10px;" />
+                       width="110" height="115" alt="TicketFlow Kenya"
+                       style="display:block;" />
                 </td>
                 <td style="vertical-align:middle;">
-                  <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:bold;
-                             line-height:1.2;">TicketFlow Kenya</h1>
-                  <p style="color:#fda4af;margin:4px 0 0;font-size:13px;">Your ticket is ready</p>
+                  <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:900;
+                             font-style:italic;line-height:1.2;letter-spacing:-0.5px;">
+                    TICKETFLOW</h1>
+                  <p style="color:#fda4af;margin:2px 0 0;font-size:13px;font-weight:700;
+                            letter-spacing:4px;">KENYA</p>
+                  <p style="color:#fecdd3;margin:6px 0 0;font-size:12px;">
+                    Your ticket is ready</p>
                 </td>
               </tr>
             </table>
