@@ -10,10 +10,7 @@ import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import type PDFDocumentType from 'pdfkit';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const PDFDocument: typeof PDFDocumentType = require('pdfkit');
+import PDFDocument from 'pdfkit';
 
 @Injectable()
 export class TicketsService {
@@ -265,7 +262,7 @@ export class TicketsService {
         const pdfBuffer = await this.buildPdf(fullTicket);
         const tt = ttMap[ticket.ticketTypeId] || fullTicket.ticketType;
 
-        await this.emailService.sendTicketEmail({
+        const sent = await this.emailService.sendTicketEmail({
           to: order.user.email,
           buyerName: `${order.user.firstName} ${order.user.lastName}`,
           eventName: order.event.title,
@@ -276,10 +273,12 @@ export class TicketsService {
           pdfBuffer,
         });
 
-        await this.prisma.ticket.update({
-          where: { id: ticket.id },
-          data: { emailSentAt: new Date() },
-        });
+        if (sent) {
+          await this.prisma.ticket.update({
+            where: { id: ticket.id },
+            data: { emailSentAt: new Date() },
+          });
+        }
       } catch (err: any) {
         this.logger.error(`Email/PDF failed for ticket ${ticket.ticketCode}: ${err?.message}`);
       }

@@ -33,10 +33,10 @@ export class EmailService {
     }
   }
 
-  async sendTicketEmail(payload: TicketEmailPayload): Promise<void> {
+  async sendTicketEmail(payload: TicketEmailPayload): Promise<boolean> {
     if (!this.transporter) {
       this.logger.warn('SMTP not configured — skipping ticket email for ' + payload.to);
-      return;
+      return false;
     }
 
     const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
@@ -158,8 +158,10 @@ export class EmailService {
         ],
       });
       this.logger.log(`Ticket email sent to ${payload.to} for ticket ${payload.ticketCode}`);
+      return true;
     } catch (err: any) {
       this.logger.error(`Failed to send ticket email to ${payload.to}: ${err?.message}`);
+      return false;
     }
   }
 }
