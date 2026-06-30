@@ -95,12 +95,33 @@ export class TicketsService {
 
       // ── Header band ─────────────────────────────────────────────────────────
       doc.rect(0, 0, W, 100).fill(orange);
+
+      // Logo mark (recreated from logo-icon.svg using pdfkit vector primitives)
+      const lx = 40; // logo top-left x
+      const ly = 18; // logo top-left y
+      const ls = 44; // logo size (square)
+      const lsc = ls / 48; // scale factor from 48-unit viewBox
+      doc.roundedRect(lx, ly, ls, ls, 12 * lsc).fill('#c2410c');
+      doc.roundedRect(lx + 9 * lsc, ly + 15 * lsc, 30 * lsc, 18 * lsc, 3 * lsc).fill('white');
+      doc.circle(lx + 9 * lsc, ly + 24 * lsc, 3.5 * lsc).fill('#c2410c');
+      doc.circle(lx + 39 * lsc, ly + 24 * lsc, 3.5 * lsc).fill('#c2410c');
+      doc.moveTo(lx + 30 * lsc, ly + 17.5 * lsc)
+        .lineTo(lx + 30 * lsc, ly + 30.5 * lsc)
+        .dash(2.2 * lsc, { space: 2.2 * lsc })
+        .strokeColor('#fdba74').lineWidth(1.4 * lsc).stroke().undash();
+      doc.moveTo(lx + 32.2 * lsc, ly + 24 * lsc)
+        .lineTo(lx + 34.4 * lsc, ly + 26.4 * lsc)
+        .lineTo(lx + 37.6 * lsc, ly + 21 * lsc)
+        .strokeColor('#c2410c').lineWidth(2 * lsc).lineJoin('round').lineCap('round').stroke();
+
+      // "TicketFlow Kenya" text beside the logo
+      const textX = lx + ls + 12;
       doc.fillColor('#ffffff').fontSize(26).font('Helvetica-Bold')
-        .text('TicketFlow Kenya', 40, 22, { width: W - 80 });
+        .text('TicketFlow Kenya', textX, 28, { width: W - textX - 20 });
       doc.fillColor('#fed7aa').fontSize(11).font('Helvetica')
-        .text('Official E-Ticket — Powered by TicketFlow Kenya', 40, 56);
-      doc.fillColor('#ffffff').fontSize(10)
-        .text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, 40, 75);
+        .text('Official E-Ticket', textX, 60);
+      doc.fillColor('#ffffff').fontSize(9)
+        .text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, textX, 76);
 
       // ── Event title strip ────────────────────────────────────────────────────
       doc.rect(0, 100, W, 52).fill(dark);

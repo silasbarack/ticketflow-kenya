@@ -41,6 +41,10 @@ export class EmailService {
 
     const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
 
+    // Logo SVG embedded as base64 — works in Gmail, Outlook, Apple Mail, etc.
+    const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="eg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#c2410c"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#eg)"/><rect x="9" y="15" width="30" height="18" rx="3" fill="white"/><circle cx="9" cy="24" r="3.5" fill="url(#eg)"/><circle cx="39" cy="24" r="3.5" fill="url(#eg)"/><line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#fdba74" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round"/><path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const logoBase64 = Buffer.from(logoSvg).toString('base64');
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -52,9 +56,21 @@ export class EmailService {
              style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <!-- Header -->
         <tr>
-          <td style="background:#ea580c;padding:28px 32px;">
-            <h1 style="color:#ffffff;margin:0;font-size:22px;">TicketFlow Kenya</h1>
-            <p style="color:#fed7aa;margin:4px 0 0;font-size:13px;">Your ticket is ready</p>
+          <td style="background:#ea580c;padding:24px 32px;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="vertical-align:middle;padding-right:14px;">
+                  <img src="data:image/svg+xml;base64,${logoBase64}"
+                       width="48" height="48" alt="TicketFlow Kenya Logo"
+                       style="display:block;border-radius:10px;" />
+                </td>
+                <td style="vertical-align:middle;">
+                  <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:bold;
+                             line-height:1.2;">TicketFlow Kenya</h1>
+                  <p style="color:#fed7aa;margin:4px 0 0;font-size:13px;">Your ticket is ready</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <!-- Body -->
