@@ -14,7 +14,7 @@ export interface TicketEmailPayload {
   pdfBuffer: Buffer;
 }
 
-const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb923c"/><stop offset="1" stop-color="#c2410c"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#g)"/><rect x="9" y="15" width="30" height="18" rx="3" fill="white"/><circle cx="9" cy="24" r="3.5" fill="url(#g)"/><circle cx="39" cy="24" r="3.5" fill="url(#g)"/><line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#fdba74" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round"/><path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e11d48"/><stop offset="1" stop-color="#881337"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#g)"/><rect x="9" y="15" width="30" height="18" rx="3" fill="white"/><circle cx="9" cy="24" r="3.5" fill="url(#g)"/><circle cx="39" cy="24" r="3.5" fill="url(#g)"/><line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#fda4af" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round"/><path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#881337" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -70,7 +70,7 @@ export class EmailService implements OnModuleInit {
              style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <!-- Header -->
         <tr>
-          <td style="background:#ea580c;padding:24px 32px;">
+          <td style="background:#be123c;padding:24px 32px;">
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td style="vertical-align:middle;padding-right:14px;">
@@ -81,7 +81,7 @@ export class EmailService implements OnModuleInit {
                 <td style="vertical-align:middle;">
                   <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:bold;
                              line-height:1.2;">TicketFlow Kenya</h1>
-                  <p style="color:#fed7aa;margin:4px 0 0;font-size:13px;">Your ticket is ready</p>
+                  <p style="color:#fda4af;margin:4px 0 0;font-size:13px;">Your ticket is ready</p>
                 </td>
               </tr>
             </table>

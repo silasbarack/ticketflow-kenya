@@ -80,7 +80,7 @@ export class TicketsService {
       doc.on('error', reject);
 
       const W = 595.28; // A4 width in points
-      const orange = '#ea580c';
+      const orange = '#be123c'; // Kenya flag red
       const dark = '#111827';
       const muted = '#6b7280';
       const light = '#f9fafb';
@@ -101,10 +101,10 @@ export class TicketsService {
       const ly = 18; // logo top-left y
       const ls = 44; // logo size (square)
       const lsc = ls / 48; // scale factor from 48-unit viewBox
-      doc.roundedRect(lx, ly, ls, ls, 12 * lsc).fill('#c2410c');
+      doc.roundedRect(lx, ly, ls, ls, 12 * lsc).fill('#9f1239');
       doc.roundedRect(lx + 9 * lsc, ly + 15 * lsc, 30 * lsc, 18 * lsc, 3 * lsc).fill('white');
-      doc.circle(lx + 9 * lsc, ly + 24 * lsc, 3.5 * lsc).fill('#c2410c');
-      doc.circle(lx + 39 * lsc, ly + 24 * lsc, 3.5 * lsc).fill('#c2410c');
+      doc.circle(lx + 9 * lsc, ly + 24 * lsc, 3.5 * lsc).fill('#9f1239');
+      doc.circle(lx + 39 * lsc, ly + 24 * lsc, 3.5 * lsc).fill('#9f1239');
       doc.moveTo(lx + 30 * lsc, ly + 17.5 * lsc)
         .lineTo(lx + 30 * lsc, ly + 30.5 * lsc)
         .dash(2.2 * lsc, { space: 2.2 * lsc })
@@ -112,13 +112,13 @@ export class TicketsService {
       doc.moveTo(lx + 32.2 * lsc, ly + 24 * lsc)
         .lineTo(lx + 34.4 * lsc, ly + 26.4 * lsc)
         .lineTo(lx + 37.6 * lsc, ly + 21 * lsc)
-        .strokeColor('#c2410c').lineWidth(2 * lsc).lineJoin('round').lineCap('round').stroke();
+        .strokeColor('#9f1239').lineWidth(2 * lsc).lineJoin('round').lineCap('round').stroke();
 
       // "TicketFlow Kenya" text beside the logo
       const textX = lx + ls + 12;
       doc.fillColor('#ffffff').fontSize(26).font('Helvetica-Bold')
         .text('TicketFlow Kenya', textX, 28, { width: W - textX - 20 });
-      doc.fillColor('#fed7aa').fontSize(11).font('Helvetica')
+      doc.fillColor('#fda4af').fontSize(11).font('Helvetica')
         .text('Official E-Ticket', textX, 60);
       doc.fillColor('#ffffff').fontSize(9)
         .text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, textX, 76);

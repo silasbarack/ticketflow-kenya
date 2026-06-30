@@ -87,7 +87,7 @@ export default function LandingPage() {
               {'\u{1F1F0}\u{1F1EA}'} Built for Kenya
             </span>
             <h1 className="mt-5 text-4xl font-bold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl">
-              Sell tickets. Scan gates. <span className="text-orange-100">Get paid via M-Pesa.</span>
+              Sell tickets. Scan gates. <span className="text-red-100">Get paid via M-Pesa.</span>
             </h1>
             <p className="mt-4 max-w-xl text-lg text-brand-50 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
               TicketFlow Kenya is the all-in-one platform for event organizers to publish events,
@@ -221,7 +221,7 @@ export default function LandingPage() {
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl bg-gray-900 px-8 py-12 text-center sm:px-16">
           <div className="absolute -right-10 -top-10 h-56 w-56 rounded-full bg-brand-600/30 blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 h-56 w-56 rounded-full bg-orange-500/20 blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 h-56 w-56 rounded-full bg-accent-600/20 blur-3xl" />
           <div className="relative">
             <h2 className="text-2xl font-bold text-white sm:text-3xl">Ready to host your next event?</h2>
             <p className="mx-auto mt-3 max-w-xl text-gray-300">
