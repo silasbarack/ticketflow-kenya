@@ -38,11 +38,15 @@ export class CheckinsService {
       throw new BadRequestException(`Ticket is ${ticket.status.toLowerCase()} and cannot be checked in`);
     }
 
+    const now = new Date();
     const checkIn = await this.prisma.$transaction(async (tx) => {
       const created = await tx.checkIn.create({
         data: { ticketId: ticket.id, eventId, scannedById: scannedByUserId, method },
       });
-      await tx.ticket.update({ where: { id: ticket.id }, data: { status: 'USED' } });
+      await tx.ticket.update({
+        where: { id: ticket.id },
+        data: { status: 'USED', scannedAt: now },
+      });
       return created;
     });
 
@@ -58,16 +62,17 @@ export class CheckinsService {
   }
 
   async scan(scannedByUserId: string, dto: ScanTicketDto) {
-    let parsed: { code?: string };
+    let parsed: { code?: string; eid?: string; sig?: string };
     try {
       parsed = JSON.parse(dto.qrData);
     } catch {
       throw new BadRequestException('Invalid QR code data');
     }
-    if (!parsed.code) {
+    const ticketCode = parsed.code;
+    if (!ticketCode) {
       throw new BadRequestException('QR code does not contain a valid ticket code');
     }
-    return this.performCheckIn(parsed.code, dto.eventId, scannedByUserId, 'QR');
+    return this.performCheckIn(ticketCode, dto.eventId, scannedByUserId, 'QR');
   }
 
   async manual(scannedByUserId: string, dto: ManualCheckinDto) {

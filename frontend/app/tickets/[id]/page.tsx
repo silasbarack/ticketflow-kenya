@@ -52,12 +52,22 @@ function ETicketContent() {
         </div>
       </div>
 
-      <button
-        onClick={() => window.print()}
-        className="mt-4 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 print:hidden"
-      >
-        Print / Save as PDF
-      </button>
+      <div className="mt-4 flex gap-3 print:hidden">
+        <a
+          href={`${process.env.NEXT_PUBLIC_API_URL}/tickets/${ticket.id}/pdf`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white text-center hover:bg-brand-700"
+        >
+          ⬇ Download PDF Ticket
+        </a>
+        <button
+          onClick={() => window.print()}
+          className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+        >
+          Print
+        </button>
+      </div>
     </main>
   );
 }

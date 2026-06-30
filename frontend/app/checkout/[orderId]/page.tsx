@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
-import { Order, Payment } from '@/types';
-import { formatCurrency } from '@/lib/format';
+import { Order, Payment, Ticket } from '@/types';
+import { formatCurrency, formatDateTime, formatTicketCategory } from '@/lib/format';
 
 function CheckoutContent() {
   const params = useParams<{ orderId: string }>();
@@ -37,6 +39,19 @@ function CheckoutContent() {
     },
   });
 
+  const { data: tickets } = useQuery({
+    queryKey: ['order-tickets', params.orderId],
+    queryFn: async () => {
+      const { data } = await api.get(`/orders/${params.orderId}`);
+      return (data as Order).tickets ?? [];
+    },
+    enabled: order?.status === 'PAID',
+    refetchInterval: (query) => {
+      const t = query.state.data as Ticket[] | undefined;
+      return !t || t.length === 0 ? 2000 : false;
+    },
+  });
+
   const latestPayment = payments?.[0];
 
   if (latestPayment?.status === 'SUCCESS') {
@@ -62,8 +77,9 @@ function CheckoutContent() {
       return data;
     },
     onSuccess: () => {
-      toast.success('Payment confirmed (mock). Redirecting to your tickets...');
-      setTimeout(() => router.push('/dashboard/tickets'), 1200);
+      queryClient.invalidateQueries({ queryKey: ['order', params.orderId] });
+      queryClient.invalidateQueries({ queryKey: ['order-tickets', params.orderId] });
+      toast.success('Payment confirmed!');
     },
     onError: (error) => toast.error(getApiErrorMessage(error)),
   });
@@ -72,21 +88,133 @@ function CheckoutContent() {
     return <main className="mx-auto max-w-2xl px-4 py-16 text-gray-500">Loading order...</main>;
   }
 
+  /* ── SUCCESS SCREEN ──────────────────────────────────────────────────── */
   if (order.status === 'PAID') {
+    const paidTickets = tickets ?? [];
+
     return (
-      <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-emerald-700">Payment confirmed!</h1>
-        <p className="mt-2 text-gray-500">Your tickets are ready.</p>
-        <button
-          onClick={() => router.push('/dashboard/tickets')}
-          className="mt-6 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700"
-        >
-          View my tickets
-        </button>
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        {/* Thank-you banner */}
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-6 py-8 text-center">
+          <div className="text-5xl mb-3">🎉</div>
+          <h1 className="text-2xl font-bold text-emerald-800">Payment Confirmed!</h1>
+          <p className="mt-2 text-emerald-700 text-base">
+            Thank you for purchasing with <strong>TicketFlow Kenya</strong>.
+          </p>
+          <p className="mt-1 text-sm text-emerald-600">
+            Your ticket{paidTickets.length > 1 ? 's have' : ' has'} been generated and
+            {paidTickets.length > 0 ? ' are' : ' will be'} sent to your email.
+          </p>
+        </div>
+
+        {/* Appreciation message */}
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white px-6 py-5 text-sm text-gray-700 space-y-2">
+          <p className="font-semibold text-gray-900 text-base">
+            Dear {order.event.title} attendee,
+          </p>
+          <p>
+            Your payment has been successfully confirmed. A PDF ticket has been generated for
+            each ticket you purchased and sent to your registered email address.
+          </p>
+          <p>
+            Please present your QR code at the event entrance for verification. Each ticket is
+            valid for <strong>one entry only</strong> — do not share your QR code publicly.
+          </p>
+          <p className="text-gray-500 text-xs pt-1">
+            We appreciate your purchase and look forward to seeing you at the event.
+            — <em>TicketFlow Kenya</em>
+          </p>
+        </div>
+
+        {/* Per-ticket cards */}
+        {paidTickets.length > 0 ? (
+          <div className="mt-6 space-y-4">
+            <h2 className="font-semibold text-gray-900">
+              Your {paidTickets.length > 1 ? `${paidTickets.length} tickets` : 'ticket'}
+            </h2>
+            {paidTickets.map((ticket) => (
+              <div
+                key={ticket.id}
+                className="rounded-2xl border border-gray-200 bg-white overflow-hidden"
+              >
+                {/* Ticket header */}
+                <div className="bg-brand-600 px-5 py-3 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-brand-100 uppercase tracking-wide">
+                    {ticket.ticketType?.name} · {formatTicketCategory(ticket.ticketType?.category ?? '')}
+                  </span>
+                  <span className="text-xs font-mono text-white">{ticket.ticketCode}</span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 p-5">
+                  {/* QR code */}
+                  <div className="flex flex-col items-center gap-2 shrink-0">
+                    <div className="rounded-xl border border-gray-200 p-2 bg-white">
+                      <Image
+                        src={ticket.qrCodeData}
+                        alt="Ticket QR code"
+                        width={160}
+                        height={160}
+                        unoptimized
+                      />
+                    </div>
+                    <p className="text-xs text-gray-400 font-mono">{ticket.ticketCode}</p>
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 space-y-2 text-sm">
+                    <Row label="Event" value={order.event.title} />
+                    <Row label="Type" value={`${ticket.ticketType?.name} (${formatTicketCategory(ticket.ticketType?.category ?? '')})`} />
+                    <Row label="Price" value={formatCurrency(ticket.ticketType?.price ?? 0)} />
+                    <Row label="Venue" value={`${order.event.venue}, ${order.event.city}`} />
+                    <Row label="Date" value={formatDateTime(order.event.startDateTime)} />
+                    <Row label="Payment" value="Confirmed ✓" />
+
+                    <div className="pt-2 flex flex-wrap gap-2">
+                      <Link
+                        href={`/tickets/${ticket.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-700"
+                      >
+                        View e-ticket
+                      </Link>
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_API_URL}/tickets/${ticket.id}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                      >
+                        ⬇ Download PDF
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+            <p>Generating your ticket{order.items.length > 1 ? 's' : ''}…</p>
+            <div className="mt-3 h-2 w-32 mx-auto rounded-full bg-gray-200 animate-pulse" />
+          </div>
+        )}
+
+        {/* Email notice */}
+        <p className="mt-4 text-center text-sm text-gray-400">
+          📧 Your PDF ticket has also been sent to your registered email address.
+        </p>
+
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/dashboard/tickets"
+            className="rounded-lg bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+          >
+            View all my tickets →
+          </Link>
+        </div>
       </main>
     );
   }
 
+  /* ── PAYMENT FORM ──────────────────────────────────────────────────────── */
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900">Complete your payment</h1>
@@ -96,7 +224,7 @@ function CheckoutContent() {
           {order.items.map((item) => (
             <li key={item.id} className="flex justify-between">
               <span>
-                {item.quantity} x {item.ticketType.name}
+                {item.quantity} × {item.ticketType.name}
               </span>
               <span>{formatCurrency(item.subtotal)}</span>
             </li>
@@ -122,14 +250,14 @@ function CheckoutContent() {
           disabled={stkPush.isPending || !phone || !!activePaymentId}
           className="mt-4 w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
         >
-          {stkPush.isPending ? 'Sending STK push...' : 'Pay with M-Pesa'}
+          {stkPush.isPending ? 'Sending STK push…' : 'Pay with M-Pesa'}
         </button>
 
         {activePaymentId && (
           <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
             <p>
-              Status: <strong>{latestPayment?.status || 'PENDING'}</strong> — waiting for confirmation from
-              Safaricom.
+              Status: <strong>{latestPayment?.status || 'PENDING'}</strong> — waiting for
+              confirmation from Safaricom.
             </p>
             <button
               onClick={() => mockSuccess.mutate()}
@@ -142,6 +270,15 @@ function CheckoutContent() {
         )}
       </div>
     </main>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <span className="text-gray-500 shrink-0">{label}</span>
+      <span className="font-medium text-gray-900 text-right">{value}</span>
+    </div>
   );
 }
 
