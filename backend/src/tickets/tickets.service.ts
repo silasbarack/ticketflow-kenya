@@ -10,9 +10,10 @@ import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import type PDFDocumentType from 'pdfkit';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const PDFDocument: new (opts?: PDFKit.PDFDocumentOptions) => PDFKit.PDFDocument = require('pdfkit');
+const PDFDocument: typeof PDFDocumentType = require('pdfkit');
 
 @Injectable()
 export class TicketsService {
