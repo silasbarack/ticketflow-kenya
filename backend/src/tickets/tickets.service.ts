@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const PDFDocument = require('pdfkit') as new (opts?: Record<string, unknown>) => typeof import('pdfkit') extends new (...a: infer A) => infer R ? R : never;
+const PDFDocument: new (opts?: PDFKit.PDFDocumentOptions) => PDFKit.PDFDocument = require('pdfkit');
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 
