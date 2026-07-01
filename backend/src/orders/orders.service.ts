@@ -30,7 +30,7 @@ export class OrdersService {
       }
 
       let totalAmount = 0;
-      const itemsData: { ticketTypeId: string; quantity: number; unitPrice: number; subtotal: number }[] = [];
+      const itemsData: { ticketTypeId: string; quantity: number; unitPrice: number; subtotal: number; attendeesJson?: any }[] = [];
 
       for (const item of dto.items) {
         const ticketType = await tx.ticketType.findUnique({ where: { id: item.ticketTypeId } });
@@ -46,7 +46,13 @@ export class OrdersService {
         const subtotal = unitPrice * item.quantity;
         totalAmount += subtotal;
 
-        itemsData.push({ ticketTypeId: ticketType.id, quantity: item.quantity, unitPrice, subtotal });
+        itemsData.push({
+          ticketTypeId: ticketType.id,
+          quantity: item.quantity,
+          unitPrice,
+          subtotal,
+          ...(item.attendees?.length ? { attendeesJson: item.attendees } : {}),
+        });
 
         // Reserve the tickets immediately so concurrent buyers cannot oversell.
         // Reservation is released if payment fails or is cancelled.

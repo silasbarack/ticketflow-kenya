@@ -236,11 +236,17 @@ export class TicketsService {
     const createdTickets: Awaited<ReturnType<typeof this.prisma.ticket.create>>[] = [];
 
     for (const item of order.items) {
+      const attendeeList: any[] = Array.isArray(item.attendeesJson) ? (item.attendeesJson as any[]) : [];
       for (let i = 0; i < item.quantity; i++) {
         const ticketCode = this.generateTicketCode();
         const qrPayload = this.buildQrPayload(ticketCode, order.eventId);
         const sig = this.signQrPayload(ticketCode, order.eventId);
         const qrCodeData = await QRCode.toDataURL(qrPayload);
+
+        const attendee = attendeeList[i] as { firstName: string; lastName: string } | undefined;
+        const attendeeName = attendee
+          ? `${attendee.firstName} ${attendee.lastName}`
+          : `${order.user.firstName} ${order.user.lastName}`;
 
         const ticket = await this.prisma.ticket.create({
           data: {
@@ -250,7 +256,7 @@ export class TicketsService {
             orderId: order.id,
             ticketTypeId: item.ticketTypeId,
             userId: order.userId,
-            attendeeName: `${order.user.firstName} ${order.user.lastName}`,
+            attendeeName,
           },
         });
         createdTickets.push(ticket);

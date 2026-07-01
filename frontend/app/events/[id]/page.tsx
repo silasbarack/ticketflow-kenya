@@ -2,11 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { api, getApiErrorMessage } from '@/lib/api';
+import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 import { EventItem } from '@/types';
 import { formatCurrency, formatDateTime, formatTicketCategory } from '@/lib/format';
 
@@ -14,6 +16,7 @@ export default function EventDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuth();
+  const { items: cartItems, addToCart, totalItems } = useCart();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   const { data: event, isLoading } = useQuery({
@@ -29,29 +32,18 @@ export default function EventDetailsPage() {
     return event.ticketTypes.reduce((sum, tt) => sum + (quantities[tt.id] || 0) * Number(tt.price), 0);
   }, [event, quantities]);
 
-  const createOrder = useMutation({
-    mutationFn: async () => {
-      const items = Object.entries(quantities)
-        .filter(([, qty]) => qty > 0)
-        .map(([ticketTypeId, quantity]) => ({ ticketTypeId, quantity }));
-      const { data } = await api.post('/orders', { eventId: event!.id, items });
-      return data;
-    },
-    onSuccess: (order) => {
-      router.push(`/checkout/${order.id}`);
-    },
-    onError: (error) => toast.error(getApiErrorMessage(error)),
-  });
+  const totalSelected = useMemo(
+    () => Object.values(quantities).reduce((s, q) => s + q, 0),
+    [quantities],
+  );
 
-  if (isLoading) {
-    return <main className="mx-auto max-w-5xl px-4 py-16 text-gray-500">Loading event...</main>;
-  }
-  if (!event) {
-    return <main className="mx-auto max-w-5xl px-4 py-16 text-gray-500">Event not found.</main>;
-  }
+  // Warn if cart already has a different event's tickets
+  const cartEventId = cartItems[0]?.eventId;
+  const cartEventName = cartItems[0]?.eventTitle;
+  const willReplaceCart = cartItems.length > 0 && cartEventId !== event?.id;
 
-  function handleBuy() {
-    if (total <= 0) {
+  function handleAddToCart() {
+    if (totalSelected <= 0) {
       toast.error('Select at least one ticket');
       return;
     }
@@ -63,7 +55,46 @@ export default function EventDetailsPage() {
       toast.error('Only customer accounts can purchase tickets');
       return;
     }
-    createOrder.mutate();
+
+    if (willReplaceCart) {
+      if (!confirm(`Your cart currently has tickets for "${cartEventName}". Adding these will replace your cart. Continue?`)) {
+        return;
+      }
+    }
+
+    let added = 0;
+    for (const tt of event!.ticketTypes) {
+      const qty = quantities[tt.id] || 0;
+      if (qty > 0) {
+        addToCart({
+          eventId: event!.id,
+          eventTitle: event!.title,
+          eventSlug: event!.slug,
+          eventDateTime: event!.startDateTime,
+          eventVenue: event!.venue,
+          eventCity: event!.city,
+          ticketTypeId: tt.id,
+          ticketTypeName: tt.name,
+          ticketTypeCategory: tt.category,
+          price: Number(tt.price),
+          quantity: qty,
+        });
+        added += qty;
+      }
+    }
+
+    setQuantities({});
+    toast.success(
+      `${added} ticket${added !== 1 ? 's' : ''} added to cart`,
+      { icon: '🛒', duration: 3000 },
+    );
+  }
+
+  if (isLoading) {
+    return <main className="mx-auto max-w-5xl px-4 py-16 text-gray-500">Loading event...</main>;
+  }
+  if (!event) {
+    return <main className="mx-auto max-w-5xl px-4 py-16 text-gray-500">Event not found.</main>;
   }
 
   return (
@@ -141,12 +172,24 @@ export default function EventDetailsPage() {
           </div>
 
           <button
-            onClick={handleBuy}
-            disabled={createOrder.isPending}
+            onClick={handleAddToCart}
             className="mt-4 w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
           >
-            {createOrder.isPending ? 'Creating order...' : 'Buy Ticket'}
+            Add to Cart
           </button>
+
+          {totalItems > 0 && (
+            <Link
+              href="/cart"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-100"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 5h14.6M10 21a1 1 0 110-2 1 1 0 010 2zm7 0a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+              View Cart ({totalItems} ticket{totalItems !== 1 ? 's' : ''})
+            </Link>
+          )}
         </div>
       </div>
     </main>

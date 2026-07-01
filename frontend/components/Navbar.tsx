@@ -3,10 +3,38 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
 import Logo from '@/components/Logo';
+
+function CartIcon({ count }: { count: number }) {
+  return (
+    <Link href="/cart" className="relative p-2 text-gray-600 hover:text-brand-600" aria-label="Cart">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.8}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 5h14.6M10 21a1 1 0 110-2 1 1 0 010 2zm7 0a1 1 0 110-2 1 1 0 010 2z"
+        />
+      </svg>
+      {count > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const [open, setOpen] = useState(false);
 
   const dashboardHref =
@@ -31,6 +59,7 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <CartIcon count={totalItems} />
           {!user ? (
             <>
               <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-brand-600">
@@ -56,11 +85,14 @@ export default function Navbar() {
           )}
         </div>
 
-        <button className="p-2 md:hidden" onClick={() => setOpen(!open)} aria-label="Toggle menu">
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <CartIcon count={totalItems} />
+          <button className="p-2" onClick={() => setOpen(!open)} aria-label="Toggle menu">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {open && (

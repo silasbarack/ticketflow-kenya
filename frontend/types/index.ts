@@ -135,6 +135,28 @@ export interface Attendee {
   purchasedAt: string;
 }
 
+export interface AttendeeInfo {
+  firstName: string;
+  lastName: string;
+  nationalId: string;
+  email: string;
+  phone: string;
+}
+
+export interface CartItem {
+  eventId: string;
+  eventTitle: string;
+  eventSlug: string;
+  eventDateTime: string;
+  eventVenue: string;
+  eventCity: string;
+  ticketTypeId: string;
+  ticketTypeName: string;
+  ticketTypeCategory: TicketTypeCategory;
+  price: number;
+  quantity: number;
+}
+
 export interface AdminStats {
   totalUsers: number;
   totalOrganizers: number;

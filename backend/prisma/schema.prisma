@@ -189,14 +189,15 @@ model Order {
 }
 
 model OrderItem {
-  id           String     @id @default(uuid())
-  orderId      String
-  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  ticketTypeId String
-  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
-  quantity     Int
-  unitPrice    Decimal    @db.Decimal(10, 2)
-  subtotal     Decimal    @db.Decimal(10, 2)
+  id            String     @id @default(uuid())
+  orderId       String
+  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ticketTypeId  String
+  ticketType    TicketType @relation(fields: [ticketTypeId], references: [id])
+  quantity      Int
+  unitPrice     Decimal    @db.Decimal(10, 2)
+  subtotal      Decimal    @db.Decimal(10, 2)
+  attendeesJson Json?
 
   @@map("order_items")
 }
