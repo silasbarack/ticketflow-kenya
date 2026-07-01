@@ -67,10 +67,10 @@ export class EmailService {
     /*
      * Plain-text fallback:
      * Dear ${payload.buyerName},
-     * Thank you for purchasing a ticket through TicketFlow Kenya.
-     * Your payment is confirmed. Ticket for ${payload.eventName} is attached as a PDF.
+     * Thank you for purchasing your ticket through TicketFlow Kenya.
+     * Your payment has been successfully confirmed, and your ticket for ${payload.eventName} is attached as a PDF.
      * Ticket Code: ${payload.ticketCode} | Venue: ${payload.venue} | Date: ${payload.eventDateTime}
-     * Please present the QR code at the entrance. Valid for one entry only.
+     * Please present the QR code at the entrance. Important: valid for one entry only.
      * We appreciate your purchase. Regards, TicketFlow Kenya — support@ticketflow.co.ke
      */
     const html = `<!DOCTYPE html>
@@ -82,12 +82,12 @@ export class EmailService {
 </head>
 <body style="margin:0;padding:0;background-color:#121212;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 
-<!-- Outer wrapper -->
+<!-- Outer wrapper: #121212 background, 32px 24px padding -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
        style="background-color:#121212;padding:32px 24px;">
 <tr><td align="center">
 
-<!-- Main card -->
+<!-- Main card: max 600px, #1e1f21 background -->
 <table role="presentation" cellpadding="0" cellspacing="0"
        style="width:100%;max-width:600px;background-color:#1e1f21;border-radius:8px;overflow:hidden;">
 
@@ -106,23 +106,27 @@ export class EmailService {
     </td>
   </tr>
 
-  <!-- ── Body ── -->
+  <!-- ── Body: 24px padding ── -->
   <tr>
     <td style="padding:28px 24px 24px;">
 
-      <!-- 1. Greeting -->
-      <p style="margin:0 0 16px;font-size:20px;font-weight:600;color:#eaeeef;line-height:1.4;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      <!-- 1. Greeting: 20px, #eaeeef -->
+      <p style="margin:0 0 18px;font-size:20px;font-weight:600;color:#eaeeef;line-height:1.4;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         Dear <strong>${payload.buyerName}</strong>,
       </p>
 
-      <!-- 2. Confirmation paragraph -->
-      <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#eaeeef;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      <!-- 2. Paragraph 1: 14px, dark blue #1a3a6e -->
+      <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         Thank you for purchasing your ticket through <strong>TicketFlow Kenya</strong>.
+      </p>
+
+      <!-- 3. Paragraph 2: separate block, same 14px dark blue, margin-top via margin -->
+      <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         Your payment has been successfully confirmed, and your ticket for
         <strong>${payload.eventName}</strong> is attached to this email as a PDF.
       </p>
 
-      <!-- 3. Ticket details card -->
+      <!-- 4. Ticket details rounded card -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
              style="border-radius:12px;border:1px solid #2a2b2d;overflow:hidden;margin:0 0 24px;">
 
@@ -133,31 +137,31 @@ export class EmailService {
           </td>
         </tr>
 
-        <!-- Event (odd) -->
+        <!-- Event (odd row: #121212) -->
         <tr style="background-color:#121212;">
           <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;width:130px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Event</td>
           <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.eventName}</td>
         </tr>
 
-        <!-- Ticket Type (even) -->
+        <!-- Ticket Type (even row: #1e1f21) -->
         <tr style="background-color:#1e1f21;">
           <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Ticket Type</td>
           <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.ticketType}</td>
         </tr>
 
-        <!-- Ticket Code (odd) -->
+        <!-- Ticket Code (odd row: #121212) — coral #ff6b6b, monospace -->
         <tr style="background-color:#121212;">
           <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Ticket Code</td>
-          <td style="font-size:16px;color:#be123c;font-weight:700;padding:11px 16px;font-family:'Courier New',Courier,monospace;">${payload.ticketCode}</td>
+          <td style="font-size:16px;color:#ff6b6b;font-weight:700;padding:11px 16px;font-family:'Courier New',Courier,monospace;">${payload.ticketCode}</td>
         </tr>
 
-        <!-- Venue (even) -->
+        <!-- Venue (even row: #1e1f21) -->
         <tr style="background-color:#1e1f21;">
           <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Venue</td>
           <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.venue}</td>
         </tr>
 
-        <!-- Date & Time (odd) -->
+        <!-- Date & Time (odd row: #121212) -->
         <tr style="background-color:#121212;">
           <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Date &amp; Time</td>
           <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.eventDateTime}</td>
@@ -165,29 +169,29 @@ export class EmailService {
 
       </table>
 
-      <!-- 4. Instructional paragraph -->
-      <p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#eaeeef;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      <!-- 5. Instructional paragraph: 14px dark blue -->
+      <p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         Please download and keep your ticket safely. You will be required to present
         the QR code at the entrance for verification.
       </p>
 
-      <!-- 5. Important notice — 12px, intentionally smaller than body -->
+      <!-- 6. Important notice — 12px (smaller than 14px body, per spec) -->
       <p style="margin:0 0 20px;font-size:12px;line-height:1.6;color:#9aa0a6;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         <strong style="color:#eaeeef;">Important:</strong> This ticket is valid for one entry only.
         Do not share your QR code publicly.
       </p>
 
-      <!-- 6. Closing paragraph -->
-      <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#eaeeef;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      <!-- 7. Closing paragraph: 14px dark blue -->
+      <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         We appreciate your purchase and look forward to serving you again.
       </p>
 
-      <!-- 7. Horizontal divider -->
+      <!-- 8. Horizontal divider -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
         <tr><td style="border-top:1px solid #2a2b2d;font-size:0;line-height:0;">&nbsp;</td></tr>
       </table>
 
-      <!-- 8. Footer -->
+      <!-- 9. Footer: 14px #9aa0a6, centered, email link #6ea8fe -->
       <p style="margin:0;font-size:14px;color:#9aa0a6;text-align:center;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
         Regards, <strong style="color:#eaeeef;">TicketFlow Kenya</strong> &nbsp;&middot;&nbsp;
         <a href="mailto:support@ticketflow.co.ke"
