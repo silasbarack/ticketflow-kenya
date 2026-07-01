@@ -67,7 +67,7 @@ export class EmailService {
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/></head>
 <body style="font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:16px 0;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:12px 0;">
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0"
        style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e0e0e0;">
@@ -87,15 +87,15 @@ export class EmailService {
   </tr>
 
   <tr>
-    <td style="padding:18px 22px 14px;">
+    <td style="padding:16px 20px 14px;">
 
-      <p style="font-size:15px;color:#111827;margin:0 0 6px;">Dear <strong>${payload.buyerName}</strong>,</p>
+      <p style="font-size:15px;color:#111827;margin:0 0 12px;line-height:1.5;">Dear <strong>${payload.buyerName}</strong>,</p>
 
-      <p style="font-size:14px;color:#374151;margin:0 0 5px;line-height:1.5;">
+      <p style="font-size:14px;color:#111827;margin:0 0 12px;line-height:1.5;">
         Thank you for purchasing your ticket through <strong>TicketFlow Kenya</strong>.
       </p>
 
-      <p style="font-size:14px;color:#374151;margin:0 0 14px;line-height:1.5;">
+      <p style="font-size:14px;color:#111827;margin:0 0 16px;line-height:1.5;">
         Your payment has been successfully confirmed, and your ticket for
         <strong>${payload.eventName}</strong> is attached to this email as a PDF.
       </p>
@@ -110,38 +110,38 @@ export class EmailService {
           </td>
         </tr>
         <tr style="background:#f9fafb;">
-          <td style="font-size:13px;color:#6b7280;padding:7px 14px;width:110px;">Event</td>
-          <td style="font-size:13px;color:#111827;padding:7px 14px;font-weight:600;">${payload.eventName}</td>
+          <td style="font-size:13px;color:#6b7280;padding:8px 14px;width:110px;">Event</td>
+          <td style="font-size:13px;color:#111827;padding:8px 14px;font-weight:600;">${payload.eventName}</td>
         </tr>
         <tr style="background:#ffffff;">
-          <td style="font-size:13px;color:#6b7280;padding:7px 14px;">Ticket Type</td>
-          <td style="font-size:13px;color:#111827;padding:7px 14px;font-weight:600;">${payload.ticketType}</td>
+          <td style="font-size:13px;color:#6b7280;padding:8px 14px;">Ticket Type</td>
+          <td style="font-size:13px;color:#111827;padding:8px 14px;font-weight:600;">${payload.ticketType}</td>
         </tr>
         <tr style="background:#f9fafb;">
-          <td style="font-size:13px;color:#6b7280;padding:7px 14px;">Ticket Code</td>
-          <td style="font-size:13px;color:#be123c;padding:7px 14px;font-weight:700;font-family:Courier New,monospace;">${payload.ticketCode}</td>
+          <td style="font-size:13px;color:#6b7280;padding:8px 14px;">Ticket Code</td>
+          <td style="font-size:13px;color:#be123c;padding:8px 14px;font-weight:700;font-family:Courier New,monospace;">${payload.ticketCode}</td>
         </tr>
         <tr style="background:#ffffff;">
-          <td style="font-size:13px;color:#6b7280;padding:7px 14px;">Venue</td>
-          <td style="font-size:13px;color:#111827;padding:7px 14px;font-weight:600;">${payload.venue}</td>
+          <td style="font-size:13px;color:#6b7280;padding:8px 14px;">Venue</td>
+          <td style="font-size:13px;color:#111827;padding:8px 14px;font-weight:600;">${payload.venue}</td>
         </tr>
         <tr style="background:#f9fafb;">
-          <td style="font-size:13px;color:#6b7280;padding:7px 14px;">Date &amp; Time</td>
-          <td style="font-size:13px;color:#111827;padding:7px 14px;font-weight:600;">${payload.eventDateTime}</td>
+          <td style="font-size:13px;color:#6b7280;padding:8px 14px;">Date &amp; Time</td>
+          <td style="font-size:13px;color:#111827;padding:8px 14px;font-weight:600;">${payload.eventDateTime}</td>
         </tr>
       </table>
 
-      <p style="font-size:14px;color:#374151;margin:0 0 5px;line-height:1.5;">
+      <p style="font-size:14px;color:#111827;margin:0 0 10px;line-height:1.5;">
         Please download and keep your ticket safely. You will be required to present
         the QR code at the entrance for verification.
       </p>
 
-      <p style="font-size:14px;color:#374151;margin:0 0 5px;line-height:1.5;">
+      <p style="font-size:14px;color:#111827;margin:0 0 16px;line-height:1.5;">
         <strong>Important:</strong> This ticket is valid for one entry only.
         Do not share your QR code publicly.
       </p>
 
-      <p style="font-size:14px;color:#374151;margin:0 0 0;line-height:1.5;">
+      <p style="font-size:14px;color:#111827;margin:0;line-height:1.5;">
         We appreciate your purchase and look forward to serving you again.
       </p>
 
@@ -149,8 +149,8 @@ export class EmailService {
   </tr>
 
   <tr>
-    <td style="border-top:1px solid #e0e0e0;padding:10px 22px;text-align:center;">
-      <p style="font-size:12px;color:#9ca3af;margin:0;">
+    <td style="border-top:1px solid #e0e0e0;padding:8px 18px;text-align:center;">
+      <p style="font-size:12px;color:#9ca3af;margin:0;line-height:1.4;">
         Regards, <strong>TicketFlow Kenya</strong> &nbsp;&middot;&nbsp; support@ticketflow.co.ke
       </p>
     </td>
