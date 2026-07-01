@@ -16,7 +16,7 @@ interface LogoProps {
  * Place the downloaded logo file at frontend/public/logo.png to show it.
  * Falls back to a styled text mark if the image is unavailable.
  */
-export default function Logo({ variant = 'full', theme = 'light', className = 'h-9' }: LogoProps) {
+export default function Logo({ variant = 'full', theme = 'light', className = 'h-14' }: LogoProps) {
   const [imgFailed, setImgFailed] = useState(false);
 
   const wordmarkColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
@@ -45,10 +45,10 @@ export default function Logo({ variant = 'full', theme = 'light', className = 'h
   }
 
   return (
-    <span className="inline-flex items-center gap-2.5">
+    <span className="inline-flex items-center gap-3">
       {imgFailed ? (
         <span
-          className="inline-flex h-9 w-9 items-center justify-center rounded-xl
+          className="inline-flex h-14 w-14 items-center justify-center rounded-xl
                      bg-brand-700 text-sm font-black text-white"
         >
           TK
@@ -65,7 +65,7 @@ export default function Logo({ variant = 'full', theme = 'light', className = 'h
           />
         </span>
       )}
-      <span className={`text-lg font-bold leading-none ${wordmarkColor}`}>
+      <span className={`text-xl font-bold leading-none ${wordmarkColor}`}>
         TicketFlow <span className="text-brand-700">Kenya</span>
       </span>
     </span>

@@ -84,15 +84,30 @@ export default function LandingPage() {
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24 lg:px-8">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
-              {'\u{1F1F0}\u{1F1EA}'} Built for Kenya
+              {'\u{1F1F0}\u{1F1EA}'} East Africa&apos;s Premier Ticketing Platform
             </span>
-            <h1 className="mt-5 text-4xl font-bold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl">
-              Sell tickets. Scan gates. <span className="text-red-100">Get paid via M-Pesa.</span>
+
+            <h1 className="mt-5 text-4xl font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl">
+              Sell tickets. Scan gates.{' '}
+              <span className="text-red-100">Get paid via M-Pesa.</span>
             </h1>
-            <p className="mt-4 max-w-xl text-lg text-brand-50 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">
-              TicketFlow Kenya is the all-in-one platform for event organizers to publish events,
-              sell tickets with QR-code entry, and track sales in real time.
+
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)] sm:text-lg">
+              <strong className="font-semibold text-white">TicketFlow Kenya</strong> is a purpose-built
+              event management and ticketing platform for Kenyan organizers and attendees. Whether
+              you&apos;re hosting an intimate private gathering, a corporate conference, or a
+              large-scale concert, we deliver a complete, professional ticketing experience from
+              listing to gate entry.
             </p>
+
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
+              Publish your event in minutes, offer tiered ticket categories — Regular, VIP, VVIP,
+              Early Bird &amp; Student — accept instant M-Pesa STK Push payments with zero manual
+              reconciliation, and manage entry through cryptographically signed, tamper-proof
+              QR-code e-tickets. Every ticket is unique, verified, and delivered directly to
+              the buyer&apos;s inbox as a PDF.
+            </p>
+
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/events"
@@ -107,10 +122,14 @@ export default function LandingPage() {
                 Become an Organizer
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-brand-50">
+
+            <div className="mt-8 grid grid-cols-2 gap-2 text-xs text-white/80 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-sm">
               <span className="flex items-center gap-1.5">{'✅'} M-Pesa STK Push</span>
-              <span className="flex items-center gap-1.5">{'\u{1F4F1}'} QR e-tickets</span>
-              <span className="flex items-center gap-1.5">{'\u{1F512}'} Secure check-in</span>
+              <span className="flex items-center gap-1.5">{'\u{1F4F1}'} QR e-tickets by email</span>
+              <span className="flex items-center gap-1.5">{'\u{1F512}'} Signed QR check-in</span>
+              <span className="flex items-center gap-1.5">{'\u{1F4CA}'} Real-time sales dashboard</span>
+              <span className="flex items-center gap-1.5">{'\u{1F4BC}'} 7% platform fee only</span>
+              <span className="flex items-center gap-1.5">{'\u{1F3AB}'} VIP · VVIP · Student tiers</span>
             </div>
           </div>
 
