@@ -17,7 +17,7 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
   const { user, logout } = useAuth();
 
   return (
-    <div className="flex min-h-[calc(100vh-65px)] bg-gray-50">
+    <div className="flex min-h-[calc(100vh-65px)]">
       <aside className="hidden w-64 flex-col border-r border-gray-200 bg-white p-4 md:flex">
         <div className="mb-6 px-2">
           <p className="text-sm font-semibold text-gray-900">{user?.firstName} {user?.lastName}</p>
