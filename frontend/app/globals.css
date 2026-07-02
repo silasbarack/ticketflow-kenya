@@ -2,9 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-color: #f9fafb;
+}
+
 html,
 body {
-  background-color: #f9fafb;
+  background-color: var(--bg-color);
 }
 
 .line-clamp-1 {

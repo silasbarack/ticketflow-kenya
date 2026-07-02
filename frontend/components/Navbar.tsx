@@ -51,6 +51,9 @@ export default function Navbar() {
           <Link href="/events" className="hover:text-brand-600">
             Browse Events
           </Link>
+          <Link href="/settings/appearance" className="hover:text-brand-600">
+            Appearance
+          </Link>
           {user && (
             <Link href={dashboardHref} className="hover:text-brand-600">
               Dashboard
@@ -100,6 +103,9 @@ export default function Navbar() {
           <div className="flex flex-col gap-3 text-sm font-medium text-gray-700">
             <Link href="/events" onClick={() => setOpen(false)}>
               Browse Events
+            </Link>
+            <Link href="/settings/appearance" onClick={() => setOpen(false)}>
+              Appearance
             </Link>
             {user ? (
               <>
