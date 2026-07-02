@@ -3,12 +3,42 @@
 @tailwind utilities;
 
 :root {
-  --bg-color: #f9fafb;
+  --bg-color: #ffffff;
+  --fg-color: #111827;
+}
+
+html[data-theme='dark'] {
+  --fg-color: #f3f4f6;
 }
 
 html,
 body {
   background-color: var(--bg-color);
+}
+
+body {
+  color: var(--fg-color);
+}
+
+/*
+ * Text that sits directly on the page background (no card of its own) must flip with the
+ * chosen theme, or it goes invisible on black. Text inside an explicitly-coloured surface
+ * (a white/gray card, or a permanently dark section like the footer) keeps its own colours,
+ * since those are already legible against their own background regardless of the site theme.
+ */
+html[data-theme='dark']
+  :is(.text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800, .text-gray-900):not(
+    :is(
+        [class~='bg-white'],
+        [class~='bg-white/95'],
+        [class~='bg-white/90'],
+        [class~='bg-gray-50'],
+        [class~='bg-gray-900'],
+        [class~='bg-gray-950']
+      )
+      *
+  ) {
+  color: var(--fg-color);
 }
 
 .line-clamp-1 {

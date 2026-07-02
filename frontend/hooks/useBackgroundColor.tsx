@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { BG_COLOR_KEY, DEFAULT_BG_COLOR } from '@/lib/appearance';
+import { BG_COLOR_KEY, DEFAULT_BG_COLOR, themeFor } from '@/lib/appearance';
 
 interface BackgroundColorContextType {
   color: string;
@@ -14,6 +14,7 @@ const BackgroundColorContext = createContext<BackgroundColorContextType | null>(
 
 function applyColor(color: string) {
   document.documentElement.style.setProperty('--bg-color', color);
+  document.documentElement.dataset.theme = themeFor(color);
 }
 
 export function BackgroundColorProvider({ children }: { children: ReactNode }) {

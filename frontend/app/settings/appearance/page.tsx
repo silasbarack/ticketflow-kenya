@@ -1,18 +1,10 @@
 'use client';
 
 import { useBackgroundColor } from '@/hooks/useBackgroundColor';
-
-const PRESETS = [
-  { name: 'Default', value: '#f9fafb' },
-  { name: 'White', value: '#ffffff' },
-  { name: 'Warm cream', value: '#fdf6e9' },
-  { name: 'Soft green', value: '#f0fdf4' },
-  { name: 'Soft blue', value: '#eff6ff' },
-  { name: 'Dark slate', value: '#111827' },
-];
+import { BG_COLOR_OPTIONS } from '@/lib/appearance';
 
 export default function AppearanceSettingsPage() {
-  const { color, defaultColor, setColor, reset } = useBackgroundColor();
+  const { color, setColor } = useBackgroundColor();
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
@@ -22,47 +14,29 @@ export default function AppearanceSettingsPage() {
           Choose a background colour for the site. This only affects your browser — no one else will see it.
         </p>
 
-        <div className="mt-6 flex items-center gap-4">
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            aria-label="Background colour"
-            className="h-12 w-16 cursor-pointer rounded-lg border border-gray-300"
-          />
-          <div>
-            <p className="text-sm font-semibold text-gray-900">{color}</p>
-            <p className="text-xs text-gray-500">Pick a custom colour or choose a preset below</p>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <p className="text-sm font-medium text-gray-700">Presets</p>
-          <div className="mt-2 flex flex-wrap gap-3">
-            {PRESETS.map((preset) => (
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          {BG_COLOR_OPTIONS.map((option) => {
+            const selected = color.toLowerCase() === option.value;
+            return (
               <button
-                key={preset.value}
+                key={option.value}
                 type="button"
-                onClick={() => setColor(preset.value)}
-                title={preset.name}
-                className={`flex h-10 w-10 items-center justify-center rounded-full border-2 ${
-                  color.toLowerCase() === preset.value ? 'border-brand-600' : 'border-gray-200'
+                onClick={() => setColor(option.value)}
+                aria-pressed={selected}
+                className={`flex flex-col items-center gap-3 rounded-xl border-2 p-5 transition ${
+                  selected ? 'border-brand-600' : 'border-gray-200 hover:border-gray-300'
                 }`}
-                style={{ backgroundColor: preset.value }}
-                aria-label={preset.name}
-              />
-            ))}
-          </div>
+              >
+                <span
+                  className="h-14 w-14 rounded-full border border-gray-300"
+                  style={{ backgroundColor: option.value }}
+                  aria-hidden="true"
+                />
+                <span className="text-sm font-semibold text-gray-900">{option.name}</span>
+              </button>
+            );
+          })}
         </div>
-
-        <button
-          type="button"
-          onClick={reset}
-          disabled={color === defaultColor}
-          className="mt-8 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Reset to default
-        </button>
       </div>
     </main>
   );
