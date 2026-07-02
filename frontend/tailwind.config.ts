@@ -25,7 +25,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['var(--font-noto-sans)', 'Arial', 'sans-serif'],
       },
     },
   },
