@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { api, getApiErrorMessage } from '@/lib/api';
 import { AttendeeInfo } from '@/types';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { isValidKenyanPhone, KENYA_PHONE_MESSAGE } from '@/lib/phone';
 
 const EMPTY_ATTENDEE: AttendeeInfo = { firstName: '', lastName: '', nationalId: '', email: '', phone: '' };
 
@@ -63,8 +64,8 @@ export default function CartPage() {
         toast.error(`Enter a valid email for ticket ${i + 1}`);
         return false;
       }
-      if (!a.phone.trim()) {
-        toast.error(`Enter phone number for ticket ${i + 1}`);
+      if (!a.phone.trim() || !isValidKenyanPhone(a.phone)) {
+        toast.error(`Enter a valid Kenyan phone number for ticket ${i + 1}`);
         return false;
       }
     }
@@ -83,8 +84,8 @@ export default function CartPage() {
       toast.error('Only customer accounts can purchase tickets');
       return;
     }
-    if (!customerPhone.trim()) {
-      toast.error('Enter your M-Pesa phone number');
+    if (!customerPhone.trim() || !isValidKenyanPhone(customerPhone)) {
+      toast.error(KENYA_PHONE_MESSAGE);
       return;
     }
     if (needsAttendees && !validateAttendees()) return;

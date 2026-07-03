@@ -109,7 +109,7 @@ export class MpesaService {
     }
   }
 
-  /** Normalizes 07xxxxxxxx / +254xxxxxxxxx / 254xxxxxxxxx to 254xxxxxxxxx. */
+  /** Normalizes 07xxxxxxxx / 01xxxxxxxx / +254xxxxxxxxx / 254xxxxxxxxx to 254xxxxxxxxx. */
   normalizePhone(phone: string): string {
     let normalized = phone.trim().replace(/\s+/g, '');
     if (normalized.startsWith('+')) normalized = normalized.slice(1);

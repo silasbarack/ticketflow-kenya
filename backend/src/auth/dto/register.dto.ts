@@ -1,5 +1,6 @@
-import { IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 import { Role } from '../../common/enums/roles.enum';
+import { KENYA_PHONE_REGEX, KENYA_PHONE_MESSAGE } from '../../common/validators/phone.validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -17,6 +18,7 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString()
+  @Matches(KENYA_PHONE_REGEX, { message: KENYA_PHONE_MESSAGE })
   phone?: string;
 
   @IsOptional()

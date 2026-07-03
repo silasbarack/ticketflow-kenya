@@ -36,7 +36,7 @@ export default function EventCard({ event }: { event: EventItem }) {
       href={`/events/${event.slug}`}
       className="group block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
     >
-      <div className="relative h-48 w-full overflow-hidden sm:h-52">
+      <div className="relative aspect-square w-full overflow-hidden">
         {showImage ? (
           <Image
             src={event.posterUrl as string}

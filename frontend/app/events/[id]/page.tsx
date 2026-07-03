@@ -99,7 +99,7 @@ export default function EventDetailsPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="relative h-64 w-full overflow-hidden rounded-2xl bg-gray-100 sm:h-80">
+      <div className="relative aspect-square w-full max-w-xl overflow-hidden rounded-2xl bg-gray-100">
         {event.posterUrl && (
           <Image src={event.posterUrl} alt={event.title} fill className="object-cover" unoptimized />
         )}

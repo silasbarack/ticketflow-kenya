@@ -16,11 +16,11 @@ const NAV = [
 ];
 
 const CATEGORY_IMAGE_KEYWORDS: Record<string, string> = {
-  'music & concerts': 'concert,music,crowd,stage',
-  'tech & business': 'conference,technology,startup,meeting',
-  sports: 'sports,stadium,athlete,game',
-  'arts & theatre': 'theatre,stage,performance,actor',
-  festivals: 'festival,africa,culture,market',
+  'music & concerts': 'kenya,concert,music,crowd',
+  'tech & business': 'kenya,nairobi,conference,technology',
+  sports: 'kenya,sports,stadium,athlete',
+  'arts & theatre': 'kenya,nairobi,theatre,performance',
+  festivals: 'kenya,africa,culture,festival',
 };
 
 // Deterministic, lightweight hash so the same event title always maps to the same stock photo.
@@ -33,8 +33,8 @@ function hashToLock(value: string): number {
 }
 
 function buildFallbackPosterUrl(title: string, categoryName?: string) {
-  const keywords = (categoryName && CATEGORY_IMAGE_KEYWORDS[categoryName.toLowerCase()]) || 'event,crowd,celebration';
-  return `https://loremflickr.com/800/500/${keywords}?lock=${hashToLock(title || 'ticketflow-event')}`;
+  const keywords = (categoryName && CATEGORY_IMAGE_KEYWORDS[categoryName.toLowerCase()]) || 'kenya,event,crowd,celebration';
+  return `https://loremflickr.com/800/800/${keywords}?lock=${hashToLock(title || 'ticketflow-event')}`;
 }
 
 function CreateEventContent() {

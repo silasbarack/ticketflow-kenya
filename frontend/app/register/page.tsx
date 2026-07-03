@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types';
+import { isValidKenyanPhone, KENYA_PHONE_MESSAGE } from '@/lib/phone';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -27,6 +28,10 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isValidKenyanPhone(form.phone)) {
+      toast.error(KENYA_PHONE_MESSAGE);
+      return;
+    }
     setSubmitting(true);
     try {
       const user = await register(form);
@@ -80,11 +85,12 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Phone (e.g. 07XXXXXXXX)</label>
+            <label className="text-sm font-medium text-gray-700">Phone (e.g. 0712345678 or 0112345678)</label>
             <input
               required
               value={form.phone}
               onChange={(e) => update('phone', e.target.value)}
+              placeholder="07XXXXXXXX or 01XXXXXXXX"
               className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
             />
           </div>

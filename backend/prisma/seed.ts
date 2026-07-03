@@ -104,7 +104,7 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 0,
       daysFromNow: 30,
-      imageKeywords: 'concert,music,crowd,stage',
+      imageKeywords: 'kenya,concert,music,crowd',
     },
     {
       title: 'Kenya Tech Summit',
@@ -113,7 +113,7 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 1,
       daysFromNow: 45,
-      imageKeywords: 'conference,technology,startup,meeting',
+      imageKeywords: 'kenya,nairobi,conference,technology',
     },
     {
       title: 'Mombasa Beach Sports Gala',
@@ -122,7 +122,7 @@ async function main() {
       city: 'Mombasa',
       categoryIndex: 2,
       daysFromNow: 20,
-      imageKeywords: 'beach,sports,volleyball,ocean',
+      imageKeywords: 'kenya,mombasa,beach,ocean',
     },
     {
       title: 'Nairobi Theatre Night',
@@ -131,7 +131,7 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 3,
       daysFromNow: 15,
-      imageKeywords: 'theatre,stage,performance,actor',
+      imageKeywords: 'kenya,nairobi,theatre,performance',
     },
     {
       title: 'Lake Naivasha Cultural Festival',
@@ -140,7 +140,7 @@ async function main() {
       city: 'Naivasha',
       categoryIndex: 4,
       daysFromNow: 60,
-      imageKeywords: 'festival,africa,culture,market',
+      imageKeywords: 'kenya,africa,culture,festival',
     },
   ];
 
@@ -152,7 +152,7 @@ async function main() {
 
     // lock=<n> pins a specific real photo from LoremFlickr's keyword pool so the
     // same event always shows the same image instead of a random one per request.
-    const posterUrl = `https://loremflickr.com/800/500/${seedEvent.imageKeywords}?lock=${index + 1}`;
+    const posterUrl = `https://loremflickr.com/800/800/${seedEvent.imageKeywords}?lock=${index + 1}`;
 
     const event = await prisma.event.upsert({
       where: { slug: slugify(seedEvent.title) },

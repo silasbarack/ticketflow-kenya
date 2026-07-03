@@ -7,9 +7,11 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
+import { KENYA_PHONE_REGEX, KENYA_PHONE_MESSAGE } from '../../common/validators/phone.validator';
 
 export class AttendeeDto {
   @IsString()
@@ -25,6 +27,7 @@ export class AttendeeDto {
   email!: string;
 
   @IsString()
+  @Matches(KENYA_PHONE_REGEX, { message: KENYA_PHONE_MESSAGE })
   phone!: string;
 }
 
@@ -55,5 +58,6 @@ export class CreateOrderDto {
 
   @IsOptional()
   @IsString()
+  @Matches(KENYA_PHONE_REGEX, { message: KENYA_PHONE_MESSAGE })
   customerPhone?: string;
 }

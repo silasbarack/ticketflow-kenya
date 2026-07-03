@@ -10,6 +10,7 @@ import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import { Order, Payment, Ticket } from '@/types';
 import { formatCurrency, formatDateTime, formatTicketCategory } from '@/lib/format';
+import { isValidKenyanPhone, KENYA_PHONE_MESSAGE } from '@/lib/phone';
 
 function CheckoutContent() {
   const params = useParams<{ orderId: string }>();
@@ -240,13 +241,19 @@ function CheckoutContent() {
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="07XXXXXXXX"
+            placeholder="07XXXXXXXX or 01XXXXXXXX"
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
         </div>
 
         <button
-          onClick={() => stkPush.mutate()}
+          onClick={() => {
+            if (!isValidKenyanPhone(phone)) {
+              toast.error(KENYA_PHONE_MESSAGE);
+              return;
+            }
+            stkPush.mutate();
+          }}
           disabled={stkPush.isPending || !phone || !!activePaymentId}
           className="mt-4 w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
         >
