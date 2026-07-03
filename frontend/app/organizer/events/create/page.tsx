@@ -15,19 +15,16 @@ const NAV = [
   { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
 ];
 
-// Real Kenyan photos (Wikimedia Commons) used as a poster when an organizer
-// doesn't upload one. Static per category rather than a keyword-search
-// service, since LoremFlickr's Flickr-backed search is unreliable and often
-// returns 500s for multi-keyword queries.
+// Designed posters (TicketFlow Kenya branding, frontend/public/posters/generic)
+// used when an organizer doesn't upload their own image. Static per category
+// rather than a keyword-search service, since LoremFlickr's Flickr-backed
+// search is unreliable and often returns 500s for multi-keyword queries.
 const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
-  'music & concerts': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Music_Festival_Safaricom_Stadium_Kasarani.jpg',
-  'tech & business':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg/1280px-Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg',
-  sports:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/A_few_minutes_before_the_match%2C_Kasarani%2C_Nairobi.jpg/1280px-A_few_minutes_before_the_match%2C_Kasarani%2C_Nairobi.jpg',
-  'arts & theatre':
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg/1280px-Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg',
-  festivals: 'https://upload.wikimedia.org/wikipedia/commons/6/68/Maasai_women_jumping.jpg',
+  'music & concerts': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/music-concerts.svg',
+  'tech & business': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/tech-business.svg',
+  sports: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/sports.svg',
+  'arts & theatre': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/arts-theatre.svg',
+  festivals: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/festivals.svg',
 };
 
 const DEFAULT_FALLBACK_IMAGE = CATEGORY_FALLBACK_IMAGES['festivals'];

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="curtainBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a0509"/>
+      <stop offset="1" stop-color="#3d0b14"/>
+    </linearGradient>
+    <linearGradient id="fold1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5c0f1a"/>
+      <stop offset="0.5" stop-color="#7a1523"/>
+      <stop offset="1" stop-color="#5c0f1a"/>
+    </linearGradient>
+    <radialGradient id="spotT" cx="0.5" cy="0.35" r="0.45">
+      <stop offset="0" stop-color="#ffe8a3" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#ffe8a3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#curtainBg)"/>
+  <circle cx="540" cy="380" r="420" fill="url(#spotT)"/>
+
+  <!-- Curtain folds left and right -->
+  <g opacity="0.9">
+    <path d="M0,0 L90,0 L60,1080 L0,1080 Z" fill="url(#fold1)"/>
+    <path d="M110,0 L190,0 L175,1080 L95,1080 Z" fill="url(#fold1)" opacity="0.8"/>
+    <path d="M990,0 L1080,0 L1080,1080 L1020,1080 Z" fill="url(#fold1)"/>
+    <path d="M890,0 L965,0 L985,1080 L905,1080 Z" fill="url(#fold1)" opacity="0.8"/>
+  </g>
+
+  <!-- Tag pill -->
+  <rect x="90" y="120" width="270" height="56" rx="28" fill="#ffffff" opacity="0.12"/>
+  <text x="225" y="157" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="3" fill="#f4b6c2" text-anchor="middle">LIVE THEATRE</text>
+
+  <!-- Title -->
+  <text x="540" y="370" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900" fill="#ffffff" text-anchor="middle">ARTS &amp;</text>
+  <text x="540" y="450" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900" fill="#ffffff" text-anchor="middle">THEATRE</text>
+  <text x="540" y="505" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="400" fill="#f4c9d1" text-anchor="middle">Kenya</text>
+
+  <!-- Theatre masks -->
+  <g transform="translate(455,600)">
+    <path d="M0,-55 C-45,-55 -60,-15 -50,15 C-42,40 -20,55 0,55 C20,55 42,40 50,15 C60,-15 45,-55 0,-55 Z" fill="#f5e9dc"/>
+    <path d="M-22,-8 C-22,-18 -8,-18 -8,-8" stroke="#3d0b14" stroke-width="4" fill="none"/>
+    <path d="M8,-8 C8,-18 22,-18 22,-8" stroke="#3d0b14" stroke-width="4" fill="none"/>
+    <path d="M-20,20 C-8,8 8,8 20,20" stroke="#3d0b14" stroke-width="4" fill="none"/>
+  </g>
+  <g transform="translate(625,610)">
+    <path d="M0,-55 C-45,-55 -60,-15 -50,15 C-42,40 -20,55 0,55 C20,55 42,40 50,15 C60,-15 45,-55 0,-55 Z" fill="#e8d4c0"/>
+    <path d="M-22,-6 C-22,-16 -8,-16 -8,-6" stroke="#3d0b14" stroke-width="4" fill="none"/>
+    <path d="M8,-6 C8,-16 22,-16 22,-6" stroke="#3d0b14" stroke-width="4" fill="none"/>
+    <path d="M-20,32 C-8,44 8,44 20,32" stroke="#3d0b14" stroke-width="4" fill="none"/>
+  </g>
+
+  <!-- Stage floor -->
+  <rect x="0" y="880" width="1080" height="200" fill="#0f0206"/>
+  <rect x="0" y="880" width="1080" height="10" fill="#7a1523"/>
+
+  <!-- Brand badge -->
+  <rect x="390" y="955" width="300" height="100" rx="18" fill="#ffffff"/>
+  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="405" y="965" width="270" height="80" preserveAspectRatio="xMidYMid meet"/>
+</svg>

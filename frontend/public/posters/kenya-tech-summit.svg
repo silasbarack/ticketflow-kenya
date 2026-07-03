@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="skyT" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#050b18"/>
+      <stop offset="0.6" stop-color="#0b1f3a"/>
+      <stop offset="1" stop-color="#0f2e4a"/>
+    </linearGradient>
+    <radialGradient id="glowT" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#skyT)"/>
+  <circle cx="540" cy="440" r="430" fill="url(#glowT)"/>
+
+  <!-- Circuit grid -->
+  <g stroke="#2dd4bf" stroke-width="2" opacity="0.28">
+    <line x1="0" y1="120" x2="1080" y2="120"/>
+    <line x1="0" y1="260" x2="1080" y2="260"/>
+    <line x1="0" y1="640" x2="1080" y2="640"/>
+    <line x1="120" y1="0" x2="120" y2="700"/>
+    <line x1="960" y1="0" x2="960" y2="700"/>
+    <line x1="820" y1="0" x2="820" y2="300"/>
+    <line x1="260" y1="0" x2="260" y2="300"/>
+  </g>
+  <g fill="#5eead4" opacity="0.7">
+    <circle cx="120" cy="120" r="6"/>
+    <circle cx="960" cy="120" r="6"/>
+    <circle cx="120" cy="260" r="5"/>
+    <circle cx="820" cy="260" r="5"/>
+    <circle cx="260" cy="640" r="6"/>
+    <circle cx="960" cy="640" r="5"/>
+  </g>
+
+  <!-- Tag pill -->
+  <rect x="90" y="120" width="290" height="56" rx="28" fill="#ffffff" opacity="0.1"/>
+  <text x="235" y="157" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="3" fill="#5eead4" text-anchor="middle">TECH &amp; INNOVATION</text>
+
+  <!-- Title -->
+  <text x="540" y="330" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="900" fill="#ffffff" text-anchor="middle">KENYA TECH</text>
+  <text x="540" y="410" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="900" fill="#ffffff" text-anchor="middle">SUMMIT</text>
+  <text x="540" y="470" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="400" fill="#a5f3e6" text-anchor="middle">KICC &#8226; Nairobi</text>
+
+  <!-- KICC tower skyline -->
+  <g fill="#050c14">
+    <rect x="0" y="760" width="1080" height="320"/>
+    <rect x="60" y="690" width="60" height="130"/>
+    <rect x="150" y="640" width="50" height="180"/>
+    <rect x="230" y="700" width="55" height="120"/>
+    <rect x="850" y="700" width="55" height="120"/>
+    <rect x="930" y="650" width="50" height="170"/>
+    <rect x="1000" y="710" width="50" height="110"/>
+    <!-- central KICC tower -->
+    <rect x="500" y="580" width="80" height="240"/>
+    <ellipse cx="540" cy="572" rx="70" ry="22"/>
+    <rect x="525" y="525" width="30" height="55"/>
+    <circle cx="540" cy="515" r="7" fill="#f43f5e"/>
+  </g>
+
+  <!-- connecting nodes over skyline -->
+  <g stroke="#5eead4" stroke-width="2" opacity="0.5">
+    <line x1="120" y1="700" x2="500" y2="600"/>
+    <line x1="960" y1="700" x2="580" y2="600"/>
+  </g>
+
+  <!-- Brand badge -->
+  <rect x="390" y="955" width="300" height="100" rx="18" fill="#ffffff"/>
+  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="405" y="965" width="270" height="80" preserveAspectRatio="xMidYMid meet"/>
+</svg>

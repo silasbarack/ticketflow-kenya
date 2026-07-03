@@ -104,9 +104,8 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 0,
       daysFromNow: 30,
-      // Real photo, fan enjoying a live music event in Kenya (Wikimedia Commons).
-      posterUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Alune_Wade%27s_performance_moved_the_crowd.jpg/1280px-Alune_Wade%27s_performance_moved_the_crowd.jpg',
+      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-music-festival-2026.svg',
     },
     {
       title: 'Kenya Tech Summit',
@@ -115,9 +114,8 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 1,
       daysFromNow: 45,
-      // Real photo, iHub Nairobi tech hub (Wikimedia Commons).
-      posterUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg/1280px-Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg',
+      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/kenya-tech-summit.svg',
     },
     {
       title: 'Mombasa Beach Sports Gala',
@@ -126,9 +124,8 @@ async function main() {
       city: 'Mombasa',
       categoryIndex: 2,
       daysFromNow: 20,
-      // Real photo, people enjoying themselves at Nyali Beach, Mombasa (Wikimedia Commons).
-      posterUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/People_bathing_as_viewed_from_Nyali_Beach_next_to_Mombasa_Beach_Hotel_during_low_tide_and_still_conditions_in_Mombasa%2C_Kenya.jpg/1280px-People_bathing_as_viewed_from_Nyali_Beach_next_to_Mombasa_Beach_Hotel_during_low_tide_and_still_conditions_in_Mombasa%2C_Kenya.jpg',
+      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/mombasa-beach-sports-gala.svg',
     },
     {
       title: 'Nairobi Theatre Night',
@@ -137,9 +134,8 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 3,
       daysFromNow: 15,
-      // Real photo, Bomas of Kenya cultural/theatre venue, Nairobi (Wikimedia Commons).
-      posterUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg/1280px-Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg',
+      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-theatre-night.svg',
     },
     {
       title: 'Lake Naivasha Cultural Festival',
@@ -148,8 +144,8 @@ async function main() {
       city: 'Naivasha',
       categoryIndex: 4,
       daysFromNow: 60,
-      // Real photo, Maasai traditional dance (Wikimedia Commons).
-      posterUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/68/Maasai_women_jumping.jpg',
+      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/lake-naivasha-cultural-festival.svg',
     },
   ];
 

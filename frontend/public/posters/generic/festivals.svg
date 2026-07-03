@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="skyC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7c2d12"/>
+      <stop offset="0.4" stop-color="#c2410c"/>
+      <stop offset="0.7" stop-color="#f59e0b"/>
+      <stop offset="1" stop-color="#fde68a"/>
+    </linearGradient>
+    <radialGradient id="sunC" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff4d6"/>
+      <stop offset="1" stop-color="#fcd34d"/>
+    </radialGradient>
+    <linearGradient id="lakeC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7c2d12"/>
+      <stop offset="1" stop-color="#4a1607"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1080" height="720" fill="url(#skyC)"/>
+  <circle cx="860" cy="170" r="90" fill="url(#sunC)"/>
+
+  <!-- Birds -->
+  <g stroke="#3f1608" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M150,150 q18,-18 36,0 q18,-18 36,0"/>
+    <path d="M260,110 q14,-14 28,0 q14,-14 28,0"/>
+    <path d="M650,140 q16,-16 32,0 q16,-16 32,0"/>
+  </g>
+
+  <!-- Tag pill -->
+  <rect x="90" y="90" width="300" height="56" rx="28" fill="#ffffff" opacity="0.18"/>
+  <text x="240" y="127" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="3" fill="#fff4d6" text-anchor="middle">CULTURE &amp; HERITAGE</text>
+
+  <!-- Title -->
+  <text x="540" y="330" font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="900" fill="#ffffff" text-anchor="middle">FESTIVAL</text>
+  <text x="540" y="385" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="500" fill="#fff4d6" text-anchor="middle">Kenya</text>
+
+  <!-- Acacia trees silhouette (flat-topped crown, umbrella-of-leaves style) -->
+  <g fill="#3f1608">
+    <rect x="148" y="560" width="14" height="140"/>
+    <path d="M75,560 C75,520 110,495 155,495 C200,495 235,520 235,560 C210,545 190,552 155,552 C120,552 100,545 75,560 Z"/>
+    <ellipse cx="120" cy="530" rx="34" ry="14"/>
+    <ellipse cx="190" cy="530" rx="34" ry="14"/>
+    <ellipse cx="155" cy="512" rx="40" ry="16"/>
+
+    <rect x="900" y="600" width="12" height="120"/>
+    <path d="M840,600 C840,566 868,545 906,545 C944,545 972,566 972,600 C952,588 936,594 906,594 C876,594 856,588 840,600 Z"/>
+    <ellipse cx="878" cy="574" rx="28" ry="12"/>
+    <ellipse cx="934" cy="574" rx="28" ry="12"/>
+  </g>
+
+  <!-- Ground band -->
+  <rect x="0" y="720" width="1080" height="360" fill="url(#lakeC)"/>
+
+  <!-- Maasai flag-colour divider -->
+  <rect x="0" y="720" width="1080" height="14" fill="#111827"/>
+  <rect x="0" y="734" width="1080" height="9" fill="#be123c"/>
+  <rect x="0" y="743" width="1080" height="9" fill="#16a34a"/>
+
+  <!-- Water reflection lines -->
+  <g stroke="#fde68a" stroke-width="4" opacity="0.3">
+    <line x1="120" y1="820" x2="260" y2="820"/>
+    <line x1="700" y1="860" x2="880" y2="860"/>
+    <line x1="360" y1="900" x2="540" y2="900"/>
+    <line x1="150" y1="940" x2="330" y2="940"/>
+  </g>
+
+  <!-- Maasai beaded accents -->
+  <g>
+    <circle cx="40" cy="990" r="10" fill="#be123c"/>
+    <circle cx="80" cy="990" r="10" fill="#ffffff"/>
+    <circle cx="120" cy="990" r="10" fill="#16a34a"/>
+    <circle cx="160" cy="990" r="10" fill="#be123c"/>
+    <circle cx="200" cy="990" r="10" fill="#ffffff"/>
+    <circle cx="840" cy="990" r="10" fill="#be123c"/>
+    <circle cx="880" cy="990" r="10" fill="#ffffff"/>
+    <circle cx="920" cy="990" r="10" fill="#16a34a"/>
+    <circle cx="960" cy="990" r="10" fill="#be123c"/>
+    <circle cx="1000" cy="990" r="10" fill="#ffffff"/>
+  </g>
+
+  <!-- Brand badge -->
+  <rect x="390" y="955" width="300" height="100" rx="18" fill="#ffffff"/>
+  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="405" y="965" width="270" height="80" preserveAspectRatio="xMidYMid meet"/>
+</svg>
