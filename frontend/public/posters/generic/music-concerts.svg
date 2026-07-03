@@ -1,75 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
   <defs>
-    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1a0b2e"/>
-      <stop offset="0.55" stop-color="#4a1042"/>
-      <stop offset="1" stop-color="#be123c"/>
+    <linearGradient id="topScrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000000" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
     </linearGradient>
-    <radialGradient id="glow1" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#ffd166" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#ffd166" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="beam1" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffe8a3" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#ffe8a3" stop-opacity="0"/>
+    <linearGradient id="botScrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.92"/>
     </linearGradient>
-    <linearGradient id="beam2" x1="1" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fda4af" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="#fda4af" stop-opacity="0"/>
-    </linearGradient>
+    <clipPath id="frame"><rect x="0" y="0" width="1080" height="1080"/></clipPath>
   </defs>
 
-  <rect width="1080" height="1080" fill="url(#sky)"/>
-  <circle cx="540" cy="330" r="420" fill="url(#glow1)"/>
-
-  <!-- Stage light beams -->
-  <polygon points="90,0 340,0 620,560 460,610" fill="url(#beam1)"/>
-  <polygon points="990,0 760,0 470,560 640,610" fill="url(#beam2)"/>
-  <polygon points="540,60 470,60 380,600 630,600" fill="url(#beam1)" opacity="0.5"/>
-
-  <!-- Sparkle bokeh -->
-  <g fill="#ffe8a3">
-    <circle cx="140" cy="200" r="5" opacity="0.8"/>
-    <circle cx="220" cy="130" r="3" opacity="0.6"/>
-    <circle cx="900" cy="180" r="6" opacity="0.7"/>
-    <circle cx="960" cy="260" r="3" opacity="0.5"/>
-    <circle cx="820" cy="110" r="4" opacity="0.6"/>
-    <circle cx="180" cy="330" r="3" opacity="0.5"/>
-    <circle cx="70" cy="420" r="4" opacity="0.55"/>
-    <circle cx="1000" cy="400" r="4" opacity="0.5"/>
+  <g clip-path="url(#frame)">
+    <image href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Alune_Wade%27s_performance_moved_the_crowd.jpg/1280px-Alune_Wade%27s_performance_moved_the_crowd.jpg"
+           x="-260" y="0" width="1600" height="1080" preserveAspectRatio="xMidYMid slice"/>
   </g>
 
-  <!-- Nairobi skyline silhouette -->
-  <g fill="#0f0a1a">
-    <rect x="0" y="760" width="1080" height="320"/>
-    <rect x="40" y="700" width="70" height="120"/>
-    <rect x="130" y="650" width="55" height="170"/>
-    <rect x="205" y="710" width="60" height="110"/>
-    <rect x="290" y="600" width="80" height="220"/>
-    <rect x="400" y="660" width="50" height="160"/>
-    <!-- KICC-style tower with disc top -->
-    <rect x="490" y="560" width="46" height="260"/>
-    <ellipse cx="513" cy="555" rx="40" ry="14"/>
-    <rect x="503" y="520" width="20" height="45"/>
-    <rect x="570" y="680" width="60" height="140"/>
-    <rect x="650" y="620" width="70" height="200"/>
-    <rect x="740" y="700" width="55" height="120"/>
-    <rect x="815" y="640" width="60" height="180"/>
-    <rect x="900" y="710" width="50" height="110"/>
-    <rect x="970" y="670" width="70" height="150"/>
-  </g>
+  <rect width="1080" height="230" fill="url(#topScrim)"/>
+  <rect y="470" width="1080" height="610" fill="url(#botScrim)"/>
 
-  <!-- Tag pill -->
-  <rect x="90" y="120" width="230" height="56" rx="28" fill="#ffffff" opacity="0.12"/>
-  <text x="205" y="157" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" letter-spacing="3" fill="#ffe8a3" text-anchor="middle">LIVE MUSIC</text>
+  <!-- Category tag -->
+  <rect x="60" y="56" width="230" height="56" rx="28" fill="#ffffff" opacity="0.15"/>
+  <text x="175" y="93" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" letter-spacing="3" fill="#ffe8a3" text-anchor="middle">LIVE MUSIC</text>
 
   <!-- Title -->
-  <text x="540" y="370" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="900" fill="#ffffff" text-anchor="middle">MUSIC &amp;</text>
-  <text x="540" y="450" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="900" fill="#ffffff" text-anchor="middle">CONCERTS</text>
+  <text x="540" y="800" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900" fill="#ffffff" text-anchor="middle">MUSIC &amp; CONCERTS</text>
+  <text x="540" y="850" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="500" fill="#e5d8dd" text-anchor="middle">Kenya</text>
 
-  <text x="540" y="505" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="400" fill="#f4d9e0" text-anchor="middle">Kenya</text>
+  <!-- Bottom brand bar -->
+  <rect y="970" width="1080" height="110" fill="#be123c"/>
+  <text x="60" y="1015" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1" fill="#ffffff" opacity="0.85">TICKETS &amp; ENTRY</text>
+  <text x="60" y="1048" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Book online now</text>
 
-  <!-- Brand badge -->
-  <rect x="390" y="955" width="300" height="100" rx="18" fill="#ffffff"/>
-  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="405" y="965" width="270" height="80" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="760" y="985" width="260" height="80" rx="14" fill="#ffffff"/>
+  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="772" y="993" width="236" height="64" preserveAspectRatio="xMidYMid meet"/>
 </svg>

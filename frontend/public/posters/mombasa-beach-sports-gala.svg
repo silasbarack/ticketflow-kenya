@@ -1,73 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
   <defs>
-    <linearGradient id="skyB" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#38bdf8"/>
-      <stop offset="0.45" stop-color="#7dd3c0"/>
-      <stop offset="0.6" stop-color="#2dd4bf"/>
-      <stop offset="1" stop-color="#0d9488"/>
+    <linearGradient id="topScrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000000" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
     </linearGradient>
-    <radialGradient id="sunB" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#fff7cc"/>
-      <stop offset="1" stop-color="#ffe066"/>
-    </radialGradient>
+    <linearGradient id="botScrim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#000000" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.9"/>
+    </linearGradient>
+    <clipPath id="frame"><rect x="0" y="0" width="1080" height="1080"/></clipPath>
   </defs>
 
-  <rect width="1080" height="1080" fill="url(#skyB)"/>
-  <circle cx="850" cy="190" r="110" fill="url(#sunB)" opacity="0.95"/>
-
-  <!-- clouds -->
-  <g fill="#ffffff" opacity="0.8">
-    <ellipse cx="180" cy="150" rx="70" ry="26"/>
-    <ellipse cx="230" cy="140" rx="50" ry="22"/>
-    <ellipse cx="130" cy="160" rx="45" ry="18"/>
+  <g clip-path="url(#frame)">
+    <image href="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/People_bathing_as_viewed_from_Nyali_Beach_next_to_Mombasa_Beach_Hotel_during_low_tide_and_still_conditions_in_Mombasa%2C_Kenya.jpg/1280px-People_bathing_as_viewed_from_Nyali_Beach_next_to_Mombasa_Beach_Hotel_during_low_tide_and_still_conditions_in_Mombasa%2C_Kenya.jpg"
+           x="-460" y="-40" width="2000" height="1120" preserveAspectRatio="xMidYMid slice"/>
   </g>
 
-  <!-- Palm trees -->
-  <g fill="#0f3d2e">
-    <path d="M104,520 C96,480 100,440 115,405" stroke="#0f3d2e" stroke-width="15" fill="none" stroke-linecap="round"/>
-    <g transform="translate(112,400)">
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(-55)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(-22)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(8)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(38)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(68)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(-88)"/>
-    </g>
-  </g>
-  <g fill="#0f3d2e">
-    <path d="M953,560 C946,522 949,486 962,453" stroke="#0f3d2e" stroke-width="13" fill="none" stroke-linecap="round"/>
-    <g transform="translate(960,448) scale(0.85)">
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(-55)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(-22)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(8)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(38)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(68)"/>
-      <path d="M0,0 C-14,-28 -46,-46 -88,-46 C-52,-30 -28,-14 0,0 Z" transform="rotate(-88)"/>
-    </g>
-  </g>
+  <rect width="1080" height="230" fill="url(#topScrim)"/>
+  <rect y="470" width="1080" height="610" fill="url(#botScrim)"/>
 
-  <!-- Tag pill -->
-  <rect x="90" y="120" width="260" height="56" rx="28" fill="#ffffff" opacity="0.3"/>
-  <text x="220" y="157" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="3" fill="#0f3d2e" text-anchor="middle">BEACH &amp; SPORTS</text>
+  <!-- Category tag -->
+  <rect x="60" y="56" width="230" height="56" rx="28" fill="#ffffff" opacity="0.2"/>
+  <text x="175" y="93" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="3" fill="#fef08a" text-anchor="middle">BEACH &amp; SPORTS</text>
 
   <!-- Title -->
-  <text x="540" y="330" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="900" fill="#ffffff" text-anchor="middle" style="paint-order: stroke; stroke: #0f3d2e; stroke-width: 3;">MOMBASA BEACH</text>
-  <text x="540" y="410" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="900" fill="#ffffff" text-anchor="middle" style="paint-order: stroke; stroke: #0f3d2e; stroke-width: 3;">SPORTS GALA</text>
-  <text x="540" y="465" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="500" fill="#0f3d2e" text-anchor="middle">Nyali Beach &#8226; Mombasa</text>
+  <text x="540" y="750" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="900" fill="#ffffff" text-anchor="middle">MOMBASA BEACH</text>
+  <text x="540" y="820" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="900" fill="#ffffff" text-anchor="middle">SPORTS GALA</text>
+  <text x="540" y="865" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="500" fill="#dff5f0" text-anchor="middle">Nyali Beach &#8226; Mombasa, Kenya</text>
 
-  <!-- Volleyball icon -->
-  <g transform="translate(540,560)">
-    <circle r="46" fill="#ffffff" stroke="#0f3d2e" stroke-width="4"/>
-    <path d="M -46,0 A 46,46 0 0 1 46,0" fill="none" stroke="#f43f5e" stroke-width="4"/>
-    <path d="M -32,-32 A 46,46 0 0 1 32,32" fill="none" stroke="#16a34a" stroke-width="4"/>
-    <path d="M 0,-46 L 0,46" stroke="#0f3d2e" stroke-width="3"/>
-  </g>
+  <!-- Bottom brand bar -->
+  <rect y="970" width="1080" height="110" fill="#be123c"/>
+  <text x="60" y="1015" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1" fill="#ffffff" opacity="0.85">TICKETS &amp; ENTRY</text>
+  <text x="60" y="1048" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Book online now</text>
 
-  <!-- Waves + sand -->
-  <path d="M0,760 C120,730 200,790 320,770 C440,750 520,700 640,720 C760,740 840,790 960,760 C1020,745 1060,750 1080,745 L1080,830 L0,830 Z" fill="#ffffff" opacity="0.55"/>
-  <path d="M0,820 C150,850 260,800 400,820 C540,840 620,800 760,815 C880,828 980,860 1080,830 L1080,1080 L0,1080 Z" fill="#fde68a"/>
-
-  <!-- Brand badge -->
-  <rect x="390" y="955" width="300" height="100" rx="18" fill="#ffffff"/>
-  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="405" y="965" width="270" height="80" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="760" y="985" width="260" height="80" rx="14" fill="#ffffff"/>
+  <image href="https://ticketflow-frontend-w47s.onrender.com/logo.png" x="772" y="993" width="236" height="64" preserveAspectRatio="xMidYMid meet"/>
 </svg>
