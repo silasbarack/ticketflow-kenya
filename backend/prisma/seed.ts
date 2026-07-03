@@ -104,7 +104,8 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 0,
       daysFromNow: 30,
-      imageKeywords: 'kenya,concert,music,crowd',
+      // Real photo, Music Festival at Safaricom Stadium Kasarani (Wikimedia Commons).
+      posterUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Music_Festival_Safaricom_Stadium_Kasarani.jpg',
     },
     {
       title: 'Kenya Tech Summit',
@@ -113,7 +114,9 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 1,
       daysFromNow: 45,
-      imageKeywords: 'kenya,nairobi,conference,technology',
+      // Real photo, iHub Nairobi tech hub (Wikimedia Commons).
+      posterUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg/1280px-Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg',
     },
     {
       title: 'Mombasa Beach Sports Gala',
@@ -122,7 +125,9 @@ async function main() {
       city: 'Mombasa',
       categoryIndex: 2,
       daysFromNow: 20,
-      imageKeywords: 'kenya,mombasa,beach,ocean',
+      // Real photo, Diani Beach, Mombasa (Wikimedia Commons).
+      posterUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Diani_Beach%2C_Mombasa%2C_Kenya.jpg/1280px-Diani_Beach%2C_Mombasa%2C_Kenya.jpg',
     },
     {
       title: 'Nairobi Theatre Night',
@@ -131,7 +136,9 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 3,
       daysFromNow: 15,
-      imageKeywords: 'kenya,nairobi,theatre,performance',
+      // Real photo, Bomas of Kenya cultural/theatre venue, Nairobi (Wikimedia Commons).
+      posterUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg/1280px-Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg',
     },
     {
       title: 'Lake Naivasha Cultural Festival',
@@ -140,7 +147,8 @@ async function main() {
       city: 'Naivasha',
       categoryIndex: 4,
       daysFromNow: 60,
-      imageKeywords: 'kenya,africa,culture,festival',
+      // Real photo, Maasai traditional dance (Wikimedia Commons).
+      posterUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/68/Maasai_women_jumping.jpg',
     },
   ];
 
@@ -150,9 +158,7 @@ async function main() {
     const end = new Date(start);
     end.setHours(end.getHours() + 6);
 
-    // lock=<n> pins a specific real photo from LoremFlickr's keyword pool so the
-    // same event always shows the same image instead of a random one per request.
-    const posterUrl = `https://loremflickr.com/800/800/${seedEvent.imageKeywords}?lock=${index + 1}`;
+    const posterUrl = seedEvent.posterUrl;
 
     const event = await prisma.event.upsert({
       where: { slug: slugify(seedEvent.title) },

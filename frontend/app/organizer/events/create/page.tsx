@@ -15,26 +15,25 @@ const NAV = [
   { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
 ];
 
-const CATEGORY_IMAGE_KEYWORDS: Record<string, string> = {
-  'music & concerts': 'kenya,concert,music,crowd',
-  'tech & business': 'kenya,nairobi,conference,technology',
-  sports: 'kenya,sports,stadium,athlete',
-  'arts & theatre': 'kenya,nairobi,theatre,performance',
-  festivals: 'kenya,africa,culture,festival',
+// Real Kenyan photos (Wikimedia Commons) used as a poster when an organizer
+// doesn't upload one. Static per category rather than a keyword-search
+// service, since LoremFlickr's Flickr-backed search is unreliable and often
+// returns 500s for multi-keyword queries.
+const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
+  'music & concerts': 'https://upload.wikimedia.org/wikipedia/commons/4/45/Music_Festival_Safaricom_Stadium_Kasarani.jpg',
+  'tech & business':
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg/1280px-Overnight_gaming_%26_LAN_party_at_iHub_Nairobi.jpg',
+  sports:
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/A_few_minutes_before_the_match%2C_Kasarani%2C_Nairobi.jpg/1280px-A_few_minutes_before_the_match%2C_Kasarani%2C_Nairobi.jpg',
+  'arts & theatre':
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg/1280px-Bomas_of_Kenya%2C_Nairobi_%2854078773523%29.jpg',
+  festivals: 'https://upload.wikimedia.org/wikipedia/commons/6/68/Maasai_women_jumping.jpg',
 };
 
-// Deterministic, lightweight hash so the same event title always maps to the same stock photo.
-function hashToLock(value: string): number {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) % 1000;
-  }
-  return hash + 1;
-}
+const DEFAULT_FALLBACK_IMAGE = CATEGORY_FALLBACK_IMAGES['festivals'];
 
-function buildFallbackPosterUrl(title: string, categoryName?: string) {
-  const keywords = (categoryName && CATEGORY_IMAGE_KEYWORDS[categoryName.toLowerCase()]) || 'kenya,event,crowd,celebration';
-  return `https://loremflickr.com/800/800/${keywords}?lock=${hashToLock(title || 'ticketflow-event')}`;
+function buildFallbackPosterUrl(_title: string, categoryName?: string) {
+  return (categoryName && CATEGORY_FALLBACK_IMAGES[categoryName.toLowerCase()]) || DEFAULT_FALLBACK_IMAGE;
 }
 
 function CreateEventContent() {
