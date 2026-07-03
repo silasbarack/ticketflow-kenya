@@ -104,8 +104,9 @@ async function main() {
       city: 'Nairobi',
       categoryIndex: 0,
       daysFromNow: 30,
-      // Real photo, Music Festival at Safaricom Stadium Kasarani (Wikimedia Commons).
-      posterUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Music_Festival_Safaricom_Stadium_Kasarani.jpg',
+      // Real photo, fan enjoying a live music event in Kenya (Wikimedia Commons).
+      posterUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Alune_Wade%27s_performance_moved_the_crowd.jpg/1280px-Alune_Wade%27s_performance_moved_the_crowd.jpg',
     },
     {
       title: 'Kenya Tech Summit',
@@ -125,9 +126,9 @@ async function main() {
       city: 'Mombasa',
       categoryIndex: 2,
       daysFromNow: 20,
-      // Real photo, Diani Beach, Mombasa (Wikimedia Commons).
+      // Real photo, people enjoying themselves at Nyali Beach, Mombasa (Wikimedia Commons).
       posterUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Diani_Beach%2C_Mombasa%2C_Kenya.jpg/1280px-Diani_Beach%2C_Mombasa%2C_Kenya.jpg',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/People_bathing_as_viewed_from_Nyali_Beach_next_to_Mombasa_Beach_Hotel_during_low_tide_and_still_conditions_in_Mombasa%2C_Kenya.jpg/1280px-People_bathing_as_viewed_from_Nyali_Beach_next_to_Mombasa_Beach_Hotel_during_low_tide_and_still_conditions_in_Mombasa%2C_Kenya.jpg',
     },
     {
       title: 'Nairobi Theatre Night',
