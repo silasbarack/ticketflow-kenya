@@ -9,6 +9,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Role } from '../common/enums/roles.enum';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private auditLogsService: AuditLogsService,
+    private emailService: EmailService,
   ) {}
 
   private sanitize(user: any) {
@@ -110,9 +112,25 @@ export class AuthService {
       data: { userId: user.id, token, expiresAt },
     });
 
-    // In production this token would be emailed to the user via an email provider.
-    // Returned here only so local/sandbox testing can complete the flow without email infra.
-    return { message: 'If that email exists, a reset link has been sent.', devToken: token };
+    const sent = await this.emailService.sendPasswordResetEmail({
+      to: user.email,
+      firstName: user.firstName,
+      token,
+    });
+
+    await this.auditLogsService.log({
+      actorId: user.id,
+      action: 'PASSWORD_RESET_REQUESTED',
+      entityType: 'User',
+      entityId: user.id,
+    });
+
+    // devToken is only surfaced when SMTP isn't configured, so local/sandbox
+    // testing can still complete the flow without real email infra.
+    return {
+      message: 'If that email exists, a reset link has been sent.',
+      ...(sent ? {} : { devToken: token }),
+    };
   }
 
   async resetPassword(dto: ResetPasswordDto) {
