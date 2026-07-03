@@ -1,8 +1,11 @@
 export function formatCurrency(amount: string | number): string {
   const value = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', maximumFractionDigits: 0 }).format(
-    value || 0,
-  );
+  return new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
+    currencyDisplay: 'code',
+    maximumFractionDigits: 0,
+  }).format(value || 0);
 }
 
 export function formatDate(date: string | Date): string {
