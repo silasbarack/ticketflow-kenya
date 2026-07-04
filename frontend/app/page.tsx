@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import EventCard from '@/components/EventCard';
+import FeaturedEvents from '@/components/FeaturedEvents';
 import { EventCategory, EventItem } from '@/types';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -37,8 +37,8 @@ const HOW_IT_WORKS = [
 ];
 
 export default function LandingPage() {
-  const { data: eventsData, isLoading } = useQuery({
-    queryKey: ['featured-events'],
+  const { data: eventsData } = useQuery({
+    queryKey: ['home-events'],
     queryFn: async () => {
       const { data } = await api.get('/events', { params: { take: 50 } });
       return data as { events: EventItem[]; total: number };
@@ -54,7 +54,6 @@ export default function LandingPage() {
   });
 
   const events = eventsData?.events ?? [];
-  const featured = events.slice(0, 6);
   const heroPosters = events.filter((e) => e.posterUrl).slice(0, 3);
   const cities = new Set(events.map((e) => e.city)).size;
 
@@ -184,36 +183,7 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* Featured events */}
-      <section className="bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Don&apos;t miss out</p>
-              <h2 className="mt-1 text-2xl font-bold text-gray-900">Upcoming Events</h2>
-            </div>
-            <Link href="/events" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
-              View all &rarr;
-            </Link>
-          </div>
-
-          {isLoading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-80 animate-pulse rounded-2xl bg-gray-200" />
-              ))}
-            </div>
-          ) : featured.length === 0 ? (
-            <p className="text-gray-500">No events published yet. Check back soon.</p>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <FeaturedEvents />
 
       {/* How it works */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

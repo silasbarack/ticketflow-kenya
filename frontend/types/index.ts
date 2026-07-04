@@ -61,6 +61,7 @@ export interface EventItem {
   endDateTime: string;
   status: EventStatus;
   rejectionReason?: string | null;
+  isFeatured?: boolean;
   category: EventCategory;
   ticketTypes: TicketType[];
   organizer?: { companyName: string; description?: string | null };

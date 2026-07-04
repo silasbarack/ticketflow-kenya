@@ -20,11 +20,11 @@ const NAV = [
 // rather than a keyword-search service, since LoremFlickr's Flickr-backed
 // search is unreliable and often returns 500s for multi-keyword queries.
 const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
-  'music & concerts': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/music-concerts.svg',
-  'tech & business': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/tech-business.svg',
-  sports: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/sports.svg',
-  'arts & theatre': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/arts-theatre.svg',
-  festivals: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/festivals.svg',
+  'music & concerts': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/music-concerts.jpg',
+  'tech & business': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/tech-business.jpg',
+  sports: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/sports.jpg',
+  'arts & theatre': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/arts-theatre.jpg',
+  festivals: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/festivals.jpg',
 };
 
 const DEFAULT_FALLBACK_IMAGE = CATEGORY_FALLBACK_IMAGES['festivals'];

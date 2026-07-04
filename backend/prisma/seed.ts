@@ -95,65 +95,72 @@ async function main() {
     categories.push(cat);
   }
 
-  // Events
+  // Featured events
   const eventSeeds = [
     {
-      title: 'Nairobi Music Festival 2026',
-      description: 'A weekend of live performances from top Kenyan and East African artists.',
-      venue: 'Uhuru Gardens',
-      city: 'Nairobi',
-      categoryIndex: 0,
-      daysFromNow: 30,
-      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-music-festival-2026.svg',
-    },
-    {
-      title: 'Kenya Tech Summit',
-      description: 'Annual gathering of developers, startups, and investors shaping the Kenyan tech ecosystem.',
-      venue: 'KICC',
-      city: 'Nairobi',
-      categoryIndex: 1,
-      daysFromNow: 45,
-      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/kenya-tech-summit.svg',
-    },
-    {
-      title: 'Mombasa Beach Sports Gala',
-      description: 'Beach volleyball, football tournaments, and live entertainment on the coast.',
-      venue: 'Nyali Beach Grounds',
-      city: 'Mombasa',
-      categoryIndex: 2,
-      daysFromNow: 20,
-      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/mombasa-beach-sports-gala.svg',
-    },
-    {
-      title: 'Nairobi Theatre Night',
-      description: 'An evening of contemporary Kenyan theatre and spoken word performances.',
+      title: '7th Annual Dance Life Festival 2026',
+      description:
+        "Kenya's premier dance showcase returns for its 7th year, bringing together the country's finest choreographers, dance crews, and performers for three days of movement, culture, and celebration at the Kenya National Theatre.",
       venue: 'Kenya National Theatre',
       city: 'Nairobi',
       categoryIndex: 3,
-      daysFromNow: 15,
-      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-theatre-night.svg',
+      daysFromNow: 0,
+      durationDays: 2,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/dance-life-festival-2026.jpg',
     },
     {
-      title: 'Lake Naivasha Cultural Festival',
-      description: 'Celebrating Kenyan culture through food, music, and craft markets.',
-      venue: 'Lake Naivasha Resort Grounds',
-      city: 'Naivasha',
+      title: 'Destination Rhumba - Sounds of Afrika',
+      description:
+        "An unforgettable night of classic and contemporary rhumba, live horns, and Afrika's finest sounds at Hillpark Hotels. Dress sharp, come dance.",
+      venue: 'Hillpark Hotels',
+      city: 'Nairobi',
+      categoryIndex: 0,
+      daysFromNow: 1,
+      durationDays: 0,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/destination-rhumba-sounds-of-afrika.jpg',
+    },
+    {
+      title: 'Bizarre Bazaar Summer Festival',
+      description:
+        'A two-day summer market festival at the Kenya School of TVET featuring local vendors, street food, live performances, and family-friendly activities.',
+      venue: 'Kenya School of TVET',
+      city: 'Nairobi',
       categoryIndex: 4,
-      daysFromNow: 60,
-      // Designed poster with TicketFlow Kenya branding (frontend/public/posters).
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/lake-naivasha-cultural-festival.svg',
+      daysFromNow: 1,
+      durationDays: 1,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/bizarre-bazaar-summer-festival.jpg',
+    },
+    {
+      title: 'The Monument - 06.16 Festival',
+      description:
+        'A night festival at ASK Arena built around live instrumentation, atmosphere, and sound - The Monument brings a moody, intimate festival experience under the stars.',
+      venue: 'ASK Arena',
+      city: 'Nairobi',
+      categoryIndex: 4,
+      daysFromNow: 7,
+      durationDays: 0,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/the-monument-0616-festival.jpg',
+    },
+    {
+      title: 'Sidenotes Vol. 1 - R&B Experience',
+      description:
+        "The first installment of Sidenotes brings Nairobi's smoothest R&B sounds to the Nairobi National Museum Amphitheatre for an intimate evening under the stars.",
+      venue: 'Nairobi National Museum Amphitheatre',
+      city: 'Nairobi',
+      categoryIndex: 0,
+      daysFromNow: 7,
+      durationDays: 0,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sidenotes-vol-1-rnb-experience.jpg',
     },
   ];
 
   for (const [index, seedEvent] of eventSeeds.entries()) {
     const start = new Date();
     start.setDate(start.getDate() + seedEvent.daysFromNow);
+    start.setHours(18, 0, 0, 0);
     const end = new Date(start);
-    end.setHours(end.getHours() + 6);
+    end.setDate(end.getDate() + seedEvent.durationDays);
+    end.setHours(23, 0, 0, 0);
 
     const posterUrl = seedEvent.posterUrl;
 
@@ -173,6 +180,7 @@ async function main() {
         startDateTime: start,
         endDateTime: end,
         status: EventStatus.PUBLISHED,
+        isFeatured: true,
       },
     });
 

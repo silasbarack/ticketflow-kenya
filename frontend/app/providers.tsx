@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/hooks/useAuth';
 import { CartProvider } from '@/hooks/useCart';
 import { BackgroundColorProvider } from '@/hooks/useBackgroundColor';
+import { FavoritesProvider } from '@/hooks/useFavorites';
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({ defaultOptions: { queries: { retry: 1 } } }));
@@ -14,10 +15,12 @@ export default function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <BackgroundColorProvider>
-            {children}
-            <Toaster position="top-center" />
-          </BackgroundColorProvider>
+          <FavoritesProvider>
+            <BackgroundColorProvider>
+              {children}
+              <Toaster position="top-center" />
+            </BackgroundColorProvider>
+          </FavoritesProvider>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>
