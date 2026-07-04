@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { EventItem } from '@/types';
-import FeaturedEventCard from './FeaturedEventCard';
+import EventPosterCard from './EventPosterCard';
 
 export default function FeaturedEvents() {
   const { data, isLoading } = useQuery({
@@ -35,13 +35,13 @@ export default function FeaturedEvents() {
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] animate-pulse rounded-[20px] bg-gray-200" />
+              <div key={i} className="aspect-[3/5] animate-pulse rounded-[18px] bg-gray-200" />
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((event) => (
-              <FeaturedEventCard key={event.id} event={event} />
+              <EventPosterCard key={event.id} event={event} />
             ))}
           </div>
         )}
