@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import Logo from '@/components/Logo';
 
 const LEGAL_LINKS = [
@@ -67,6 +68,17 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-gray-800 pt-6 text-sm text-gray-500 sm:flex-row">
           <p>&copy; {new Date().getFullYear()} TicketFlow Kenya. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <span>Powered by</span>
+            <Image
+              src="/mpesa-logo.svg"
+              alt="M-PESA"
+              width={512}
+              height={273}
+              unoptimized
+              className="h-8 w-auto"
+            />
+          </div>
           <p>Built for event organizers and ticket buyers across Kenya.</p>
         </div>
       </div>
