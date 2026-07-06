@@ -255,23 +255,21 @@ function CheckoutContent() {
             stkPush.mutate();
           }}
           disabled={stkPush.isPending || !phone || !!activePaymentId}
-          className="mt-4 w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+          className="mt-4 w-full rounded-lg border-2 border-green-600 bg-white px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 disabled:opacity-60"
         >
           {stkPush.isPending ? (
             'Sending STK push…'
           ) : (
             <span className="flex items-center justify-center gap-2">
               Pay with
-              <span className="rounded bg-white px-1.5 py-0.5">
-                <Image
-                  src="/mpesa-logo.svg"
-                  alt="M-PESA"
-                  width={512}
-                  height={273}
-                  unoptimized
-                  className="h-5 w-auto"
-                />
-              </span>
+              <Image
+                src="/mpesa-logo.svg"
+                alt="M-PESA"
+                width={512}
+                height={273}
+                unoptimized
+                className="h-7 w-auto"
+              />
             </span>
           )}
         </button>
