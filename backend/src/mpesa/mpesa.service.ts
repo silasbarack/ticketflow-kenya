@@ -87,8 +87,8 @@ export class MpesaService {
       PartyB: shortcode,
       PhoneNumber: this.normalizePhone(params.phone),
       CallBackURL: callbackUrl,
-      AccountReference: params.accountReference,
-      TransactionDesc: params.transactionDesc,
+      AccountReference: this.sanitizeField(params.accountReference, 12),
+      TransactionDesc: this.sanitizeField(params.transactionDesc, 13),
     };
 
     try {
@@ -107,6 +107,17 @@ export class MpesaService {
       this.logger.error('STK Push failed', error?.response?.data || error.message);
       throw error;
     }
+  }
+
+  /**
+   * Daraja processes the request through an XML pipeline that breaks on
+   * XML-special characters (e.g. the "&" in "R&B" returns an
+   * XSLEvaluationFailed 500), and the API spec caps AccountReference at 12
+   * and TransactionDesc at 13 characters.
+   */
+  sanitizeField(text: string, maxLength: number): string {
+    const cleaned = text.replace(/[^A-Za-z0-9 ._-]/g, ' ').replace(/\s+/g, ' ').trim();
+    return (cleaned || 'Payment').slice(0, maxLength);
   }
 
   /** Normalizes 07xxxxxxxx / 01xxxxxxxx / +254xxxxxxxxx / 254xxxxxxxxx to 254xxxxxxxxx. */
