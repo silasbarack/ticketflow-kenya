@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useCart } from '@/hooks/useCart';
@@ -331,7 +332,23 @@ export default function CartPage() {
               disabled={placing}
               className="mt-4 w-full rounded-lg bg-brand-600 px-4 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
             >
-              {placing ? 'Placing order...' : `Pay ${formatCurrency(totalAmount)} via M-Pesa`}
+              {placing ? (
+                'Placing order...'
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  Pay {formatCurrency(totalAmount)} via
+                  <span className="rounded bg-white px-1.5 py-0.5">
+                    <Image
+                      src="/mpesa-logo.svg"
+                      alt="M-PESA"
+                      width={512}
+                      height={273}
+                      unoptimized
+                      className="h-5 w-auto"
+                    />
+                  </span>
+                </span>
+              )}
             </button>
 
             {!user && (
