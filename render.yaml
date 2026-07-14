@@ -13,9 +13,7 @@ services:
     region: oregon
     rootDir: backend
     buildCommand: npm install && npx prisma generate && npm run build
-    # TEMPORARY: one-off seed on deploy to publish the August 2026 event lineup;
-    # revert to plain start once it has run (seeding must not happen every deploy).
-    startCommand: npx prisma migrate deploy && (npm run seed || true) && npm run start:prod
+    startCommand: npx prisma migrate deploy && npm run start:prod
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
