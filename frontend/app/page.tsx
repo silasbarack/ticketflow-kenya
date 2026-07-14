@@ -70,14 +70,14 @@ export default function LandingPage() {
       <section className="relative overflow-hidden text-white">
         <div className="absolute inset-0">
           <Image
-            src="https://loremflickr.com/1600/900/conference,business,auditorium,audience?lock=120"
+            src="/hero-party.jpg"
             alt=""
             fill
             priority
             unoptimized
-            className="object-cover brightness-[0.45]"
+            className="object-cover brightness-[0.55]"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-brand-900/70 to-brand-800/55" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30" />
           <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:28px_28px]" />
         </div>
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24 lg:px-8">
