@@ -15,6 +15,22 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, '');
 }
 
+// Demo customer accounts aren't referenced anywhere else in this script, so
+// if one's seed phone number collides with a real account created by app
+// testing (e.g. the seed email was changed via the profile page), skip it
+// with a warning instead of failing the whole seed run.
+async function upsertDemoUser(args: Parameters<typeof prisma.user.upsert>[0]) {
+  try {
+    return await prisma.user.upsert(args);
+  } catch (e: any) {
+    if (e?.code === 'P2002') {
+      console.warn(`Skipped demo user ${JSON.stringify(args.where)}: unique constraint already taken (${e.meta?.target}).`);
+      return null;
+    }
+    throw e;
+  }
+}
+
 async function main() {
   console.log('Seeding database...');
 
@@ -45,7 +61,7 @@ async function main() {
     },
   });
 
-  const customer1 = await prisma.user.upsert({
+  await upsertDemoUser({
     where: { email: 'customer1@ticketflow.co.ke' },
     update: {},
     create: {
@@ -58,7 +74,7 @@ async function main() {
     },
   });
 
-  const customer2 = await prisma.user.upsert({
+  await upsertDemoUser({
     where: { email: 'customer2@ticketflow.co.ke' },
     update: {},
     create: {
@@ -98,59 +114,70 @@ async function main() {
   // Featured events
   const eventSeeds = [
     {
-      title: '7th Annual Dance Life Festival 2026',
+      title: 'Sundown Sessions: Live at Carnivore',
       description:
-        "Kenya's premier dance showcase returns for its 7th year, bringing together the country's finest choreographers, dance crews, and performers for three days of movement, culture, and celebration at the Kenya National Theatre.",
+        'An open-air evening of live Kenyan bands, rhumba classics, and Afrobeat sets at Carnivore Grounds - full bar, nyama choma stalls, and dancing under the string lights until late.',
+      venue: 'Carnivore Grounds',
+      city: 'Nairobi',
+      categoryIndex: 0,
+      daysFromNow: 16,
+      durationDays: 0,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sundown-sessions-live-at-carnivore.jpg',
+    },
+    {
+      title: 'Nairobi Innovation Week',
+      description:
+        "Three days of keynotes, startup pitch sessions, and hands-on workshops bringing together Kenya's tech founders, investors, and engineers at the iconic KICC towers in the heart of Nairobi.",
+      venue: 'Kenyatta International Convention Centre (KICC)',
+      city: 'Nairobi',
+      categoryIndex: 1,
+      daysFromNow: 33,
+      durationDays: 2,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-innovation-week.jpg',
+    },
+    {
+      title: 'Mombasa Beach Games',
+      description:
+        'A weekend of beach volleyball, kitesurfing exhibitions, and a coastal fun run on the white sands of Diani Beach, with live commentary, food vendors, and a sunset bonfire to close out day one.',
+      venue: 'Diani Beach',
+      city: 'Mombasa',
+      categoryIndex: 2,
+      daysFromNow: 24,
+      durationDays: 1,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/mombasa-beach-games.jpg',
+    },
+    {
+      title: 'The Nairobi Playwrights Showcase',
+      description:
+        "A curated evening of new one-act plays from Kenya's rising playwrights, staged by the Kenya National Theatre's resident company, followed by a talkback with the cast and directors.",
       venue: 'Kenya National Theatre',
       city: 'Nairobi',
       categoryIndex: 3,
-      daysFromNow: 0,
-      durationDays: 2,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/dance-life-festival-2026.jpg',
-    },
-    {
-      title: 'Destination Rhumba - Sounds of Afrika',
-      description:
-        "An unforgettable night of classic and contemporary rhumba, live horns, and Afrika's finest sounds at Hillpark Hotels. Dress sharp, come dance.",
-      venue: 'Hillpark Hotels',
-      city: 'Nairobi',
-      categoryIndex: 0,
-      daysFromNow: 1,
-      durationDays: 0,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/destination-rhumba-sounds-of-afrika.jpg',
-    },
-    {
-      title: 'Bizarre Bazaar Summer Festival',
-      description:
-        'A two-day summer market festival at the Kenya School of TVET featuring local vendors, street food, live performances, and family-friendly activities.',
-      venue: 'Kenya School of TVET',
-      city: 'Nairobi',
-      categoryIndex: 4,
-      daysFromNow: 1,
+      daysFromNow: 10,
       durationDays: 1,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/bizarre-bazaar-summer-festival.jpg',
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/the-nairobi-playwrights-showcase.jpg',
     },
     {
-      title: 'The Monument - 06.16 Festival',
+      title: 'Nairobi Street Food & Culture Festival',
       description:
-        'A night festival at ASK Arena built around live instrumentation, atmosphere, and sound - The Monument brings a moody, intimate festival experience under the stars.',
-      venue: 'ASK Arena',
+        'A weekend celebration of Kenyan street food, Maasai market crafts, and live cultural performances, bringing vendors from across the country together for tastings, music, and family activities.',
+      venue: 'The Village Market',
       city: 'Nairobi',
       categoryIndex: 4,
-      daysFromNow: 7,
-      durationDays: 0,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/the-monument-0616-festival.jpg',
+      daysFromNow: 40,
+      durationDays: 1,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-street-food-culture-festival.jpg',
     },
     {
-      title: 'Sidenotes Vol. 1 - R&B Experience',
+      title: 'Lake Naivasha Sunset Festival',
       description:
-        "The first installment of Sidenotes brings Nairobi's smoothest R&B sounds to the Nairobi National Museum Amphitheatre for an intimate evening under the stars.",
-      venue: 'Nairobi National Museum Amphitheatre',
-      city: 'Nairobi',
-      categoryIndex: 0,
-      daysFromNow: 7,
+        'A laid-back lakeside festival of live acoustic sets, boat rides, and sundowner cocktails on the shores of Lake Naivasha, capped with a golden-hour sunset over the water.',
+      venue: 'Lake Naivasha',
+      city: 'Naivasha',
+      categoryIndex: 4,
+      daysFromNow: 54,
       durationDays: 0,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sidenotes-vol-1-rnb-experience.jpg',
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/lake-naivasha-sunset-festival.jpg',
     },
   ];
 
@@ -208,6 +235,23 @@ async function main() {
         });
       }
     }
+  }
+
+  // Retire any previously-seeded events that aren't in the current lineup
+  // above (soft "replace": CANCELLED instead of deleted, since Order rows
+  // reference events with onDelete: Restrict, and cancelled events simply
+  // no longer show up in the public /events listing).
+  const currentSlugs = eventSeeds.map((e) => slugify(e.title));
+  const stale = await prisma.event.findMany({
+    where: {
+      organizerId: organizerProfile.id,
+      status: EventStatus.PUBLISHED,
+      slug: { notIn: currentSlugs },
+    },
+  });
+  for (const event of stale) {
+    await prisma.event.update({ where: { id: event.id }, data: { status: EventStatus.CANCELLED } });
+    console.log(`Retired stale seed event: ${event.title}`);
   }
 
   console.log('Seed complete.');
