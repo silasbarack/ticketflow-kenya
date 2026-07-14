@@ -111,83 +111,92 @@ async function main() {
     categories.push(cat);
   }
 
-  // Featured events
+  // Featured events — August 2026 lineup
   const eventSeeds = [
     {
-      title: 'Sundown Sessions: Live at Carnivore',
+      title: 'Watamu Ocean & Seafood Festival',
       description:
-        'An open-air evening of live Kenyan bands, rhumba classics, and Afrobeat sets at Carnivore Grounds - full bar, nyama choma stalls, and dancing under the string lights until late.',
-      venue: 'Carnivore Grounds',
+        'A two-day coastal celebration on Watamu Beach: fresh seafood grills and Swahili food stalls, dhow sailing races at high tide, tide-pool and marine park tours, and taarab and bango bands playing into the sunset.',
+      venue: 'Watamu Beach',
+      city: 'Watamu',
+      categoryIndex: 4,
+      date: '2026-08-01',
+      startHour: 10,
+      durationDays: 1,
+      endHour: 22,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/watamu-ocean-seafood-festival.jpg',
+    },
+    {
+      title: 'August Nights: Afro-Fusion Live',
+      description:
+        'One night, one big stage at Uhuru Gardens: an afro-fusion lineup running from benga and rhumba classics to gengetone and Afrobeats headliners, with a full festival light show, food trucks, and late-night DJ sets.',
+      venue: 'Uhuru Gardens',
       city: 'Nairobi',
       categoryIndex: 0,
-      daysFromNow: 16,
+      date: '2026-08-08',
+      startHour: 18,
       durationDays: 0,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sundown-sessions-live-at-carnivore.jpg',
+      endHour: 23,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/august-nights-afro-fusion-live.jpg',
     },
     {
-      title: 'Nairobi Innovation Week',
+      title: 'Coast Sevens Rugby Festival',
       description:
-        "Three days of keynotes, startup pitch sessions, and hands-on workshops bringing together Kenya's tech founders, investors, and engineers at the iconic KICC towers in the heart of Nairobi.",
-      venue: 'Kenyatta International Convention Centre (KICC)',
-      city: 'Nairobi',
-      categoryIndex: 1,
-      daysFromNow: 33,
-      durationDays: 2,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-innovation-week.jpg',
-    },
-    {
-      title: 'Mombasa Beach Games',
-      description:
-        'A weekend of beach volleyball, kitesurfing exhibitions, and a coastal fun run on the white sands of Diani Beach, with live commentary, food vendors, and a sunset bonfire to close out day one.',
-      venue: 'Diani Beach',
+        'Sixteen club sides battle it out over a fast-and-loose weekend of sevens rugby at Mombasa Sports Club - non-stop matches, a family fan village, halftime entertainment, and the coast derby final on Sunday evening.',
+      venue: 'Mombasa Sports Club',
       city: 'Mombasa',
       categoryIndex: 2,
-      daysFromNow: 24,
+      date: '2026-08-15',
+      startHour: 9,
       durationDays: 1,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/mombasa-beach-games.jpg',
+      endHour: 18,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/coast-sevens-rugby-festival.jpg',
     },
     {
-      title: 'The Nairobi Playwrights Showcase',
+      title: 'Nairobi Fintech & AI Summit 2026',
       description:
-        "A curated evening of new one-act plays from Kenya's rising playwrights, staged by the Kenya National Theatre's resident company, followed by a talkback with the cast and directors.",
+        "Two days of keynotes, panels, and live demos on where Kenyan fintech is heading: mobile money APIs, AI in credit scoring, agent banking, and regulation - plus a startup pitch arena and investor office hours at Sarit Expo Centre.",
+      venue: 'Sarit Expo Centre',
+      city: 'Nairobi',
+      categoryIndex: 1,
+      date: '2026-08-19',
+      startHour: 9,
+      durationDays: 1,
+      endHour: 17,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-fintech-ai-summit-2026.jpg',
+    },
+    {
+      title: 'Sanaa Live: Spoken Word & Theatre Night',
+      description:
+        "An evening at the Kenya National Theatre mixing spoken word and slam poetry with two new one-act plays and a contemporary dance piece - followed by a talkback with the performers and directors.",
       venue: 'Kenya National Theatre',
       city: 'Nairobi',
       categoryIndex: 3,
-      daysFromNow: 10,
-      durationDays: 1,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/the-nairobi-playwrights-showcase.jpg',
+      date: '2026-08-23',
+      startHour: 17,
+      durationDays: 0,
+      endHour: 22,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sanaa-live-spoken-word-theatre-night.jpg',
     },
     {
-      title: 'Nairobi Street Food & Culture Festival',
+      title: 'Nairobi Coffee & Culture Festival',
       description:
-        'A weekend celebration of Kenyan street food, Maasai market crafts, and live cultural performances, bringing vendors from across the country together for tastings, music, and family activities.',
-      venue: 'The Village Market',
+        'A full day at Ngong Racecourse celebrating Kenyan coffee from farm to cup: cuppings with roasters from Kiambu to Kisii, a barista latte-art championship, a craft and vinyl market, and an acoustic stage all afternoon.',
+      venue: 'Ngong Racecourse',
       city: 'Nairobi',
       categoryIndex: 4,
-      daysFromNow: 40,
-      durationDays: 1,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-street-food-culture-festival.jpg',
-    },
-    {
-      title: 'Lake Naivasha Sunset Festival',
-      description:
-        'A laid-back lakeside festival of live acoustic sets, boat rides, and sundowner cocktails on the shores of Lake Naivasha, capped with a golden-hour sunset over the water.',
-      venue: 'Lake Naivasha',
-      city: 'Naivasha',
-      categoryIndex: 4,
-      daysFromNow: 54,
+      date: '2026-08-29',
+      startHour: 10,
       durationDays: 0,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/lake-naivasha-sunset-festival.jpg',
+      endHour: 20,
+      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-coffee-culture-festival.jpg',
     },
   ];
 
   for (const [index, seedEvent] of eventSeeds.entries()) {
-    const start = new Date();
-    start.setDate(start.getDate() + seedEvent.daysFromNow);
-    start.setHours(18, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(end.getDate() + seedEvent.durationDays);
-    end.setHours(23, 0, 0, 0);
+    const [year, month, day] = seedEvent.date.split('-').map(Number);
+    const start = new Date(year, month - 1, day, seedEvent.startHour, 0, 0, 0);
+    const end = new Date(year, month - 1, day + seedEvent.durationDays, seedEvent.endHour, 0, 0, 0);
 
     const posterUrl = seedEvent.posterUrl;
 
