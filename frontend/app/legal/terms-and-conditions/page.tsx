@@ -146,9 +146,10 @@ export default function TermsPage() {
         Ticket purchases and payments are governed in detail by our{' '}
         <a href="/legal/ticket-purchase-policy">Ticket Purchase Policy</a> and{' '}
         <a href="/legal/payment-policy">Payment Policy</a>, each of which forms an integral part of
-        these Terms. TicketFlow Kenya charges Organizers a Platform Commission on each successfully
+        these Terms. TicketFlow Kenya charges a Platform Service Fee on each successfully
         paid Ticket, currently <strong>nine per cent (9%) of the ticket price</strong> by default,
-        deducted before the Organizer&apos;s earnings are calculated. The applicable commission
+        added on top of the ticket price and paid by the buyer at checkout; Organizers receive the
+        full ticket price as their earnings. The applicable commission
         rate is shown to Organizers before they publish ticket pricing and may be varied for future
         Events with reasonable prior notice.
       </p>

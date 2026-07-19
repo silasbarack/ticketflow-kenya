@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { EventItem } from '@/types';
 import { formatCurrency, formatDateTime, formatTicketCategory } from '@/lib/format';
+import { SERVICE_FEE_PERCENT, serviceFeeFor, totalWithServiceFee } from '@/lib/fees';
 
 export default function EventDetailClient() {
   const params = useParams<{ id: string }>();
@@ -133,7 +134,14 @@ export default function EventDetailClient() {
                       <p className="text-sm font-semibold text-gray-900">{tt.name}</p>
                       <p className="text-xs text-gray-500">{formatTicketCategory(tt.category)}</p>
                     </div>
-                    <p className="text-sm font-semibold text-gray-900">{formatCurrency(tt.price)}</p>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {formatCurrency(totalWithServiceFee(Number(tt.price)))}
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        {formatCurrency(tt.price)} + {formatCurrency(serviceFeeFor(Number(tt.price)))} fee
+                      </p>
+                    </div>
                   </div>
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-xs text-gray-400">
@@ -166,9 +174,19 @@ export default function EventDetailClient() {
             })}
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-gray-200 pt-4">
-            <span className="text-sm font-medium text-gray-500">Total</span>
-            <span className="text-lg font-bold text-gray-900">{formatCurrency(total)}</span>
+          <div className="mt-5 space-y-1 border-t border-gray-200 pt-4">
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <span>Subtotal</span>
+              <span>{formatCurrency(total)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <span>Service fee ({SERVICE_FEE_PERCENT}%)</span>
+              <span>{formatCurrency(serviceFeeFor(total))}</span>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-sm font-medium text-gray-500">You pay</span>
+              <span className="text-lg font-bold text-gray-900">{formatCurrency(totalWithServiceFee(total))}</span>
+            </div>
           </div>
 
           <button

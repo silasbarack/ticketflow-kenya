@@ -131,9 +131,11 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
 ## Architecture notes
 
 - **Commission**: `PLATFORM_COMMISSION_PERCENT` (default 9%) is applied in
-  `backend/src/orders/orders.service.ts` at order creation; `platformFee` and
-  `organizerEarning` are stored on the `Order` row and a `PlatformCommission` record is written
-  once payment succeeds.
+  `backend/src/orders/orders.service.ts` at order creation as a buyer-paid service fee added on
+  top of the ticket price: `totalAmount` = subtotal + fee, `organizerEarning` = full subtotal,
+  `platformFee` = the fee. A `PlatformCommission` record is written once payment succeeds. The
+  frontend shows the same percentage before checkout via `NEXT_PUBLIC_SERVICE_FEE_PERCENT`
+  (`frontend/lib/fees.ts`) — keep it in sync with the backend value.
 - **Stock control**: ticket quantity is reserved (incremented on `TicketType.quantitySold`) at
   order creation time inside a Prisma transaction, and released if the payment fails/cancels —
   this prevents overselling without requiring a separate "reservation" table.

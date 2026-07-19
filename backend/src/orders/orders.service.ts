@@ -29,7 +29,7 @@ export class OrdersService {
         throw new BadRequestException('This event has already started or ended');
       }
 
-      let totalAmount = 0;
+      let ticketSubtotal = 0;
       const itemsData: { ticketTypeId: string; quantity: number; unitPrice: number; subtotal: number; attendeesJson?: any }[] = [];
 
       for (const item of dto.items) {
@@ -44,7 +44,7 @@ export class OrdersService {
 
         const unitPrice = Number(ticketType.price);
         const subtotal = unitPrice * item.quantity;
-        totalAmount += subtotal;
+        ticketSubtotal += subtotal;
 
         itemsData.push({
           ticketTypeId: ticketType.id,
@@ -62,9 +62,12 @@ export class OrdersService {
         });
       }
 
+      // Service-fee model: the platform fee is charged to the buyer on top of the
+      // ticket price, so the organizer earns the full ticket subtotal.
       const commissionPercent = this.getCommissionPercent();
-      const platformFee = Math.round(totalAmount * (commissionPercent / 100) * 100) / 100;
-      const organizerEarning = Math.round((totalAmount - platformFee) * 100) / 100;
+      const platformFee = Math.round(ticketSubtotal * (commissionPercent / 100) * 100) / 100;
+      const totalAmount = Math.round((ticketSubtotal + platformFee) * 100) / 100;
+      const organizerEarning = Math.round(ticketSubtotal * 100) / 100;
 
       const order = await tx.order.create({
         data: {

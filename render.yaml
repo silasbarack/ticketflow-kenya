@@ -58,3 +58,6 @@ services:
       # Set to https://<ticketflow-backend>.onrender.com/api once the backend service is deployed.
       - key: NEXT_PUBLIC_API_URL
         sync: false
+      # Buyer-facing service fee shown at checkout. Keep in sync with the backend's PLATFORM_COMMISSION_PERCENT.
+      - key: NEXT_PUBLIC_SERVICE_FEE_PERCENT
+        value: "9"

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { CartItem } from '@/types';
+import { serviceFeeFor, totalWithServiceFee } from '@/lib/fees';
 
 interface CartContextType {
   items: CartItem[];
@@ -10,7 +11,11 @@ interface CartContextType {
   updateQuantity: (ticketTypeId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
+  /** Ticket subtotal before the service fee */
   totalAmount: number;
+  serviceFee: number;
+  /** Final amount the buyer pays (subtotal + service fee) */
+  finalTotal: number;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -69,10 +74,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const serviceFee = serviceFeeFor(totalAmount);
+  const finalTotal = totalWithServiceFee(totalAmount);
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount }}
+      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount, serviceFee, finalTotal }}
     >
       {children}
     </CartContext.Provider>

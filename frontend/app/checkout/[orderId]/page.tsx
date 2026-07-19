@@ -231,8 +231,12 @@ function CheckoutContent() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex justify-between border-t border-gray-200 pt-3 font-semibold text-gray-900">
-          <span>Total</span>
+        <div className="mt-3 flex justify-between border-t border-gray-200 pt-3 text-sm text-gray-600">
+          <span>Service fee</span>
+          <span>{formatCurrency(order.platformFee)}</span>
+        </div>
+        <div className="mt-3 flex justify-between border-t border-gray-200 pt-3 font-semibold text-gray-900">
+          <span>Total to pay</span>
           <span>{formatCurrency(order.totalAmount)}</span>
         </div>
 

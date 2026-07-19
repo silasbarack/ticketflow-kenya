@@ -127,7 +127,7 @@ export default function LandingPage() {
               <span className="flex items-center gap-1.5">{'\u{1F4F1}'} QR e-tickets by email</span>
               <span className="flex items-center gap-1.5">{'\u{1F512}'} Signed QR check-in</span>
               <span className="flex items-center gap-1.5">{'\u{1F4CA}'} Real-time sales dashboard</span>
-              <span className="flex items-center gap-1.5">{'\u{1F4BC}'} 9% platform fee only</span>
+              <span className="flex items-center gap-1.5">{'\u{1F4BC}'} Keep 100% of your ticket price</span>
               <span className="flex items-center gap-1.5">{'\u{1F3AB}'} VIP · VVIP · Student tiers</span>
             </div>
           </div>
@@ -215,7 +215,8 @@ export default function LandingPage() {
             <h2 className="text-2xl font-bold text-white sm:text-3xl">Ready to host your next event?</h2>
             <p className="mx-auto mt-3 max-w-xl text-gray-300">
               Join organizers across Kenya selling tickets with M-Pesa, QR check-in, and real-time
-              sales tracking — for just 9% commission per ticket.
+              sales tracking — you keep 100% of your ticket price; buyers pay a 9% service fee at
+              checkout.
             </p>
             <Link
               href="/register"

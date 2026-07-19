@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { api, getApiErrorMessage } from '@/lib/api';
 import { AttendeeInfo } from '@/types';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { SERVICE_FEE_PERCENT } from '@/lib/fees';
 import { isValidKenyanPhone, KENYA_PHONE_MESSAGE } from '@/lib/phone';
 
 const EMPTY_ATTENDEE: AttendeeInfo = { firstName: '', lastName: '', nationalId: '', email: '', phone: '' };
@@ -17,7 +18,7 @@ const EMPTY_ATTENDEE: AttendeeInfo = { firstName: '', lastName: '', nationalId: 
 export default function CartPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { items, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount, serviceFee, finalTotal } = useCart();
 
   const [customerPhone, setCustomerPhone] = useState('');
   const [attendees, setAttendees] = useState<AttendeeInfo[]>([]);
@@ -303,12 +304,21 @@ export default function CartPage() {
               ))}
             </div>
 
-            <div className="mt-3 border-t border-gray-200 pt-3 flex justify-between font-semibold">
-              <span>Total</span>
-              <span className="text-brand-700">{formatCurrency(totalAmount)}</span>
+            <div className="mt-3 space-y-1.5 border-t border-gray-200 pt-3 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>{formatCurrency(totalAmount)}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Service fee ({SERVICE_FEE_PERCENT}%)</span>
+                <span>{formatCurrency(serviceFee)}</span>
+              </div>
             </div>
 
-            <div className="mt-1 text-xs text-gray-400">Inclusive of 9% platform fee</div>
+            <div className="mt-3 border-t border-gray-200 pt-3 flex justify-between font-semibold">
+              <span>Total to pay</span>
+              <span className="text-brand-700">{formatCurrency(finalTotal)}</span>
+            </div>
           </div>
 
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -336,7 +346,7 @@ export default function CartPage() {
                 'Placing order...'
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  Pay {formatCurrency(totalAmount)} via
+                  Pay {formatCurrency(finalTotal)} via
                   <Image
                     src="/mpesa-logo.svg"
                     alt="M-PESA"

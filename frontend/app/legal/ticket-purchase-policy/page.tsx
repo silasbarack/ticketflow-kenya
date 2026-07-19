@@ -52,8 +52,8 @@ export default function TicketPurchasePolicyPage() {
           someone else while you complete payment.
         </li>
         <li>
-          An Order is created showing the total price, including the Platform Commission embedded
-          in the ticket price.
+          An Order is created showing the ticket subtotal, the Platform Service Fee added at
+          checkout, and the final total you will pay.
         </li>
         <li>
           You complete payment, typically via M-Pesa STK Push — see our{' '}
