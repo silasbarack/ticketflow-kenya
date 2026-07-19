@@ -117,7 +117,7 @@ export default function EventOrganizerPolicyPage() {
 
       <h2>8. Platform Commission and earnings</h2>
       <p>
-        TicketFlow Kenya charges a Platform Commission of <strong>seven per cent (7%) of the
+        TicketFlow Kenya charges a Platform Commission of <strong>nine per cent (9%) of the
         ticket price by default</strong> on each successfully paid Ticket. Your Organizer Earning
         per Ticket is the ticket price minus this commission. Commission rates and any future
         changes will be shown in your Organizer dashboard before they apply to new sales. See our{' '}

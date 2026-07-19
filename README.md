@@ -130,7 +130,7 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
 
 ## Architecture notes
 
-- **Commission**: `PLATFORM_COMMISSION_PERCENT` (default 7%) is applied in
+- **Commission**: `PLATFORM_COMMISSION_PERCENT` (default 9%) is applied in
   `backend/src/orders/orders.service.ts` at order creation; `platformFee` and
   `organizerEarning` are stored on the `Order` row and a `PlatformCommission` record is written
   once payment succeeds.

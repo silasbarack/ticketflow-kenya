@@ -308,7 +308,7 @@ export default function CartPage() {
               <span className="text-brand-700">{formatCurrency(totalAmount)}</span>
             </div>
 
-            <div className="mt-1 text-xs text-gray-400">Inclusive of 7% platform fee</div>
+            <div className="mt-1 text-xs text-gray-400">Inclusive of 9% platform fee</div>
           </div>
 
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">

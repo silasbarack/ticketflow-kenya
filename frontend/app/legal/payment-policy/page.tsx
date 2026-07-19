@@ -101,7 +101,7 @@ export default function PaymentPolicyPage() {
       <h2>6. Platform Commission</h2>
       <p>
         TicketFlow Kenya deducts a Platform Commission from each successfully paid Order —{' '}
-        <strong>seven per cent (7%) of the ticket price by default</strong>. The remainder, the
+        <strong>nine per cent (9%) of the ticket price by default</strong>. The remainder, the
         Organizer Earning, is recorded against the Organizer&apos;s account. Commission is charged
         only on completed, successful sales; there is <strong>no charge</strong> on pending,
         failed, or cancelled Orders. Any future change to the default commission rate will be

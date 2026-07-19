@@ -60,7 +60,7 @@ Key invariants that span modules:
 
 - **Payment trust boundary**: only `payments.service.ts` may set a payment to `SUCCESS`, and only in response to the M-Pesa callback (`POST /api/payments/mpesa/callback`) or the dev mock endpoint. Client-reported status is never trusted. Payment success is what triggers commission recording and QR ticket generation.
 - **Stock control**: `orders.service.ts` reserves stock by incrementing `TicketType.quantitySold` inside a Prisma transaction at order creation, and releases it if payment fails/cancels. There is no separate reservation table — keep this pattern when touching order/payment flow.
-- **Commission**: `PLATFORM_COMMISSION_PERCENT` (default 7%) is applied in `orders.service.ts` at order creation; `platformFee`/`organizerEarning` live on `Order`, and a `PlatformCommission` row is written on payment success.
+- **Commission**: `PLATFORM_COMMISSION_PERCENT` (default 9%) is applied in `orders.service.ts` at order creation; `platformFee`/`organizerEarning` live on `Order`, and a `PlatformCommission` row is written on payment success.
 - **M-Pesa isolation**: all Daraja-specific logic lives in `src/mpesa/mpesa.service.ts`. To add another payment provider, create a sibling module with the same shape (`initiate(...)` + callback handler) and branch on the `PaymentProvider` enum inside `payments.service.ts` — `Payment`/`Order` are provider-agnostic.
 - **Mock payments**: with `ENABLE_MOCK_PAYMENTS=true` (local dev only), `POST /api/payments/mock/:paymentId/success` simulates the whole successful callback, so the full purchase → QR ticket flow works without Daraja credentials or a public callback URL.
 

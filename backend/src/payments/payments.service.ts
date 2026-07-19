@@ -117,7 +117,7 @@ export class PaymentsService {
         update: {},
         create: {
           orderId: order.id,
-          percentApplied: parseFloat(this.configService.get<string>('PLATFORM_COMMISSION_PERCENT') || '7'),
+          percentApplied: parseFloat(this.configService.get<string>('PLATFORM_COMMISSION_PERCENT') || '9'),
           amount: order.platformFee,
         },
       });

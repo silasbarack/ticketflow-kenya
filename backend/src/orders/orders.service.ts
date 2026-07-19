@@ -15,7 +15,7 @@ export class OrdersService {
   }
 
   private getCommissionPercent() {
-    return parseFloat(this.configService.get<string>('PLATFORM_COMMISSION_PERCENT') || '7');
+    return parseFloat(this.configService.get<string>('PLATFORM_COMMISSION_PERCENT') || '9');
   }
 
   async create(userId: string, dto: CreateOrderDto) {

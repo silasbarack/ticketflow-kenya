@@ -25,7 +25,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: PLATFORM_COMMISSION_PERCENT
-        value: "7"
+        value: "9"
       - key: ENABLE_MOCK_PAYMENTS
         value: "false"
       - key: MPESA_ENV
