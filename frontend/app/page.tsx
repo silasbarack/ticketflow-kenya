@@ -40,22 +40,41 @@ export default function LandingPage() {
   return (
     <main>
       {/* ---------------------------------------------------------------- */}
-      {/* Hero                                                              */}
+      {/* Hero — night-event photo background                               */}
       {/* ---------------------------------------------------------------- */}
-      <section className="overflow-hidden bg-cream">
-        <Container className="grid gap-10 py-10 sm:py-14 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-20">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-party.jpg"
+            alt=""
+            fill
+            priority
+            unoptimized
+            className="object-cover"
+          />
+          {/* Navy overlay keeps text readable while letting the crowd/light show through */}
+          <div className="absolute inset-0 bg-gradient-to-r from-navy-950/95 via-navy-950/80 to-navy-900/55" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-navy-950/90 to-transparent" />
+        </div>
+
+        <Container className="relative grid gap-10 py-14 sm:py-16 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-24">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-semibold text-navy-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur">
               🇰🇪 Kenya&apos;s modern ticketing marketplace
             </span>
 
-            <h1 className="mt-5 text-[34px] font-extrabold leading-[1.1] text-navy-900 sm:text-5xl lg:text-[52px]">
+            <h1 className="mt-5 text-[34px] font-extrabold leading-[1.1] text-white drop-shadow-[0_2px_8px_rgba(8,15,24,0.6)] sm:text-5xl lg:text-[52px]">
               Discover events worth showing up for.
             </h1>
 
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
-              Book concerts, festivals, theatre, sports and business events across Kenya. Pay
-              securely with M-Pesa and receive your QR ticket instantly.
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">
+              Book concerts, festivals, theatre, sports and business events across Kenya —
+              from Nairobi&apos;s biggest stages to coastal weekends in Watamu and Mombasa.
+            </p>
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/65 sm:text-[15px]">
+              Choose your tier — Early Bird, Regular, Student, VIP or VVIP — pay securely with an
+              M-Pesa STK push, and your signed QR e-ticket lands in your account and inbox
+              instantly. No queues, no paper, no fakes at the gate.
             </p>
 
             <div className="mt-7">
@@ -69,23 +88,27 @@ export default function LandingPage() {
                 </Button>
               </Link>
               <Link href="/register">
-                <Button variant="outline" size="lg">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white/40 bg-transparent text-white hover:border-white/70 hover:bg-white/10"
+                >
                   Create an Event
                 </Button>
               </Link>
             </div>
 
-            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2.5 text-sm text-muted">
+            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2.5 text-sm text-white/80">
               <span className="flex items-center gap-1.5">
-                <Smartphone className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                <Smartphone className="h-4 w-4 text-brand-300" aria-hidden="true" />
                 Secure M-Pesa payments
               </span>
               <span className="flex items-center gap-1.5">
-                <Ticket className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                <Ticket className="h-4 w-4 text-brand-300" aria-hidden="true" />
                 Instant QR tickets
               </span>
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                <ShieldCheck className="h-4 w-4 text-brand-300" aria-hidden="true" />
                 Verified event organizers
               </span>
             </div>
@@ -95,7 +118,7 @@ export default function LandingPage() {
           <div className="relative hidden lg:block">
             {spotlightEvent ? (
               <Link href={`/events/${spotlightEvent.slug}`} className="group relative block">
-                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-line shadow-elevated">
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-white/15 shadow-elevated">
                   {spotlightEvent.posterUrl ? (
                     <Image
                       src={spotlightEvent.posterUrl}
@@ -110,13 +133,9 @@ export default function LandingPage() {
                       <span className="text-center text-xl font-bold text-white/90">{spotlightEvent.title}</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-navy-950/0 to-navy-950/0" />
                   <span className="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-brand-700">
                     Spotlight event
                   </span>
-                  <div className="absolute inset-x-5 bottom-5">
-                    <h3 className="line-clamp-2 text-xl font-bold text-white">{spotlightEvent.title}</h3>
-                  </div>
                 </div>
 
                 {/* Overlapping date/location chip */}
@@ -134,7 +153,7 @@ export default function LandingPage() {
                 </div>
               </Link>
             ) : (
-              <div className="flex aspect-[4/5] w-full items-center justify-center rounded-3xl border border-line bg-gradient-to-br from-navy-800 to-navy-950 shadow-elevated">
+              <div className="flex aspect-[4/5] w-full items-center justify-center rounded-3xl border border-white/15 bg-gradient-to-br from-navy-800 to-navy-950 shadow-elevated">
                 <Ticket className="h-16 w-16 text-white/30" aria-hidden="true" />
               </div>
             )}

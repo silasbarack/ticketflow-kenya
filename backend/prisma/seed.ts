@@ -111,7 +111,10 @@ async function main() {
     categories.push(cat);
   }
 
-  // Featured events — August 2026 lineup
+  // Featured events — August 2026 lineup.
+  // Each event carries its own realistic KES price ladder; these same figures
+  // are printed on the poster artwork (see frontend/scripts/generate-posters.py),
+  // so keep the two in sync if prices change.
   const eventSeeds = [
     {
       title: 'Watamu Ocean & Seafood Festival',
@@ -125,6 +128,13 @@ async function main() {
       durationDays: 1,
       endHour: 22,
       posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/watamu-ocean-seafood-festival.jpg',
+      ticketTiers: [
+        { name: 'Student', category: TicketTypeCategory.STUDENT, price: 500, quantity: 150 },
+        { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 800, quantity: 200 },
+        { name: 'Regular', category: TicketTypeCategory.REGULAR, price: 1200, quantity: 600 },
+        { name: 'VIP Beach Deck', category: TicketTypeCategory.VIP, price: 2500, quantity: 120 },
+        { name: 'VVIP Cabana', category: TicketTypeCategory.VVIP, price: 5000, quantity: 30 },
+      ],
     },
     {
       title: 'August Nights: Afro-Fusion Live',
@@ -138,6 +148,13 @@ async function main() {
       durationDays: 0,
       endHour: 23,
       posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/august-nights-afro-fusion-live.jpg',
+      ticketTiers: [
+        { name: 'Student', category: TicketTypeCategory.STUDENT, price: 1000, quantity: 300 },
+        { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 1500, quantity: 500 },
+        { name: 'Regular', category: TicketTypeCategory.REGULAR, price: 2000, quantity: 2000 },
+        { name: 'VIP', category: TicketTypeCategory.VIP, price: 5000, quantity: 300 },
+        { name: 'VVIP Front Stage', category: TicketTypeCategory.VVIP, price: 10000, quantity: 80 },
+      ],
     },
     {
       title: 'Coast Sevens Rugby Festival',
@@ -151,6 +168,13 @@ async function main() {
       durationDays: 1,
       endHour: 18,
       posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/coast-sevens-rugby-festival.jpg',
+      ticketTiers: [
+        { name: 'Student', category: TicketTypeCategory.STUDENT, price: 300, quantity: 400 },
+        { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 500, quantity: 500 },
+        { name: 'Regular Terraces', category: TicketTypeCategory.REGULAR, price: 800, quantity: 1500 },
+        { name: 'VIP Grandstand', category: TicketTypeCategory.VIP, price: 2000, quantity: 200 },
+        { name: 'VVIP Hospitality', category: TicketTypeCategory.VVIP, price: 4500, quantity: 50 },
+      ],
     },
     {
       title: 'Nairobi Fintech & AI Summit 2026',
@@ -164,6 +188,13 @@ async function main() {
       durationDays: 1,
       endHour: 17,
       posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-fintech-ai-summit-2026.jpg',
+      ticketTiers: [
+        { name: 'Student', category: TicketTypeCategory.STUDENT, price: 1500, quantity: 100 },
+        { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 3500, quantity: 150 },
+        { name: 'Regular Delegate', category: TicketTypeCategory.REGULAR, price: 5500, quantity: 400 },
+        { name: 'VIP Executive', category: TicketTypeCategory.VIP, price: 9500, quantity: 80 },
+        { name: 'VVIP Investor Lounge', category: TicketTypeCategory.VVIP, price: 15000, quantity: 25 },
+      ],
     },
     {
       title: 'Sanaa Live: Spoken Word & Theatre Night',
@@ -177,6 +208,12 @@ async function main() {
       durationDays: 0,
       endHour: 22,
       posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sanaa-live-spoken-word-theatre-night.jpg',
+      ticketTiers: [
+        { name: 'Student', category: TicketTypeCategory.STUDENT, price: 500, quantity: 120 },
+        { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 700, quantity: 100 },
+        { name: 'Regular', category: TicketTypeCategory.REGULAR, price: 1000, quantity: 250 },
+        { name: 'VIP Front Row', category: TicketTypeCategory.VIP, price: 2000, quantity: 40 },
+      ],
     },
     {
       title: 'Nairobi Coffee & Culture Festival',
@@ -190,6 +227,12 @@ async function main() {
       durationDays: 0,
       endHour: 20,
       posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-coffee-culture-festival.jpg',
+      ticketTiers: [
+        { name: 'Student', category: TicketTypeCategory.STUDENT, price: 600, quantity: 200 },
+        { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 900, quantity: 250 },
+        { name: 'Regular', category: TicketTypeCategory.REGULAR, price: 1300, quantity: 800 },
+        { name: 'VIP Tasting Pass', category: TicketTypeCategory.VIP, price: 2800, quantity: 150 },
+      ],
     },
   ];
 
@@ -220,19 +263,23 @@ async function main() {
       },
     });
 
-    const ticketTypeSeeds = [
-      { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 1000, quantity: 50 },
-      { name: 'Regular', category: TicketTypeCategory.REGULAR, price: 1500, quantity: 200 },
-      { name: 'VIP', category: TicketTypeCategory.VIP, price: 3500, quantity: 80 },
-      { name: 'VVIP', category: TicketTypeCategory.VVIP, price: 7500, quantity: 20 },
-      { name: 'Student', category: TicketTypeCategory.STUDENT, price: 700, quantity: 100 },
-    ];
-
-    for (const tt of ticketTypeSeeds) {
+    // One tier per category per event, so match existing rows by category and
+    // update name/price/quantity in place — reseeding after a price change
+    // must actually apply it, not silently keep the old figures.
+    for (const tt of seedEvent.ticketTiers) {
       const existing = await prisma.ticketType.findFirst({
-        where: { eventId: event.id, name: tt.name },
+        where: { eventId: event.id, category: tt.category },
       });
-      if (!existing) {
+      if (existing) {
+        await prisma.ticketType.update({
+          where: { id: existing.id },
+          data: {
+            name: tt.name,
+            price: tt.price,
+            quantity: Math.max(tt.quantity, existing.quantitySold),
+          },
+        });
+      } else {
         await prisma.ticketType.create({
           data: {
             eventId: event.id,
@@ -242,6 +289,22 @@ async function main() {
             quantity: tt.quantity,
           },
         });
+      }
+    }
+
+    // Remove tiers no longer in this event's ladder (e.g. a VVIP tier dropped
+    // from a theatre night) — but only when nothing has been sold, since sold
+    // ticket types are referenced by orders/tickets and must stay.
+    const seededCategories = seedEvent.ticketTiers.map((tt) => tt.category);
+    const staleTiers = await prisma.ticketType.findMany({
+      where: { eventId: event.id, category: { notIn: seededCategories } },
+    });
+    for (const staleTier of staleTiers) {
+      if (staleTier.quantitySold === 0) {
+        await prisma.ticketType.delete({ where: { id: staleTier.id } });
+        console.log(`Removed stale tier "${staleTier.name}" from ${event.title}`);
+      } else {
+        console.warn(`Kept stale tier "${staleTier.name}" on ${event.title} (${staleTier.quantitySold} sold)`);
       }
     }
   }
