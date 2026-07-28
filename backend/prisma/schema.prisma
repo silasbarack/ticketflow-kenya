@@ -80,23 +80,26 @@ model User {
   tickets             Ticket[]
   passwordResetTokens PasswordResetToken[]
   auditLogs           AuditLog[]
-  checkInsPerformed   CheckIn[]             @relation("CheckInScannedBy")
+  checkInsPerformed   CheckIn[]            @relation("CheckInScannedBy")
 
   @@map("users")
 }
 
 model OrganizerProfile {
-  id           String   @id @default(uuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName  String
-  description  String?
-  phone        String?
-  isVerified   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  description String?
+  phone       String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   events Event[]
+
+  taxProfile      OrganizerTaxProfile?
+  taxCalculations TaxCalculation[]
 
   @@map("organizer_profiles")
 }
@@ -113,13 +116,13 @@ model EventCategory {
 }
 
 model Event {
-  id              String      @id @default(uuid())
+  id              String           @id @default(uuid())
   organizerId     String
   organizer       OrganizerProfile @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   categoryId      String
-  category        EventCategory @relation(fields: [categoryId], references: [id])
+  category        EventCategory    @relation(fields: [categoryId], references: [id])
   title           String
-  slug            String      @unique
+  slug            String           @unique
   description     String
   posterUrl       String?
   venue           String
@@ -127,15 +130,17 @@ model Event {
   address         String?
   startDateTime   DateTime
   endDateTime     DateTime
-  status          EventStatus @default(DRAFT)
+  status          EventStatus      @default(DRAFT)
   rejectionReason String?
-  isFeatured      Boolean     @default(false)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  isFeatured      Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   ticketTypes TicketType[]
   orders      Order[]
   checkIns    CheckIn[]
+
+  taxCalculations TaxCalculation[]
 
   @@index([status])
   @@index([city])
@@ -144,19 +149,19 @@ model Event {
 }
 
 model TicketType {
-  id          String             @id @default(uuid())
-  eventId     String
-  event       Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name        String
-  category    TicketTypeCategory @default(REGULAR)
-  price       Decimal            @db.Decimal(10, 2)
-  quantity    Int
-  quantitySold Int               @default(0)
-  description String?
-  salesStart  DateTime?
-  salesEnd    DateTime?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id           String             @id @default(uuid())
+  eventId      String
+  event        Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name         String
+  category     TicketTypeCategory @default(REGULAR)
+  price        Decimal            @db.Decimal(10, 2)
+  quantity     Int
+  quantitySold Int                @default(0)
+  description  String?
+  salesStart   DateTime?
+  salesEnd     DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 
   orderItems OrderItem[]
   tickets    Ticket[]
@@ -165,23 +170,27 @@ model TicketType {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  orderNumber     String      @unique
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  eventId         String
-  event           Event       @relation(fields: [eventId], references: [id])
-  status          OrderStatus @default(PENDING)
-  totalAmount     Decimal     @db.Decimal(10, 2)
-  platformFee     Decimal     @db.Decimal(10, 2)
-  organizerEarning Decimal    @db.Decimal(10, 2)
-  customerPhone   String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String      @id @default(uuid())
+  orderNumber      String      @unique
+  userId           String
+  user             User        @relation(fields: [userId], references: [id])
+  eventId          String
+  event            Event       @relation(fields: [eventId], references: [id])
+  status           OrderStatus @default(PENDING)
+  totalAmount      Decimal     @db.Decimal(10, 2)
+  platformFee      Decimal     @db.Decimal(10, 2)
+  organizerEarning Decimal     @db.Decimal(10, 2)
+  customerPhone    String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   items    OrderItem[]
   tickets  Ticket[]
   payments Payment[]
+
+  taxCalculations       TaxCalculation[]
+  refundTaxCalculations RefundTaxCalculation[]
+  etimsDocuments        EtimsDocument[]
 
   @@index([userId])
   @@index([status])
@@ -203,21 +212,21 @@ model OrderItem {
 }
 
 model Payment {
-  id              String          @id @default(uuid())
-  orderId         String
-  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  provider        PaymentProvider @default(MPESA)
-  status          PaymentStatus   @default(PENDING)
-  amount          Decimal         @db.Decimal(10, 2)
-  phone           String?
-  merchantRequestId String?
-  checkoutRequestId String?
+  id                 String          @id @default(uuid())
+  orderId            String
+  order              Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider           PaymentProvider @default(MPESA)
+  status             PaymentStatus   @default(PENDING)
+  amount             Decimal         @db.Decimal(10, 2)
+  phone              String?
+  merchantRequestId  String?
+  checkoutRequestId  String?
   mpesaReceiptNumber String?
-  resultCode      String?
-  resultDesc      String?
-  rawCallback     Json?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  resultCode         String?
+  resultDesc         String?
+  rawCallback        Json?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   @@index([orderId])
   @@index([checkoutRequestId])
@@ -250,25 +259,25 @@ model Ticket {
 }
 
 model CheckIn {
-  id           String   @id @default(uuid())
-  ticketId     String   @unique
-  ticket       Ticket   @relation(fields: [ticketId], references: [id])
-  eventId      String
-  event        Event    @relation(fields: [eventId], references: [id])
-  scannedById  String
-  scannedBy    User     @relation("CheckInScannedBy", fields: [scannedById], references: [id])
-  method       String   @default("QR")
-  checkedInAt  DateTime @default(now())
+  id          String   @id @default(uuid())
+  ticketId    String   @unique
+  ticket      Ticket   @relation(fields: [ticketId], references: [id])
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  scannedById String
+  scannedBy   User     @relation("CheckInScannedBy", fields: [scannedById], references: [id])
+  method      String   @default("QR")
+  checkedInAt DateTime @default(now())
 
   @@map("check_ins")
 }
 
 model PlatformCommission {
-  id              String   @id @default(uuid())
-  orderId         String   @unique
-  percentApplied  Decimal  @db.Decimal(5, 2)
-  amount          Decimal  @db.Decimal(10, 2)
-  createdAt       DateTime @default(now())
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  percentApplied Decimal  @db.Decimal(5, 2)
+  amount         Decimal  @db.Decimal(10, 2)
+  createdAt      DateTime @default(now())
 
   @@map("platform_commissions")
 }
@@ -297,4 +306,631 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@map("audit_logs")
+}
+
+// =====================================================================
+// TAX MODULE (Kenyan tax compliance — see docs/ticketflow-tax-architecture.md)
+//
+// These models are intentionally NOT linked via Prisma `@relation` to
+// existing models (User, Order, Event, OrganizerProfile, Ticket) so that
+// none of the pre-existing models above need to change. Referential
+// integrity to those tables is enforced with plain SQL foreign keys added
+// by the tax migration; joins against them are done in application code.
+//
+// Money is stored as integer minor units (bigint), never Decimal/float —
+// see src/tax/domain/money.ts.
+// =====================================================================
+
+enum TaxRuleCode {
+  TICKETFLOW_PLATFORM_OUTPUT_VAT
+  ORGANIZER_TICKET_OUTPUT_VAT
+  CORPORATION_TAX_PROVISION
+  SUPPLIER_WITHHOLDING_TAX
+  PAYE
+  AFFORDABLE_HOUSING_LEVY
+  OTHER
+}
+
+enum RoundingMode {
+  HALF_UP
+  DOWN
+}
+
+enum CompanyVatRegistrationStatus {
+  REGISTERED
+  NOT_REGISTERED
+  PENDING
+}
+
+enum OrganizerVatRegistrationStatus {
+  REGISTERED
+  NOT_REGISTERED
+  UNKNOWN
+}
+
+enum AgencyModel {
+  DISCLOSED_AGENT
+  PRINCIPAL_RESELLER
+}
+
+enum EtimsMode {
+  DISABLED
+  SANDBOX
+  OSCU
+  VSCU
+}
+
+enum TaxPaymentMode {
+  MANUAL_PRN
+  SANDBOX
+  APPROVED_BANK_INTEGRATION
+  APPROVED_MPESA_INTEGRATION
+}
+
+enum EventSupplyTreatment {
+  STANDARD_RATED
+  ZERO_RATED
+  EXEMPT
+  OUT_OF_SCOPE
+  REQUIRES_REVIEW
+}
+
+enum TicketPricingMode {
+  VAT_INCLUSIVE
+  VAT_EXCLUSIVE
+}
+
+enum RefundReason {
+  EVENT_CANCELLED
+  EVENT_POSTPONED
+  CUSTOMER_REQUEST
+  DUPLICATE_PAYMENT
+  FRAUD
+  CHARGEBACK
+  ADMIN_CORRECTION
+}
+
+enum TaxPeriodStatus {
+  DRAFT
+  PREPARED
+  RECONCILED
+  CLOSED
+}
+
+enum TaxAdjustmentType {
+  DEBIT
+  CREDIT
+}
+
+enum TaxAdjustmentCategory {
+  INPUT_VAT
+  WITHHOLDING_VAT_CREDIT
+  CREDIT_NOTE
+  DEBIT_NOTE
+  OTHER
+}
+
+enum TaxLiabilityStatus {
+  DRAFT
+  CALCULATED
+  RECONCILED
+  APPROVED
+  PRN_REQUIRED
+  PRN_ATTACHED
+  PAYMENT_PROCESSING
+  PAID
+  KRA_CONFIRMED
+  REJECTED
+  FAILED
+  CANCELLED
+  REQUIRES_REVIEW
+}
+
+enum LiabilityOwner {
+  TICKETFLOW
+  ORGANIZER
+}
+
+enum PrnSource {
+  MANUAL_ENTRY
+  FILE_UPLOAD
+  APPROVED_API
+}
+
+enum PrnVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum TaxRemittanceAdapter {
+  MOCK
+  MANUAL_PRN
+  APPROVED_TREASURY
+}
+
+enum TaxRemittanceStatus {
+  PENDING
+  AWAITING_EXTERNAL_CONFIRMATION
+  SUBMITTED
+  REQUIRES_REVIEW
+  PAID
+  FAILED
+  SANDBOX_SIMULATED
+}
+
+enum EtimsDocumentType {
+  INVOICE
+  CREDIT_NOTE
+}
+
+enum EtimsDocumentStatus {
+  PENDING_CONFIGURATION
+  PENDING_SUBMISSION
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  SANDBOX_SIMULATED
+  REQUIRES_REVIEW
+}
+
+enum ReconciliationRunType {
+  DAILY
+  MONTHLY
+}
+
+enum ReconciliationExceptionType {
+  MISSING_ETIMS_INVOICE
+  DUPLICATE_ETIMS_INVOICE
+  AMOUNT_MISMATCH
+  VAT_MISMATCH
+  MISSING_CREDIT_NOTE
+  ORPHAN_PAYMENT
+  DUPLICATE_PAYMENT
+  PRN_MISMATCH
+  ORGANIZER_PIN_MISMATCH
+  UNBALANCED_LEDGER
+  MISSING_SETTLEMENT
+}
+
+enum ReconciliationExceptionStatus {
+  OPEN
+  RESOLVED
+  IGNORED
+}
+
+enum JournalEntryStatus {
+  POSTED
+  REVERSED
+}
+
+enum TaxPermission {
+  TAX_CALCULATION_VIEW
+  TAX_PERIOD_PREPARE
+  TAX_LIABILITY_RECONCILE
+  TAX_LIABILITY_APPROVE
+  TAX_PRN_ATTACH
+  TAX_PAYMENT_INITIATE
+  TAX_PAYMENT_CONFIRM
+  TAX_PAYMENT_REVERSE
+  TAX_AUDIT_VIEW
+  ORGANIZER_TAX_CONFIGURE
+  ETIMS_RETRY
+}
+
+model CompanyTaxProfile {
+  id                    String                       @id @default("default")
+  legalName             String
+  kraPinEncrypted       String?
+  vatRegistrationStatus CompanyVatRegistrationStatus @default(PENDING)
+  agencyModel           AgencyModel                  @default(DISCLOSED_AGENT)
+  etimsMode             EtimsMode                    @default(DISABLED)
+  taxPaymentMode        TaxPaymentMode               @default(MANUAL_PRN)
+  defaultCurrency       String                       @default("KES")
+  updatedBy             String?
+  createdAt             DateTime                     @default(now())
+  updatedAt             DateTime                     @updatedAt
+
+  @@map("tax_company_profiles")
+}
+
+model OrganizerTaxProfile {
+  id                           String                         @id @default(uuid())
+  organizerId                  String                         @unique
+  organizer                    OrganizerProfile               @relation(fields: [organizerId], references: [id])
+  legalName                    String
+  kraPinEncrypted              String?
+  vatRegistrationStatus        OrganizerVatRegistrationStatus @default(UNKNOWN)
+  eventSupplyTreatment         EventSupplyTreatment           @default(REQUIRES_REVIEW)
+  ticketPricingMode            TicketPricingMode              @default(VAT_INCLUSIVE)
+  delegatedTaxPaymentAuthority Boolean                        @default(false)
+  delegatedAuthorityDocumentId String?
+  verifiedBy                   String?
+  verifiedAt                   DateTime?
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime                       @updatedAt
+
+  @@map("organizer_tax_profiles")
+}
+
+model TaxRule {
+  id              String       @id @default(uuid())
+  code            TaxRuleCode
+  jurisdiction    String       @default("KE")
+  rateBps         Int
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+  roundingMode    RoundingMode @default(HALF_UP)
+  enabled         Boolean      @default(true)
+  requiresReview  Boolean      @default(true)
+  sourceReference String?
+  notes           String?
+  createdBy       String
+  approvedBy      String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([code, jurisdiction, enabled])
+  @@map("tax_rules")
+}
+
+model TaxCalculation {
+  id                 String           @id @default(uuid())
+  calculationVersion Int              @default(1)
+  transactionId      String
+  orderId            String
+  order              Order            @relation(fields: [orderId], references: [id])
+  eventId            String
+  event              Event            @relation(fields: [eventId], references: [id])
+  organizerId        String
+  organizer          OrganizerProfile @relation(fields: [organizerId], references: [id])
+  transactionDate    DateTime
+  currency           String           @default("KES")
+  agencyModel        AgencyModel
+
+  ruleVersionIds String[]
+
+  customerPaymentMinor                  BigInt
+  organizerTicketProceedsGrossMinor     BigInt
+  organizerTicketNetOfVatMinor          BigInt?
+  organizerTicketOutputVatMinor         BigInt?
+  bookingFeeGrossMinor                  BigInt
+  bookingFeeNetMinor                    BigInt
+  bookingFeeVatMinor                    BigInt
+  commissionGrossMinor                  BigInt
+  commissionNetMinor                    BigInt
+  commissionVatMinor                    BigInt
+  ticketFlowRevenueExVatMinor           BigInt
+  ticketFlowOutputVatMinor              BigInt
+  processorChargeMinor                  BigInt
+  organizerSettlementBeforeRefundsMinor BigInt
+  ticketFlowCashRetainedMinor           BigInt
+
+  components      Json
+  warnings        String[]
+  calculationHash String
+
+  supersededByCalculationId String?
+  isActive                  Boolean @default(true)
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@unique([transactionId, calculationVersion])
+  @@index([orderId])
+  @@index([organizerId])
+  @@index([eventId])
+  @@map("tax_calculations")
+}
+
+model RefundTaxCalculation {
+  id                    String       @id @default(uuid())
+  refundId              String       @unique
+  originalCalculationId String
+  orderId               String
+  order                 Order        @relation(fields: [orderId], references: [id])
+  reason                RefundReason
+  transactionDate       DateTime
+  currency              String       @default("KES")
+
+  refundableTicketFaceValueMinor  BigInt
+  refundableBookingFeeMinor       BigInt
+  nonRefundableFeeMinor           BigInt
+  ticketFlowRevenueReversalMinor  BigInt
+  ticketFlowVatReversalMinor      BigInt
+  organizerPayableReversalMinor   BigInt
+  organizerTicketVatReversalMinor BigInt?
+  processorChargeTreatment        String
+  organizerAlreadySettled         Boolean
+  ticketFlowRecoveryRequiredMinor BigInt  @default(0)
+  refundReserveRequiredMinor      BigInt  @default(0)
+  requiresEtimsCreditNote         Boolean @default(true)
+
+  components      Json
+  warnings        String[]
+  calculationHash String
+
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@map("refund_tax_calculations")
+}
+
+model LedgerAccount {
+  code            String   @id
+  name            String
+  type            String
+  isOrganizerMemo Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@map("tax_ledger_accounts")
+}
+
+model JournalEntry {
+  id            String             @id @default(uuid())
+  correlationId String
+  description   String
+  sourceType    String
+  sourceId      String
+  status        JournalEntryStatus @default(POSTED)
+  reversalOfId  String?
+  postedBy      String?
+  postedAt      DateTime           @default(now())
+
+  lines JournalLine[]
+
+  @@index([sourceType, sourceId])
+  @@index([correlationId])
+  @@map("tax_journal_entries")
+}
+
+model JournalLine {
+  id             String       @id @default(uuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id])
+  accountCode    String
+  debitMinor     BigInt       @default(0)
+  creditMinor    BigInt       @default(0)
+  currency       String       @default("KES")
+  organizerId    String?
+  memo           String?
+
+  @@index([journalEntryId])
+  @@index([accountCode])
+  @@map("tax_journal_lines")
+}
+
+model TaxPeriod {
+  id           String          @id @default(uuid())
+  period       String          @unique
+  jurisdiction String          @default("KE")
+  status       TaxPeriodStatus @default(DRAFT)
+
+  taxableRevenueExVatMinor   BigInt @default(0)
+  outputVatMinor             BigInt @default(0)
+  inputVatMinor              BigInt @default(0)
+  withholdingVatCreditsMinor BigInt @default(0)
+  otherCreditsMinor          BigInt @default(0)
+  creditNotesMinor           BigInt @default(0)
+  debitNotesMinor            BigInt @default(0)
+  netVatPayableMinor         BigInt @default(0)
+
+  preparedBy   String?
+  preparedAt   DateTime?
+  reconciledBy String?
+  reconciledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  adjustments TaxAdjustment[]
+  liabilities TaxLiability[]
+
+  @@map("tax_periods")
+}
+
+model TaxAdjustment {
+  id          String                @id @default(uuid())
+  periodId    String
+  period      TaxPeriod             @relation(fields: [periodId], references: [id])
+  type        TaxAdjustmentType
+  category    TaxAdjustmentCategory @default(OTHER)
+  amountMinor BigInt
+  reason      String
+  evidenceRef String?
+  createdBy   String
+  approvedBy  String?
+  createdAt   DateTime              @default(now())
+
+  @@map("tax_adjustments")
+}
+
+model TaxLiability {
+  id             String             @id @default(uuid())
+  periodId       String?
+  period         TaxPeriod?         @relation(fields: [periodId], references: [id])
+  taxHead        String
+  taxSubHead     String?
+  owner          LiabilityOwner     @default(TICKETFLOW)
+  organizerId    String?
+  amountMinor    BigInt
+  currency       String             @default("KES")
+  status         TaxLiabilityStatus @default(DRAFT)
+  idempotencyKey String             @unique
+
+  preparedBy      String
+  reconciledBy    String?
+  reconciledAt    DateTime?
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectedBy      String?
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  dueDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  registrations TaxPaymentRegistration[]
+  remittances   TaxRemittance[]
+
+  @@index([status])
+  @@index([owner, organizerId])
+  @@map("tax_liabilities")
+}
+
+model TaxPaymentRegistration {
+  id                 String                @id @default(uuid())
+  liabilityId        String
+  liability          TaxLiability          @relation(fields: [liabilityId], references: [id])
+  taxpayerPinMasked  String
+  taxHead            String
+  taxSubHead         String?
+  taxPeriod          String
+  prnEncrypted       String
+  prnHash            String                @unique
+  amountMinor        BigInt
+  currency           String                @default("KES")
+  issuedAt           DateTime?
+  expiresAt          DateTime?
+  source             PrnSource             @default(MANUAL_ENTRY)
+  verificationStatus PrnVerificationStatus @default(PENDING)
+  verifiedBy         String?
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  createdBy          String
+  createdAt          DateTime              @default(now())
+
+  remittances TaxRemittance[]
+
+  @@index([liabilityId])
+  @@map("tax_payment_registrations")
+}
+
+model TaxRemittance {
+  id             String                  @id @default(uuid())
+  liabilityId    String
+  liability      TaxLiability            @relation(fields: [liabilityId], references: [id])
+  registrationId String?
+  registration   TaxPaymentRegistration? @relation(fields: [registrationId], references: [id])
+  adapter        TaxRemittanceAdapter
+  status         TaxRemittanceStatus     @default(PENDING)
+  amountMinor    BigInt
+  currency       String                  @default("KES")
+  idempotencyKey String                  @unique
+
+  bankReference            String?
+  mpesaReference           String?
+  kraConfirmationReference String?
+  evidenceFileRef          String?
+
+  initiatedBy            String
+  initiatedAt            DateTime  @default(now())
+  requiresSecondApproval Boolean   @default(true)
+  confirmedBy            String?
+  confirmedAt            DateTime?
+  failureReason          String?
+
+  updatedAt DateTime @updatedAt
+
+  @@index([liabilityId])
+  @@index([status])
+  @@map("tax_remittances")
+}
+
+model EtimsDocument {
+  id                String              @id @default(uuid())
+  documentType      EtimsDocumentType
+  orderId           String?
+  order             Order?              @relation(fields: [orderId], references: [id])
+  refundId          String?
+  organizerId       String?
+  mode              EtimsMode
+  externalReference String              @unique
+  idempotencyKey    String              @unique
+  status            EtimsDocumentStatus @default(PENDING_SUBMISSION)
+  requestPayload    Json
+  responsePayload   Json?
+  attemptCount      Int                 @default(0)
+  maxAttempts       Int                 @default(5)
+  nextAttemptAt     DateTime?
+  lastError         String?
+  submittedAt       DateTime?
+  acceptedAt        DateTime?
+  createdBy         String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([status, nextAttemptAt])
+  @@index([orderId])
+  @@index([refundId])
+  @@map("tax_etims_documents")
+}
+
+model ReconciliationRun {
+  id        String                @id @default(uuid())
+  type      ReconciliationRunType
+  scope     String
+  status    String                @default("COMPLETED")
+  summary   Json?
+  createdBy String?
+  createdAt DateTime              @default(now())
+
+  exceptions ReconciliationException[]
+
+  @@index([type, scope])
+  @@map("tax_reconciliation_runs")
+}
+
+model ReconciliationException {
+  id             String                        @id @default(uuid())
+  runId          String
+  run            ReconciliationRun             @relation(fields: [runId], references: [id])
+  type           ReconciliationExceptionType
+  entityType     String
+  entityId       String?
+  description    String
+  metadata       Json?
+  status         ReconciliationExceptionStatus @default(OPEN)
+  resolvedBy     String?
+  resolvedAt     DateTime?
+  resolutionNote String?
+  createdAt      DateTime                      @default(now())
+
+  @@index([status])
+  @@index([type])
+  @@map("tax_reconciliation_exceptions")
+}
+
+model TaxAuditEvent {
+  id            String   @id @default(uuid())
+  action        String
+  entityType    String
+  entityId      String
+  actorUserId   String?
+  correlationId String
+  requestId     String?
+  beforeHash    String?
+  afterHash     String?
+  metadata      Json
+  occurredAt    DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([correlationId])
+  @@map("tax_audit_events")
+}
+
+model TaxPermissionGrant {
+  id         String        @id @default(uuid())
+  userId     String
+  permission TaxPermission
+  grantedBy  String
+  grantedAt  DateTime      @default(now())
+  revoked    Boolean       @default(false)
+  revokedBy  String?
+  revokedAt  DateTime?
+
+  @@unique([userId, permission])
+  @@map("tax_permission_grants")
 }

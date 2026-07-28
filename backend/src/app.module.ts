@@ -18,6 +18,7 @@ import { CheckinsModule } from './checkins/checkins.module';
 import { AdminModule } from './admin/admin.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { HealthController } from './health/health.controller';
+import { TaxModule } from './tax/tax.module';
 
 @Module({
   controllers: [HealthController],
@@ -38,6 +39,7 @@ import { HealthController } from './health/health.controller';
     TicketsModule,
     CheckinsModule,
     AdminModule,
+    TaxModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

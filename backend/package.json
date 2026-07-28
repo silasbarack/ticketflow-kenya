@@ -19,10 +19,26 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "seed:tax": "ts-node prisma/seed-tax.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:unit": "jest --testPathPattern=test/tax/(?!integration)",
+    "test:integration": "jest --testPathPattern=test/tax/integration --runInBand"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
+  },
+  "jest": {
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "rootDir": ".",
+    "testRegex": "test/.*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "testEnvironment": "node",
+    "testTimeout": 20000,
+    "setupFiles": ["<rootDir>/test/tax/integration/jest-env-setup.ts"]
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",
@@ -31,6 +47,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.4.0",
+    "@nestjs/schedule": "^4.1.2",
     "@nestjs/throttler": "^5.2.0",
     "@prisma/client": "^5.20.0",
     "@resvg/resvg-js": "^2.6.2",
@@ -53,6 +70,7 @@
     "@nestjs/testing": "^10.4.0",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.16.0",
     "@types/nodemailer": "^8.0.1",
     "@types/passport-jwt": "^4.0.1",
@@ -62,9 +80,11 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
+    "jest": "^29.7.0",
     "prettier": "^3.3.3",
     "prisma": "^5.20.0",
     "source-map-support": "^0.5.21",
+    "ts-jest": "^29.4.12",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
