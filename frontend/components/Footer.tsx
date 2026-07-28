@@ -3,29 +3,21 @@ import Image from 'next/image';
 import Logo from '@/components/Logo';
 import Container from '@/components/ui/Container';
 
-const DISCOVER_LINKS = [
+const EXPLORE_LINKS = [
   { label: 'Browse Events', href: '/events' },
-  { label: 'Categories', href: '/events' },
-  { label: 'How It Works', href: '/#how-it-works' },
-];
-
-const ORGANIZER_LINKS = [
-  { label: 'Create an Event', href: '/register' },
-  { label: 'Organizer Dashboard', href: '/organizer/dashboard' },
-  { label: 'Scan Tickets', href: '/organizer/scan' },
-];
-
-const SUPPORT_LINKS = [
-  { label: 'Help Centre', href: 'mailto:support@ticketflow.co.ke' },
-  { label: 'Contact Us', href: 'mailto:support@ticketflow.co.ke' },
+  { label: 'Become an Organizer', href: '/register' },
+  { label: 'Log In', href: '/login' },
 ];
 
 const LEGAL_LINKS = [
   { label: 'Privacy Policy', href: '/legal/privacy-policy' },
   { label: 'Terms and Conditions', href: '/legal/terms-and-conditions' },
   { label: 'Payment Policy', href: '/legal/payment-policy' },
-  { label: 'Ticket Purchase Policy', href: '/legal/ticket-purchase-policy' },
+];
+
+const MORE_LEGAL_LINKS = [
   { label: 'Event Organizer Policy', href: '/legal/event-organizer-policy' },
+  { label: 'Ticket Purchase Policy', href: '/legal/ticket-purchase-policy' },
   { label: 'Cookie Policy', href: '/legal/cookie-policy' },
 ];
 
@@ -46,31 +38,31 @@ function FooterColumn({ title, links }: { title: string; links: { label: string;
 
 export default function Footer() {
   return (
-    <footer className="bg-navy-900 text-white/80">
+    <footer className="bg-black text-white/80">
       <Container className="py-14 sm:py-16">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
+          <div className="col-span-2 lg:col-span-1">
             <Link href="/">
               <Logo theme="dark" className="h-9" />
             </Link>
             <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-white/60">
-              Kenya&apos;s modern marketplace for concerts, festivals, theatre, sports and business
-              events — with instant M-Pesa checkout and QR ticketing.
+              The all-in-one platform for event organizers to sell tickets, accept M-Pesa
+              payments, and check in attendees with QR codes — built for Kenya.
             </p>
           </div>
 
-          <FooterColumn title="Discover" links={DISCOVER_LINKS} />
-          <FooterColumn title="Organizers" links={ORGANIZER_LINKS} />
-          <FooterColumn title="Support" links={SUPPORT_LINKS} />
+          <FooterColumn title="Explore" links={EXPLORE_LINKS} />
           <FooterColumn title="Legal" links={LEGAL_LINKS} />
+          <FooterColumn title="More Legal" links={MORE_LEGAL_LINKS} />
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-7 text-sm text-white/50 sm:flex-row">
           <p>&copy; {new Date().getFullYear()} TicketFlow Kenya. All rights reserved.</p>
           <div className="flex items-center gap-2">
-            <span>Secure payments via</span>
+            <span>Powered by</span>
             <Image src="/mpesa-logo.svg" alt="M-PESA" width={512} height={273} unoptimized className="h-6 w-auto" />
           </div>
+          <p>Built for event organizers and ticket buyers across Kenya.</p>
         </div>
       </Container>
     </footer>
