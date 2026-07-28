@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { Calendar, Heart, MapPin } from 'lucide-react';
 import { EventItem } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { resolvePosterUrl } from '@/lib/posters';
 import { useFavorites } from '@/hooks/useFavorites';
 import Badge from '@/components/ui/Badge';
 
@@ -56,7 +57,7 @@ export default function EventCard({ event }: { event: EventItem }) {
       <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-navy-100">
         {showImage ? (
           <Image
-            src={event.posterUrl as string}
+            src={resolvePosterUrl(event.posterUrl as string)}
             alt={event.title}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"

@@ -12,6 +12,7 @@ import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
 import { EventItem } from '@/types';
 import { formatDate, formatDateTime } from '@/lib/format';
+import { resolvePosterUrl } from '@/lib/posters';
 import Container from '@/components/ui/Container';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -174,7 +175,7 @@ export default function EventDetailClient() {
         <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-navy-100">
             {showImage ? (
-              <Image src={event.posterUrl as string} alt={event.title} fill unoptimized className="object-cover" onError={() => setImageFailed(true)} />
+              <Image src={resolvePosterUrl(event.posterUrl as string)} alt={event.title} fill unoptimized className="object-cover" onError={() => setImageFailed(true)} />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy-800 to-navy-950 p-8">
                 <span className="text-center text-xl font-bold text-white/90">{event.title}</span>

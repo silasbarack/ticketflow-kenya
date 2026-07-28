@@ -127,7 +127,7 @@ async function main() {
       startHour: 10,
       durationDays: 1,
       endHour: 22,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/watamu-ocean-seafood-festival.jpg',
+      posterUrl: '/posters/watamu-ocean-seafood-festival.jpg',
       ticketTiers: [
         { name: 'Student', category: TicketTypeCategory.STUDENT, price: 500, quantity: 150 },
         { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 800, quantity: 200 },
@@ -147,7 +147,7 @@ async function main() {
       startHour: 18,
       durationDays: 0,
       endHour: 23,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/august-nights-afro-fusion-live.jpg',
+      posterUrl: '/posters/august-nights-afro-fusion-live.jpg',
       ticketTiers: [
         { name: 'Student', category: TicketTypeCategory.STUDENT, price: 1000, quantity: 300 },
         { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 1500, quantity: 500 },
@@ -167,7 +167,7 @@ async function main() {
       startHour: 9,
       durationDays: 1,
       endHour: 18,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/coast-sevens-rugby-festival.jpg',
+      posterUrl: '/posters/coast-sevens-rugby-festival.jpg',
       ticketTiers: [
         { name: 'Student', category: TicketTypeCategory.STUDENT, price: 300, quantity: 400 },
         { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 500, quantity: 500 },
@@ -187,7 +187,7 @@ async function main() {
       startHour: 9,
       durationDays: 1,
       endHour: 17,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-fintech-ai-summit-2026.jpg',
+      posterUrl: '/posters/nairobi-fintech-ai-summit-2026.jpg',
       ticketTiers: [
         { name: 'Student', category: TicketTypeCategory.STUDENT, price: 1500, quantity: 100 },
         { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 3500, quantity: 150 },
@@ -207,7 +207,7 @@ async function main() {
       startHour: 17,
       durationDays: 0,
       endHour: 22,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/sanaa-live-spoken-word-theatre-night.jpg',
+      posterUrl: '/posters/sanaa-live-spoken-word-theatre-night.jpg',
       ticketTiers: [
         { name: 'Student', category: TicketTypeCategory.STUDENT, price: 500, quantity: 120 },
         { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 700, quantity: 100 },
@@ -226,7 +226,7 @@ async function main() {
       startHour: 10,
       durationDays: 0,
       endHour: 20,
-      posterUrl: 'https://ticketflow-frontend-w47s.onrender.com/posters/nairobi-coffee-culture-festival.jpg',
+      posterUrl: '/posters/nairobi-coffee-culture-festival.jpg',
       ticketTiers: [
         { name: 'Student', category: TicketTypeCategory.STUDENT, price: 600, quantity: 200 },
         { name: 'Early Bird', category: TicketTypeCategory.EARLY_BIRD, price: 900, quantity: 250 },

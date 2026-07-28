@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { API_URL } from '@/lib/api';
+import { absolutePosterUrl, SITE_URL } from '@/lib/posters';
 import { EventItem } from '@/types';
 import EventDetailClient from './EventDetailClient';
 
@@ -23,7 +24,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const title = `${event.title} | TicketFlow Kenya`;
   const description =
     event.description?.slice(0, 160) || `Get tickets for ${event.title} at ${event.venue}, ${event.city}.`;
-  const images = event.posterUrl ? [{ url: event.posterUrl, width: 1080, height: 1080, alt: event.title }] : [];
+  const images = event.posterUrl
+    ? [{ url: absolutePosterUrl(event.posterUrl), width: 1080, height: 1080, alt: event.title }]
+    : [];
 
   return {
     title,
@@ -38,7 +41,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       card: 'summary_large_image',
       title,
       description,
-      images: event.posterUrl ? [event.posterUrl] : undefined,
+      images: event.posterUrl ? [absolutePosterUrl(event.posterUrl)] : undefined,
     },
   };
 }
@@ -56,7 +59,7 @@ export default async function EventDetailsPage({ params }: { params: { id: strin
         endDate: event.endDateTime,
         eventStatus: 'https://schema.org/EventScheduled',
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-        image: event.posterUrl ? [event.posterUrl] : undefined,
+        image: event.posterUrl ? [absolutePosterUrl(event.posterUrl)] : undefined,
         location: {
           '@type': 'Place',
           name: event.venue,
@@ -77,7 +80,7 @@ export default async function EventDetailsPage({ params }: { params: { id: strin
           priceCurrency: 'KES',
           availability:
             tt.quantity - tt.quantitySold > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
-          url: `https://ticketflow-frontend-w47s.onrender.com/events/${event.slug}`,
+          url: `${SITE_URL}/events/${event.slug}`,
         })),
       }
     : null;

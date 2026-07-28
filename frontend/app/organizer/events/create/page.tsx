@@ -22,12 +22,13 @@ const NAV = [
 // used when an organizer doesn't upload their own image. Static per category
 // rather than a keyword-search service, since LoremFlickr's Flickr-backed
 // search is unreliable and often returns 500s for multi-keyword queries.
+// Relative paths so the current host serves them (works on localhost and prod).
 const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
-  'music & concerts': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/music-concerts.jpg',
-  'tech & business': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/tech-business.jpg',
-  sports: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/sports.jpg',
-  'arts & theatre': 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/arts-theatre.jpg',
-  festivals: 'https://ticketflow-frontend-w47s.onrender.com/posters/generic/festivals.jpg',
+  'music & concerts': '/posters/generic/music-concerts.jpg',
+  'tech & business': '/posters/generic/tech-business.jpg',
+  sports: '/posters/generic/sports.jpg',
+  'arts & theatre': '/posters/generic/arts-theatre.jpg',
+  festivals: '/posters/generic/festivals.jpg',
 };
 
 const DEFAULT_FALLBACK_IMAGE = CATEGORY_FALLBACK_IMAGES['festivals'];

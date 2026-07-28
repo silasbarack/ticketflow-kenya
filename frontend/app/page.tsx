@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Calendar, MapPin, ShieldCheck, Smartphone, Ticket } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
+import { resolvePosterUrl } from '@/lib/posters';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import CategoryCard from '@/components/CategoryCard';
@@ -133,7 +134,7 @@ export default function LandingPage() {
                 <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-white/15 shadow-elevated">
                   {spotlightEvent.posterUrl ? (
                     <Image
-                      src={spotlightEvent.posterUrl}
+                      src={resolvePosterUrl(spotlightEvent.posterUrl)}
                       alt={spotlightEvent.title}
                       fill
                       unoptimized
