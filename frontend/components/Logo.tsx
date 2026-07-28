@@ -7,6 +7,8 @@ interface LogoProps {
   variant?: 'full' | 'icon';
   theme?: 'light' | 'dark';
   className?: string;
+  /** Wordmark text size/style override (full variant only). */
+  wordmarkClassName?: string;
   /** Kept for API compatibility — unused now that logo is an image. */
   gradientId?: string;
 }
@@ -16,7 +18,12 @@ interface LogoProps {
  * Place the downloaded logo file at frontend/public/logo.png to show it.
  * Falls back to a styled text mark if the image is unavailable.
  */
-export default function Logo({ variant = 'full', theme = 'light', className = 'h-14' }: LogoProps) {
+export default function Logo({
+  variant = 'full',
+  theme = 'light',
+  className = 'h-14',
+  wordmarkClassName = 'text-xl',
+}: LogoProps) {
   const [imgFailed, setImgFailed] = useState(false);
 
   const wordmarkColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
@@ -65,7 +72,7 @@ export default function Logo({ variant = 'full', theme = 'light', className = 'h
           />
         </span>
       )}
-      <span className={`text-xl font-bold leading-none ${wordmarkColor}`}>
+      <span className={`${wordmarkClassName} font-bold leading-none ${wordmarkColor}`}>
         TicketFlow <span className="text-brand-700">Kenya</span>
       </span>
     </span>
