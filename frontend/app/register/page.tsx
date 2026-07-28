@@ -7,6 +7,9 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types';
 import { isValidKenyanPhone, KENYA_PHONE_MESSAGE } from '@/lib/phone';
+import Container from '@/components/ui/Container';
+import { Input, Label, Select } from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -46,123 +49,94 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-10">
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-        <p className="mt-1 text-sm text-gray-500">Buy tickets or start selling your own events.</p>
+    <Container className="flex min-h-[70vh] max-w-md flex-col justify-center py-10">
+      <div className="rounded-2xl border border-line bg-white p-7 shadow-soft sm:p-8">
+        <h1 className="text-2xl font-bold text-navy-900">Create your account</h1>
+        <p className="mt-1 text-sm text-muted">Buy tickets or start selling your own events.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium text-gray-700">First name</label>
-              <input
-                required
-                value={form.firstName}
-                onChange={(e) => update('firstName', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
+              <Label htmlFor="reg-first-name">First name</Label>
+              <Input id="reg-first-name" required value={form.firstName} onChange={(e) => update('firstName', e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Last name</label>
-              <input
-                required
-                value={form.lastName}
-                onChange={(e) => update('lastName', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
+              <Label htmlFor="reg-last-name">Last name</Label>
+              <Input id="reg-last-name" required value={form.lastName} onChange={(e) => update('lastName', e.target.value)} />
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              required
-              value={form.email}
-              onChange={(e) => update('email', e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
+            <Label htmlFor="reg-email">Email</Label>
+            <Input id="reg-email" type="email" required value={form.email} onChange={(e) => update('email', e.target.value)} />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Phone (e.g. 0712345678 or 0112345678)</label>
-            <input
+            <Label htmlFor="reg-phone">Phone (e.g. 0712345678 or 0112345678)</Label>
+            <Input
+              id="reg-phone"
               required
               value={form.phone}
               onChange={(e) => update('phone', e.target.value)}
               placeholder="07XXXXXXXX or 01XXXXXXXX"
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">Password</label>
-            <input
+            <Label htmlFor="reg-password">Password</Label>
+            <Input
+              id="reg-password"
               type="password"
               required
               minLength={8}
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700">I want to</label>
-            <select
-              value={form.role}
-              onChange={(e) => update('role', e.target.value as UserRole)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            >
+            <Label htmlFor="reg-role">I want to</Label>
+            <Select id="reg-role" value={form.role} onChange={(e) => update('role', e.target.value as UserRole)}>
               <option value="CUSTOMER">Buy tickets (Customer)</option>
               <option value="ORGANIZER">Sell tickets (Organizer)</option>
-            </select>
+            </Select>
           </div>
 
           {form.role === 'ORGANIZER' && (
             <div>
-              <label className="text-sm font-medium text-gray-700">Company / Brand name</label>
-              <input
-                required
-                value={form.companyName}
-                onChange={(e) => update('companyName', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
+              <Label htmlFor="reg-company">Company / Brand name</Label>
+              <Input id="reg-company" required value={form.companyName} onChange={(e) => update('companyName', e.target.value)} />
             </div>
           )}
 
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-muted">
             By signing up, you agree to our{' '}
-            <Link href="/legal/terms-and-conditions" className="font-medium text-brand-600 hover:text-brand-700">
+            <Link href="/legal/terms-and-conditions" className="font-medium text-brand-700 hover:text-brand-800">
               Terms and Conditions
             </Link>
             ,{' '}
-            <Link href="/legal/privacy-policy" className="font-medium text-brand-600 hover:text-brand-700">
+            <Link href="/legal/privacy-policy" className="font-medium text-brand-700 hover:text-brand-800">
               Privacy Policy
             </Link>
             , and{' '}
-            <Link href="/legal/payment-policy" className="font-medium text-brand-600 hover:text-brand-700">
+            <Link href="/legal/payment-policy" className="font-medium text-brand-700 hover:text-brand-800">
               Payment Policy
             </Link>
             .
           </p>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
-          >
+          <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
             {submitting ? 'Creating account...' : 'Sign up'}
-          </button>
+          </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-muted">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link href="/login" className="font-semibold text-brand-700 hover:text-brand-800">
             Log in
           </Link>
         </p>
       </div>
-    </main>
+    </Container>
   );
 }

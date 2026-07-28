@@ -65,6 +65,8 @@ export interface EventItem {
   category: EventCategory;
   ticketTypes: TicketType[];
   organizer?: { companyName: string; description?: string | null };
+  /** Present on API responses (Prisma default scalar) even though it wasn't previously declared here. */
+  createdAt?: string;
 }
 
 export interface OrderItem {

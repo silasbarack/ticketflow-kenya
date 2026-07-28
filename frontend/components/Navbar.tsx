@@ -2,29 +2,37 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Menu, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import Logo from '@/components/Logo';
+import Container from '@/components/ui/Container';
+import Button from '@/components/ui/Button';
+import IconButton from '@/components/ui/IconButton';
+import clsx from 'clsx';
+import HeaderSearch from '@/components/HeaderSearch';
+import UserMenu from '@/components/UserMenu';
+import MobileNavigationDrawer from '@/components/MobileNavigationDrawer';
+
+const NAV_LINKS = [
+  { label: 'Browse Events', href: '/events' },
+  { label: 'Categories', href: '/events' },
+  { label: 'For Organizers', href: '/#for-organizers' },
+  { label: 'How It Works', href: '/#how-it-works' },
+];
 
 function CartIcon({ count }: { count: number }) {
   return (
-    <Link href="/cart" className="relative p-2 text-gray-600 hover:text-brand-600" aria-label="Cart">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.8}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 5h14.6M10 21a1 1 0 110-2 1 1 0 010 2zm7 0a1 1 0 110-2 1 1 0 010 2z"
-        />
-      </svg>
+    <Link
+      href="/cart"
+      aria-label={`Cart, ${count} ticket${count === 1 ? '' : 's'}`}
+      className={clsx(
+        'relative inline-flex h-11 w-11 items-center justify-center rounded-full text-navy-700 transition hover:bg-navy-900/5',
+      )}
+    >
+      <ShoppingCart className="h-5 w-5" aria-hidden="true" />
       {count > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-600 text-[10px] font-bold text-white">
+        <span className="pointer-events-none absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent-600 px-1 text-[10px] font-bold text-white">
           {count > 99 ? '99+' : count}
         </span>
       )}
@@ -33,102 +41,65 @@ function CartIcon({ count }: { count: number }) {
 }
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { totalItems } = useCart();
-  const [open, setOpen] = useState(false);
-
-  const dashboardHref =
-    user?.role === 'ADMIN' ? '/admin/dashboard' : user?.role === 'ORGANIZER' ? '/organizer/dashboard' : '/dashboard';
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
-        <Link href="/">
-          <Logo gradientId="tfk-logo-nav" />
+    <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur-md">
+      <Container className="flex h-16 items-center justify-between gap-3 sm:h-[72px]">
+        <Link href="/" className="shrink-0" aria-label="TicketFlow Kenya home">
+          <Logo className="h-8 sm:h-9" />
         </Link>
 
-        <nav className="hidden items-center gap-6 text-sm font-medium text-gray-700 md:flex">
-          <Link href="/events" className="hover:text-brand-600">
-            Browse Events
-          </Link>
-          <Link href="/settings/appearance" className="hover:text-brand-600">
-            Appearance
-          </Link>
-          {user && (
-            <Link href={dashboardHref} className="hover:text-brand-600">
-              Dashboard
+        <nav className="hidden items-center gap-7 text-[15px] font-medium text-navy-700 lg:flex">
+          {NAV_LINKS.map((link) => (
+            <Link key={link.label} href={link.href} className="transition hover:text-brand-700">
+              {link.label}
             </Link>
-          )}
+          ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
+          <HeaderSearch />
           <CartIcon count={totalItems} />
+
           {!user ? (
-            <>
-              <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-brand-600">
-                Log in
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
-              >
-                Sign up
-              </Link>
-            </>
-          ) : (
-            <>
-              <span className="text-sm text-gray-600">Hi, {user.firstName}</span>
-              <button
-                onClick={logout}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-              >
-                Log out
-              </button>
-            </>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 md:hidden">
-          <CartIcon count={totalItems} />
-          <button className="p-2" onClick={() => setOpen(!open)} aria-label="Toggle menu">
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {open && (
-        <div className="border-t border-gray-200 bg-white px-4 py-3 md:hidden">
-          <div className="flex flex-col gap-3 text-sm font-medium text-gray-700">
-            <Link href="/events" onClick={() => setOpen(false)}>
-              Browse Events
-            </Link>
-            <Link href="/settings/appearance" onClick={() => setOpen(false)}>
-              Appearance
-            </Link>
-            {user ? (
-              <>
-                <Link href={dashboardHref} onClick={() => setOpen(false)}>
-                  Dashboard
-                </Link>
-                <button onClick={logout} className="text-left text-red-600">
-                  Log out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" onClick={() => setOpen(false)}>
+            <div className="ml-1 flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
                   Log in
-                </Link>
-                <Link href="/register" onClick={() => setOpen(false)} className="font-semibold text-brand-600">
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button variant="outline" size="sm">
                   Sign up
-                </Link>
-              </>
-            )}
-          </div>
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="ml-1">
+              <UserMenu />
+            </div>
+          )}
+
+          <Link href="/register" className="ml-1">
+            <Button variant="primary" size="sm">
+              List an Event
+            </Button>
+          </Link>
         </div>
-      )}
+
+        <div className="flex items-center gap-1 lg:hidden">
+          <HeaderSearch />
+          <CartIcon count={totalItems} />
+          <IconButton aria-label="Open menu" onClick={() => setDrawerOpen(true)}>
+            <Menu className="h-6 w-6" aria-hidden="true" />
+          </IconButton>
+        </div>
+      </Container>
+
+      <MobileNavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </header>
   );
 }

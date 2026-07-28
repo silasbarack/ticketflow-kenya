@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { Minus, Plus, ShoppingCart, X } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { api, getApiErrorMessage } from '@/lib/api';
@@ -12,6 +13,10 @@ import { AttendeeInfo } from '@/types';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { SERVICE_FEE_PERCENT } from '@/lib/fees';
 import { isValidKenyanPhone, KENYA_PHONE_MESSAGE } from '@/lib/phone';
+import Container from '@/components/ui/Container';
+import { Input, Label } from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 
 const EMPTY_ATTENDEE: AttendeeInfo = { firstName: '', lastName: '', nationalId: '', email: '', phone: '' };
 
@@ -123,22 +128,18 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-          <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 5h14.6M10 21a1 1 0 110-2 1 1 0 010 2zm7 0a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">Your cart is empty</h1>
-        <p className="mt-2 text-gray-500">Browse events and add tickets to get started.</p>
-        <Link
-          href="/events"
-          className="mt-6 inline-flex rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700"
-        >
-          Browse Events
-        </Link>
-      </main>
+      <Container className="max-w-3xl py-20">
+        <EmptyState
+          icon={<ShoppingCart className="h-6 w-6" aria-hidden="true" />}
+          title="Your cart is empty"
+          description="Browse events and add tickets to get started."
+          action={
+            <Link href="/events">
+              <Button variant="primary">Browse Events</Button>
+            </Link>
+          }
+        />
+      </Container>
     );
   }
 
@@ -147,67 +148,64 @@ export default function CartPage() {
   const eventVenue = `${items[0].eventVenue}, ${items[0].eventCity}`;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-gray-900">Your Cart</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Review your tickets and fill in attendee details before paying.
-      </p>
+    <Container className="max-w-4xl py-10">
+      <h1 className="text-2xl font-bold text-navy-900">Your Cart</h1>
+      <p className="mt-1 text-sm text-muted">Review your tickets and fill in attendee details before paying.</p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">
         {/* Left: ticket list + attendee forms */}
-        <div className="lg:col-span-2 space-y-6">
-
+        <div className="space-y-6 lg:col-span-2">
           {/* Event summary card */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Event</p>
-            <p className="mt-1 text-lg font-bold text-gray-900">{eventName}</p>
-            <p className="mt-0.5 text-sm text-gray-500">
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-soft">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Event</p>
+            <p className="mt-1 text-lg font-bold text-navy-900">{eventName}</p>
+            <p className="mt-0.5 text-sm text-muted">
               {formatDateTime(eventDateTime)} &middot; {eventVenue}
             </p>
           </div>
 
           {/* Ticket rows */}
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-100">
+          <div className="divide-y divide-line rounded-2xl border border-line bg-white shadow-soft">
             <div className="px-4 py-3">
-              <h2 className="text-sm font-semibold text-gray-700">Tickets</h2>
+              <h2 className="text-sm font-semibold text-navy-800">Tickets</h2>
             </div>
             {items.map((item) => (
               <div key={item.ticketTypeId} className="flex items-center justify-between gap-4 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-gray-900">{item.ticketTypeName}</p>
-                  <p className="text-xs text-gray-500">{formatCurrency(item.price)} each</p>
+                  <p className="truncate text-sm font-semibold text-navy-900">{item.ticketTypeName}</p>
+                  <p className="text-xs text-muted">{formatCurrency(item.price)} each</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.ticketTypeId, item.quantity - 1)}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                      aria-label={`Decrease quantity for ${item.ticketTypeName}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-navy-600 hover:border-navy-300 disabled:opacity-40"
                       disabled={item.quantity <= 1}
                     >
-                      -
+                      <Minus className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
-                    <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
+                    <span className="w-6 text-center text-sm font-medium text-navy-900">{item.quantity}</span>
                     <button
                       type="button"
                       onClick={() => updateQuantity(item.ticketTypeId, item.quantity + 1)}
-                      className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50"
+                      aria-label={`Increase quantity for ${item.ticketTypeName}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-navy-600 hover:border-navy-300"
                     >
-                      +
+                      <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                   </div>
-                  <span className="w-20 text-right text-sm font-semibold text-gray-900">
+                  <span className="w-20 text-right text-sm font-semibold text-navy-900">
                     {formatCurrency(item.price * item.quantity)}
                   </span>
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.ticketTypeId)}
-                    className="text-gray-400 hover:text-red-500"
-                    aria-label="Remove"
+                    className="text-navy-300 hover:text-accent-600"
+                    aria-label={`Remove ${item.ticketTypeName} from cart`}
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -218,68 +216,61 @@ export default function CartPage() {
           {needsAttendees && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-base font-semibold text-gray-900">Attendee Details</h2>
-                <p className="text-sm text-gray-500">
-                  Fill in the details for each ticket holder.
-                </p>
+                <h2 className="text-base font-semibold text-navy-900">Attendee Details</h2>
+                <p className="text-sm text-muted">Fill in the details for each ticket holder.</p>
               </div>
 
               {ticketSlots.map((slot, i) => (
-                <div key={`${slot.ticketTypeId}-${i}`} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                  <p className="mb-3 text-sm font-semibold text-gray-700">
+                <div key={`${slot.ticketTypeId}-${i}`} className="rounded-2xl border border-line bg-white p-4 shadow-soft">
+                  <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-navy-800">
                     Ticket {i + 1}
-                    <span className="ml-2 rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
+                    <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
                       {slot.ticketTypeName}
                     </span>
                   </p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600">First Name *</label>
-                      <input
+                      <Label className="text-xs">First Name *</Label>
+                      <Input
                         type="text"
                         value={syncedAttendees[i]?.firstName ?? ''}
                         onChange={(e) => updateAttendee(i, 'firstName', e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         placeholder="John"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600">Last Name *</label>
-                      <input
+                      <Label className="text-xs">Last Name *</Label>
+                      <Input
                         type="text"
                         value={syncedAttendees[i]?.lastName ?? ''}
                         onChange={(e) => updateAttendee(i, 'lastName', e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         placeholder="Doe"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600">National ID *</label>
-                      <input
+                      <Label className="text-xs">National ID *</Label>
+                      <Input
                         type="text"
                         value={syncedAttendees[i]?.nationalId ?? ''}
                         onChange={(e) => updateAttendee(i, 'nationalId', e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         placeholder="12345678"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600">Email Address *</label>
-                      <input
+                      <Label className="text-xs">Email Address *</Label>
+                      <Input
                         type="email"
                         value={syncedAttendees[i]?.email ?? ''}
                         onChange={(e) => updateAttendee(i, 'email', e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         placeholder="john@example.com"
                       />
                     </div>
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-medium text-gray-600">Phone Number *</label>
-                      <input
+                      <Label className="text-xs">Phone Number *</Label>
+                      <Input
                         type="tel"
                         value={syncedAttendees[i]?.phone ?? ''}
                         onChange={(e) => updateAttendee(i, 'phone', e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
                         placeholder="0712345678"
                       />
                     </div>
@@ -292,76 +283,59 @@ export default function CartPage() {
 
         {/* Right: order summary + payment */}
         <div className="space-y-4">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900">Order Summary</h2>
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-soft">
+            <h2 className="text-base font-semibold text-navy-900">Order Summary</h2>
 
             <div className="mt-3 space-y-1.5 text-sm">
               {items.map((item) => (
-                <div key={item.ticketTypeId} className="flex justify-between text-gray-600">
-                  <span>{item.ticketTypeName} × {item.quantity}</span>
+                <div key={item.ticketTypeId} className="flex justify-between text-navy-600">
+                  <span>
+                    {item.ticketTypeName} &times; {item.quantity}
+                  </span>
                   <span>{formatCurrency(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-3 space-y-1.5 border-t border-gray-200 pt-3 text-sm">
-              <div className="flex justify-between text-gray-600">
+            <div className="mt-3 space-y-1.5 border-t border-line pt-3 text-sm">
+              <div className="flex justify-between text-navy-600">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totalAmount)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-navy-600">
                 <span>Service fee ({SERVICE_FEE_PERCENT}%)</span>
                 <span>{formatCurrency(serviceFee)}</span>
               </div>
             </div>
 
-            <div className="mt-3 border-t border-gray-200 pt-3 flex justify-between font-semibold">
-              <span>Total to pay</span>
+            <div className="mt-3 flex justify-between border-t border-line pt-3 font-semibold">
+              <span className="text-navy-900">Total to pay</span>
               <span className="text-brand-700">{formatCurrency(finalTotal)}</span>
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="text-base font-semibold text-gray-900">M-Pesa Payment</h2>
-            <p className="mt-1 text-xs text-gray-500">
-              An STK Push will be sent to this number after placing the order.
-            </p>
+          <div className="rounded-2xl border border-line bg-white p-5 shadow-soft">
+            <h2 className="text-base font-semibold text-navy-900">M-Pesa Payment</h2>
+            <p className="mt-1 text-xs text-muted">An STK Push will be sent to this number after placing the order.</p>
             <div className="mt-3">
-              <label className="block text-xs font-medium text-gray-600">M-Pesa Phone Number *</label>
-              <input
-                type="tel"
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                placeholder="0712345678"
-              />
+              <Label className="text-xs">M-Pesa Phone Number *</Label>
+              <Input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="0712345678" />
             </div>
 
-            <button
-              onClick={handlePlaceOrder}
-              disabled={placing}
-              className="mt-4 w-full rounded-lg border-2 border-green-600 bg-white px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 disabled:opacity-60"
-            >
+            <Button variant="primary" size="lg" fullWidth className="mt-4" onClick={handlePlaceOrder} loading={placing}>
               {placing ? (
                 'Placing order...'
               ) : (
                 <span className="flex items-center justify-center gap-2">
                   Pay {formatCurrency(finalTotal)} via
-                  <Image
-                    src="/mpesa-logo.svg"
-                    alt="M-PESA"
-                    width={512}
-                    height={273}
-                    unoptimized
-                    className="h-7 w-auto"
-                  />
+                  <Image src="/mpesa-logo.svg" alt="M-PESA" width={512} height={273} unoptimized className="h-6 w-auto" />
                 </span>
               )}
-            </button>
+            </Button>
 
             {!user && (
-              <p className="mt-3 text-center text-xs text-gray-500">
-                <Link href="/login" className="font-medium text-brand-600 hover:underline">
+              <p className="mt-3 text-center text-xs text-muted">
+                <Link href="/login" className="font-medium text-brand-700 hover:underline">
                   Log in
                 </Link>{' '}
                 to complete your purchase.
@@ -370,6 +344,6 @@ export default function CartPage() {
           </div>
         </div>
       </div>
-    </main>
+    </Container>
   );
 }

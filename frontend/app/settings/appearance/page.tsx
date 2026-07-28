@@ -1,16 +1,18 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { useBackgroundColor } from '@/hooks/useBackgroundColor';
 import { BG_COLOR_OPTIONS } from '@/lib/appearance';
+import Container from '@/components/ui/Container';
 
 export default function AppearanceSettingsPage() {
   const { color, setColor } = useBackgroundColor();
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">Appearance</h1>
-        <p className="mt-1 text-sm text-gray-500">
+    <Container className="max-w-2xl py-10">
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-soft sm:p-8">
+        <h1 className="text-2xl font-bold text-navy-900">Appearance</h1>
+        <p className="mt-1 text-sm text-muted">
           Choose a background colour for the site. This only affects your browser — no one else will see it.
         </p>
 
@@ -23,21 +25,26 @@ export default function AppearanceSettingsPage() {
                 type="button"
                 onClick={() => setColor(option.value)}
                 aria-pressed={selected}
-                className={`flex flex-col items-center gap-3 rounded-xl border-2 p-5 transition ${
-                  selected ? 'border-brand-600' : 'border-gray-200 hover:border-gray-300'
+                className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 p-5 transition ${
+                  selected ? 'border-brand-600 bg-brand-50/40' : 'border-line hover:border-navy-300'
                 }`}
               >
+                {selected && (
+                  <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-white">
+                    <Check className="h-3 w-3" aria-hidden="true" />
+                  </span>
+                )}
                 <span
-                  className="h-14 w-14 rounded-full border border-gray-300"
+                  className="h-14 w-14 rounded-full border border-line"
                   style={{ backgroundColor: option.value }}
                   aria-hidden="true"
                 />
-                <span className="text-sm font-semibold text-gray-900">{option.name}</span>
+                <span className="text-sm font-semibold text-navy-900">{option.name}</span>
               </button>
             );
           })}
         </div>
       </div>
-    </main>
+    </Container>
   );
 }

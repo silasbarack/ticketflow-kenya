@@ -9,8 +9,8 @@ const POLICIES = [
   { label: 'Privacy Policy', href: '/legal/privacy-policy' },
   { label: 'Terms and Conditions', href: '/legal/terms-and-conditions' },
   { label: 'Payment Policy', href: '/legal/payment-policy' },
-  { label: 'Event Organizer Policy', href: '/legal/event-organizer-policy' },
   { label: 'Ticket Purchase Policy', href: '/legal/ticket-purchase-policy' },
+  { label: 'Event Organizer Policy', href: '/legal/event-organizer-policy' },
   { label: 'Cookie Policy', href: '/legal/cookie-policy' },
 ];
 

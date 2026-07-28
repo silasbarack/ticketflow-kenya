@@ -3,38 +3,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, Calendar, MapPin, ShieldCheck, Smartphone, Ticket } from 'lucide-react';
 import { api } from '@/lib/api';
+import { formatDate } from '@/lib/format';
+import Container from '@/components/ui/Container';
+import Button from '@/components/ui/Button';
+import CategoryCard from '@/components/CategoryCard';
 import FeaturedEvents from '@/components/FeaturedEvents';
+import ProcessTimeline from '@/components/ProcessTimeline';
+import OrganizerCTA from '@/components/OrganizerCTA';
+import TrustSection from '@/components/TrustSection';
+import HeroSearch from '@/components/HeroSearch';
 import { EventCategory, EventItem } from '@/types';
-
-const CATEGORY_ICONS: Record<string, string> = {
-  'music & concerts': '\u{1F3B6}',
-  'tech & business': '\u{1F4BB}',
-  sports: '\u{26BD}',
-  'arts & theatre': '\u{1F3AD}',
-  festivals: '\u{1F389}',
-};
-
-const HOW_IT_WORKS = [
-  {
-    step: '01',
-    title: 'Create & publish',
-    desc: 'Set up your event, add Regular, VIP, VVIP, Student, or Early Bird ticket types, and submit for approval.',
-    icon: '\u{1F4DD}',
-  },
-  {
-    step: '02',
-    title: 'Sell with M-Pesa',
-    desc: 'Customers check out in seconds with an M-Pesa STK Push — no cash, no manual reconciliation.',
-    icon: '\u{1F4F2}',
-  },
-  {
-    step: '03',
-    title: 'Scan at the gate',
-    desc: 'Every ticket gets a unique QR code. Scan it at entry and duplicate or fake tickets are rejected instantly.',
-    icon: '\u{2705}',
-  },
-];
 
 export default function LandingPage() {
   const { data: eventsData } = useQuery({
@@ -54,178 +34,161 @@ export default function LandingPage() {
   });
 
   const events = eventsData?.events ?? [];
-  const heroPosters = events.filter((e) => e.posterUrl).slice(0, 3);
   const cities = new Set(events.map((e) => e.city)).size;
-
-  const stats = [
-    { label: 'Live events', value: eventsData ? `${eventsData.total}+` : '—' },
-    { label: 'Cities covered', value: cities || '—' },
-    { label: 'Ticket types', value: 'VIP, VVIP & more' },
-    { label: 'Platform fee', value: '9% only' },
-  ];
+  const spotlightEvent = events.find((e) => e.posterUrl) ?? events[0];
 
   return (
-    <main className="overflow-x-hidden">
-      {/* Hero */}
-      <section className="relative overflow-hidden text-white">
-        <div className="absolute inset-0">
-          <Image
-            src="/hero-party.jpg"
-            alt=""
-            fill
-            priority
-            unoptimized
-            className="object-cover brightness-[0.55]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30" />
-          <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:28px_28px]" />
-        </div>
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24 lg:px-8">
+    <main>
+      {/* ---------------------------------------------------------------- */}
+      {/* Hero                                                              */}
+      {/* ---------------------------------------------------------------- */}
+      <section className="overflow-hidden bg-cream">
+        <Container className="grid gap-10 py-10 sm:py-14 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-20">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
-              {'\u{1F1F0}\u{1F1EA}'} East Africa&apos;s Premier Ticketing Platform
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-semibold text-navy-700">
+              🇰🇪 Kenya&apos;s modern ticketing marketplace
             </span>
 
-            <h1 className="mt-5 text-4xl font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)] sm:text-5xl">
-              Sell tickets. Scan gates.{' '}
-              <span className="text-red-100">Get paid via M-Pesa.</span>
+            <h1 className="mt-5 text-[34px] font-extrabold leading-[1.1] text-navy-900 sm:text-5xl lg:text-[52px]">
+              Discover events worth showing up for.
             </h1>
 
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)] sm:text-lg">
-              <strong className="font-semibold text-white">TicketFlow Kenya</strong> is a purpose-built
-              event management and ticketing platform for Kenyan organizers and attendees. Whether
-              you&apos;re hosting an intimate private gathering, a corporate conference, or a
-              large-scale concert, we deliver a complete, professional ticketing experience from
-              listing to gate entry.
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
+              Book concerts, festivals, theatre, sports and business events across Kenya. Pay
+              securely with M-Pesa and receive your QR ticket instantly.
             </p>
 
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]">
-              Publish your event in minutes, offer tiered ticket categories — Regular, VIP, VVIP,
-              Early Bird &amp; Student — accept instant M-Pesa STK Push payments with zero manual
-              reconciliation, and manage entry through cryptographically signed, tamper-proof
-              QR-code e-tickets. Every ticket is unique, verified, and delivered directly to
-              the buyer&apos;s inbox as a PDF.
-            </p>
+            <div className="mt-7">
+              <HeroSearch />
+            </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/events"
-                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-brand-700 shadow-lg shadow-black/10 transition hover:bg-brand-50"
-              >
-                Browse Events
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/events">
+                <Button variant="primary" size="lg">
+                  Explore Events
+                </Button>
               </Link>
-              <Link
-                href="/register"
-                className="rounded-lg border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Become an Organizer
+              <Link href="/register">
+                <Button variant="outline" size="lg">
+                  Create an Event
+                </Button>
               </Link>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-2 text-xs text-white/80 sm:flex sm:flex-wrap sm:gap-x-5 sm:gap-y-2 sm:text-sm">
-              <span className="flex items-center gap-1.5">{'✅'} M-Pesa STK Push</span>
-              <span className="flex items-center gap-1.5">{'\u{1F4F1}'} QR e-tickets by email</span>
-              <span className="flex items-center gap-1.5">{'\u{1F512}'} Signed QR check-in</span>
-              <span className="flex items-center gap-1.5">{'\u{1F4CA}'} Real-time sales dashboard</span>
-              <span className="flex items-center gap-1.5">{'\u{1F4BC}'} Keep 100% of your ticket price</span>
-              <span className="flex items-center gap-1.5">{'\u{1F3AB}'} VIP · VVIP · Student tiers</span>
+            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2.5 text-sm text-muted">
+              <span className="flex items-center gap-1.5">
+                <Smartphone className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                Secure M-Pesa payments
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Ticket className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                Instant QR tickets
+              </span>
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                Verified event organizers
+              </span>
             </div>
           </div>
 
-          <div className="relative hidden h-80 lg:block">
-            {heroPosters.map((event, i) => (
-              <div
-                key={event.id}
-                className="absolute h-56 w-44 overflow-hidden rounded-2xl border-4 border-white/20 shadow-2xl transition duration-300 hover:z-20 hover:-translate-y-2"
-                style={{
-                  right: `${i * 90}px`,
-                  top: i === 1 ? '40px' : i === 0 ? '0px' : '80px',
-                  transform: `rotate(${i === 0 ? -6 : i === 1 ? 3 : -2}deg)`,
-                  zIndex: 10 - i,
-                }}
-              >
-                <Image src={event.posterUrl as string} alt={event.title} fill className="object-cover" unoptimized />
+          {/* Right: featured event spotlight */}
+          <div className="relative hidden lg:block">
+            {spotlightEvent ? (
+              <Link href={`/events/${spotlightEvent.slug}`} className="group relative block">
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-line shadow-elevated">
+                  {spotlightEvent.posterUrl ? (
+                    <Image
+                      src={spotlightEvent.posterUrl}
+                      alt={spotlightEvent.title}
+                      fill
+                      unoptimized
+                      priority
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy-800 to-navy-950 p-8">
+                      <span className="text-center text-xl font-bold text-white/90">{spotlightEvent.title}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-navy-950/0 to-navy-950/0" />
+                  <span className="absolute left-5 top-5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-brand-700">
+                    Spotlight event
+                  </span>
+                  <div className="absolute inset-x-5 bottom-5">
+                    <h3 className="line-clamp-2 text-xl font-bold text-white">{spotlightEvent.title}</h3>
+                  </div>
+                </div>
+
+                {/* Overlapping date/location chip */}
+                <div className="absolute -bottom-6 -left-6 flex items-center gap-3 rounded-2xl border border-line bg-white p-4 shadow-elevated">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                    <Calendar className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-navy-900">{formatDate(spotlightEvent.startDateTime)}</p>
+                    <p className="flex items-center gap-1 text-xs text-muted">
+                      <MapPin className="h-3 w-3" aria-hidden="true" />
+                      {spotlightEvent.venue}, {spotlightEvent.city}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="flex aspect-[4/5] w-full items-center justify-center rounded-3xl border border-line bg-gradient-to-br from-navy-800 to-navy-950 shadow-elevated">
+                <Ticket className="h-16 w-16 text-white/30" aria-hidden="true" />
               </div>
-            ))}
+            )}
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* Stats strip */}
-      <section className="border-b border-gray-100 bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-4 lg:px-8">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-2xl font-bold text-gray-900 sm:text-3xl">{s.value}</p>
-              <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-400 sm:text-sm">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TrustSection eventsTotal={eventsData?.total} citiesCount={cities} />
 
-      {/* Browse by category */}
+      {/* ---------------------------------------------------------------- */}
+      {/* Category discovery                                                */}
+      {/* ---------------------------------------------------------------- */}
       {categories && categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">Explore</p>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">Browse by category</h2>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                href={`/events?category=${c.id}`}
-                className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200 bg-white p-5 text-center transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-md"
-              >
-                <span className="text-3xl">{CATEGORY_ICONS[c.name.toLowerCase()] || '\u{1F39F}\u{FE0F}'}</span>
-                <span className="text-sm font-semibold text-gray-800">{c.name}</span>
-              </Link>
-            ))}
-          </div>
+        <section className="py-14 sm:py-20">
+          <Container>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">Explore</p>
+                <h2 className="mt-1.5 text-[28px] font-bold text-navy-900 sm:text-3xl">Browse by category</h2>
+              </div>
+            </div>
+
+            <div className="snap-row mt-7 gap-3.5 sm:hidden">
+              {categories.map((c) => (
+                <CategoryCard key={c.id} category={c} eventCount={events.filter((e) => e.category?.id === c.id).length} />
+              ))}
+            </div>
+            <div className="mt-7 hidden grid-cols-3 gap-4 sm:grid lg:grid-cols-6">
+              {categories.map((c) => (
+                <CategoryCard key={c.id} category={c} eventCount={events.filter((e) => e.category?.id === c.id).length} />
+              ))}
+            </div>
+          </Container>
         </section>
       )}
 
       <FeaturedEvents />
+      <ProcessTimeline />
+      <OrganizerCTA />
 
-      {/* How it works */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-600">How it works</p>
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">From setup to sold out</h2>
-        </div>
-        <div className="relative mt-10 grid gap-8 sm:grid-cols-3">
-          <div className="absolute left-0 right-0 top-8 hidden h-px bg-gray-200 sm:block" />
-          {HOW_IT_WORKS.map((step) => (
-            <div key={step.step} className="relative rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-2xl">
-                {step.icon}
-              </div>
-              <p className="mt-4 text-xs font-bold text-brand-500">STEP {step.step}</p>
-              <h3 className="mt-1 font-semibold text-gray-900">{step.title}</h3>
-              <p className="mt-2 text-sm text-gray-500">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Organizer CTA */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl bg-gray-900 px-8 py-12 text-center sm:px-16">
-          <div className="absolute -right-10 -top-10 h-56 w-56 rounded-full bg-brand-600/30 blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 h-56 w-56 rounded-full bg-accent-600/20 blur-3xl" />
-          <div className="relative">
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">Ready to host your next event?</h2>
-            <p className="mx-auto mt-3 max-w-xl text-gray-300">
-              Join organizers across Kenya selling tickets with M-Pesa, QR check-in, and real-time
-              sales tracking — you keep 100% of your ticket price; buyers pay a 9% service fee at
-              checkout.
-            </p>
-            <Link
-              href="/register"
-              className="mt-6 inline-flex rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-600/30 transition hover:bg-brand-700"
-            >
-              Create your free organizer account
-            </Link>
-          </div>
-        </div>
+      {/* Closing CTA */}
+      <section className="py-14 sm:py-20">
+        <Container className="flex flex-col items-center gap-4 rounded-3xl border border-line bg-white px-6 py-12 text-center shadow-soft sm:px-12">
+          <h2 className="text-2xl font-bold text-navy-900 sm:text-3xl">Ready to find your next night out?</h2>
+          <p className="max-w-md text-muted">
+            Thousands of Kenyans discover concerts, festivals, and conferences on TicketFlow every week.
+          </p>
+          <Link href="/events">
+            <Button variant="primary" size="lg" className="mt-1">
+              Explore Events
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          </Link>
+        </Container>
       </section>
     </main>
   );

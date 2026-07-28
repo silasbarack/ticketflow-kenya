@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --bg-color: #ffffff;
-  --fg-color: #111827;
+  --bg-color: #f7f6f2;
+  --fg-color: #0e1b2a;
 }
 
 html[data-theme='dark'] {
@@ -20,21 +20,63 @@ body {
   color: var(--fg-color);
 }
 
+* {
+  border-color: theme('colors.line');
+}
+
+::selection {
+  background-color: theme('colors.brand.200');
+  color: theme('colors.navy.900');
+}
+
+/* Keyboard-only focus ring — never suppressed, never colour-only in meaning. */
+:focus-visible {
+  outline: 2px solid theme('colors.brand.600');
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /*
  * Text that sits directly on the page background (no card of its own) must flip with the
  * chosen theme, or it goes invisible on black. Text inside an explicitly-coloured surface
- * (a white/gray card, or a permanently dark section like the footer) keeps its own colours,
- * since those are already legible against their own background regardless of the site theme.
+ * (a white/gray/navy card, or a permanently dark section like the footer) keeps its own
+ * colours, since those are already legible against their own background regardless of theme.
  */
 html[data-theme='dark']
-  :is(.text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800, .text-gray-900):not(
+  :is(
+    .text-gray-300,
+    .text-gray-400,
+    .text-gray-500,
+    .text-gray-600,
+    .text-gray-700,
+    .text-gray-800,
+    .text-gray-900,
+    .text-muted,
+    .text-navy-900,
+    .text-navy-800,
+    .text-navy-700
+  ):not(
     :is(
         [class~='bg-white'],
         [class~='bg-white/95'],
         [class~='bg-white/90'],
         [class~='bg-gray-50'],
         [class~='bg-gray-900'],
-        [class~='bg-gray-950']
+        [class~='bg-gray-950'],
+        [class~='bg-navy-900'],
+        [class~='bg-navy-950'],
+        [class~='bg-surface']
       )
       *
   ) {
@@ -55,22 +97,53 @@ html[data-theme='dark']
   -webkit-line-clamp: 2;
 }
 
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Shared page container — max-width 1280px with fluid inline padding. */
+.container-page {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+
+/* Horizontal scroll-snap row (category pills, related events on mobile). */
+.snap-row {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.snap-row::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-row > * {
+  scroll-snap-align: start;
+}
+
 .prose-legal h2 {
   margin-top: 1.5rem;
   font-size: 1.125rem;
   font-weight: 700;
-  color: #111827;
+  color: #0e1b2a;
 }
 
 .prose-legal h3 {
   margin-top: 1rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #18253a;
 }
 
 .prose-legal p {
-  color: #374151;
+  color: #354a66;
 }
 
 .prose-legal ul,
@@ -92,10 +165,10 @@ html[data-theme='dark']
 }
 
 .prose-legal a {
-  color: #ea580c;
+  color: #066b4c;
   text-decoration: underline;
 }
 
 .prose-legal strong {
-  color: #111827;
+  color: #0e1b2a;
 }

@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="min-h-screen font-sans text-gray-900 antialiased">
+      <body className="min-h-screen font-sans text-navy-900 antialiased">
         <Providers>
           <Navbar />
           {children}
