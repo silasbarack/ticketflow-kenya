@@ -9,7 +9,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   secondary: 'bg-navy-900 text-white hover:bg-navy-800 shadow-soft disabled:hover:bg-navy-900',
   outline: 'border border-line bg-white text-navy-900 hover:border-navy-300 hover:bg-navy-50/40',
   ghost: 'text-navy-700 hover:bg-navy-900/5',
-  danger: 'bg-accent-600 text-white hover:bg-accent-700 shadow-soft',
+  danger: 'bg-danger-600 text-white hover:bg-danger-700 shadow-soft disabled:hover:bg-danger-600',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

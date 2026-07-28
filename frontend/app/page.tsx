@@ -57,31 +57,43 @@ export default function LandingPage() {
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-navy-950/90 to-transparent" />
         </div>
 
-        <Container className="relative grid gap-10 py-14 sm:py-16 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-24">
+        <Container className="relative grid gap-10 py-14 sm:py-16 lg:grid-cols-2 lg:items-center lg:gap-12 lg:py-28">
           <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur">
+            <span
+              className="animate-fade-in-up inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur"
+              style={{ animationDelay: '0ms' }}
+            >
               🇰🇪 Kenya&apos;s modern ticketing marketplace
             </span>
 
-            <h1 className="mt-5 text-[34px] font-extrabold leading-[1.1] text-white drop-shadow-[0_2px_8px_rgba(8,15,24,0.6)] sm:text-5xl lg:text-[52px]">
+            <h1
+              className="animate-fade-in-up mt-5 text-[34px] font-extrabold leading-[1.1] text-white drop-shadow-[0_2px_8px_rgba(8,15,24,0.6)] sm:text-5xl lg:text-[52px]"
+              style={{ animationDelay: '80ms' }}
+            >
               Discover events worth showing up for.
             </h1>
 
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">
+            <p
+              className="animate-fade-in-up mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg"
+              style={{ animationDelay: '160ms' }}
+            >
               Book concerts, festivals, theatre, sports and business events across Kenya —
               from Nairobi&apos;s biggest stages to coastal weekends in Watamu and Mombasa.
             </p>
-            <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/65 sm:text-[15px]">
+            <p
+              className="animate-fade-in-up mt-3 max-w-lg text-sm leading-relaxed text-white/65 sm:text-[15px]"
+              style={{ animationDelay: '220ms' }}
+            >
               Choose your tier — Early Bird, Regular, Student, VIP or VVIP — pay securely with an
               M-Pesa STK push, and your signed QR e-ticket lands in your account and inbox
               instantly. No queues, no paper, no fakes at the gate.
             </p>
 
-            <div className="mt-7">
+            <div className="animate-fade-in-up mt-7" style={{ animationDelay: '280ms' }}>
               <HeroSearch />
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="animate-fade-in-up mt-6 flex flex-wrap gap-3" style={{ animationDelay: '340ms' }}>
               <Link href="/events">
                 <Button variant="primary" size="lg">
                   Explore Events

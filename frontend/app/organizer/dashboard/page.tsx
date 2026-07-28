@@ -2,17 +2,21 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { LayoutDashboard, PlusCircle, ScanLine } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatusBadge from '@/components/StatusBadge';
+import Card from '@/components/ui/Card';
+import { buttonVariants } from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import { EventItem, OrganizerDashboardStats } from '@/types';
 import { formatCurrency } from '@/lib/format';
 
 const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: '\u{1F4CA}' },
-  { label: 'Create Event', href: '/organizer/events/create', icon: '➕' },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
+  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
+  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
+  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
 ];
 
 function OrganizerDashboardContent() {
@@ -43,30 +47,27 @@ function OrganizerDashboardContent() {
 
   return (
     <DashboardLayout items={NAV}>
-      <h1 className="text-2xl font-bold text-gray-900">Organizer Dashboard</h1>
+      <h1 className="text-2xl font-bold text-navy-900">Organizer Dashboard</h1>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
-          <div key={c.label} className="rounded-2xl border border-gray-200 bg-white p-5">
-            <p className="text-sm text-gray-500">{c.label}</p>
-            <p className="mt-1 text-2xl font-bold text-gray-900">{c.value}</p>
-          </div>
+          <Card key={c.label} className="p-5">
+            <p className="text-sm text-muted">{c.label}</p>
+            <p className="mt-1 text-2xl font-bold text-navy-900">{c.value}</p>
+          </Card>
         ))}
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Your Events</h2>
-        <Link
-          href="/organizer/events/create"
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-        >
+        <h2 className="text-lg font-semibold text-navy-900">Your Events</h2>
+        <Link href="/organizer/events/create" className={buttonVariants({ size: 'sm' })}>
           + Create Event
         </Link>
       </div>
 
-      <div className="mt-3 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <div className="mt-3 overflow-hidden rounded-2xl border border-line bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+          <thead className="bg-surface text-left text-xs uppercase text-muted">
             <tr>
               <th className="px-4 py-3">Event</th>
               <th className="px-4 py-3">Date</th>
@@ -75,11 +76,15 @@ function OrganizerDashboardContent() {
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {!events || events.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                  You haven&apos;t created any events yet.
+                <td colSpan={5} className="p-0">
+                  <EmptyState
+                    className="rounded-none border-0"
+                    title="No events yet"
+                    description="You haven't created any events yet."
+                  />
                 </td>
               </tr>
             ) : (
@@ -88,14 +93,14 @@ function OrganizerDashboardContent() {
                 const total = event.ticketTypes.reduce((s, tt) => s + tt.quantity, 0);
                 return (
                   <tr key={event.id}>
-                    <td className="px-4 py-3 font-medium text-gray-900">{event.title}</td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 font-medium text-navy-900">{event.title}</td>
+                    <td className="px-4 py-3 text-muted">
                       {new Date(event.startDateTime).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={event.status} />
                     </td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 text-muted">
                       {sold}/{total}
                     </td>
                     <td className="px-4 py-3 text-right">

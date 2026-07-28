@@ -100,7 +100,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
                   onClose();
                   logout();
                 }}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-left text-base font-medium text-accent-700 hover:bg-accent-50"
+                className="flex items-center gap-3 rounded-xl px-3 py-3 text-left text-base font-medium text-navy-700 hover:bg-navy-900/5"
                 style={{ minHeight: 44 }}
               >
                 <LogOut className="h-5 w-5" aria-hidden="true" />

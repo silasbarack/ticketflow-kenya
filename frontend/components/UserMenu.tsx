@@ -83,7 +83,7 @@ export default function UserMenu() {
                 setOpen(false);
                 logout();
               }}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-medium text-accent-700 hover:bg-accent-50"
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-medium text-navy-700 hover:bg-navy-900/5"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
               Log Out

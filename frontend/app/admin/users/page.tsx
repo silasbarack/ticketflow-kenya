@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { LayoutDashboard, CheckCircle2, Users, CreditCard } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -10,10 +11,10 @@ import { User } from '@/types';
 import { formatDate } from '@/lib/format';
 
 const NAV = [
-  { label: 'Overview', href: '/admin/dashboard', icon: '\u{1F4CA}' },
-  { label: 'Event Approvals', href: '/admin/events', icon: '✅' },
-  { label: 'Users', href: '/admin/users', icon: '\u{1F465}' },
-  { label: 'Payments', href: '/admin/payments', icon: '\u{1F4B3}' },
+  { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+  { label: 'Event Approvals', href: '/admin/events', icon: CheckCircle2 },
+  { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Payments', href: '/admin/payments', icon: CreditCard },
 ];
 
 function AdminUsersContent() {
@@ -40,7 +41,7 @@ function AdminUsersContent() {
 
   return (
     <DashboardLayout items={NAV}>
-      <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+      <h1 className="text-2xl font-bold text-navy-900">Users</h1>
 
       <div className="mt-4 flex gap-2">
         {['', 'CUSTOMER', 'ORGANIZER', 'ADMIN'].map((r) => (
@@ -48,7 +49,7 @@ function AdminUsersContent() {
             key={r}
             onClick={() => setRole(r)}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-              role === r ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              role === r ? 'bg-brand-600 text-white' : 'bg-navy-900/5 text-navy-700 hover:bg-navy-900/10'
             }`}
           >
             {r || 'All'}
@@ -56,9 +57,9 @@ function AdminUsersContent() {
         ))}
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+          <thead className="bg-surface text-left text-xs uppercase text-muted">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Email</th>
@@ -68,30 +69,30 @@ function AdminUsersContent() {
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-navy-400">
                   Loading...
                 </td>
               </tr>
             ) : !users || users.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-navy-400">
                   No users found.
                 </td>
               </tr>
             ) : (
               users.map((u) => (
                 <tr key={u.id}>
-                  <td className="px-4 py-3 font-medium text-gray-900">
+                  <td className="px-4 py-3 font-medium text-navy-900">
                     {u.firstName} {u.lastName}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                  <td className="px-4 py-3 text-gray-600">{u.role}</td>
-                  <td className="px-4 py-3 text-gray-500">{formatDate(u.createdAt)}</td>
+                  <td className="px-4 py-3 text-navy-600">{u.email}</td>
+                  <td className="px-4 py-3 text-navy-600">{u.role}</td>
+                  <td className="px-4 py-3 text-muted">{formatDate(u.createdAt)}</td>
                   <td className="px-4 py-3">
-                    <span className={u.isActive ? 'text-emerald-600' : 'text-red-600'}>
+                    <span className={u.isActive ? 'text-emerald-600' : 'text-danger-600'}>
                       {u.isActive ? 'Active' : 'Suspended'}
                     </span>
                   </td>
@@ -99,7 +100,11 @@ function AdminUsersContent() {
                     {u.role !== 'ADMIN' && (
                       <button
                         onClick={() => toggleActive.mutate({ id: u.id, activate: !u.isActive })}
-                        className="font-semibold text-brand-600 hover:text-brand-700"
+                        className={
+                          u.isActive
+                            ? 'font-semibold text-danger-600 hover:text-danger-700'
+                            : 'font-semibold text-brand-600 hover:text-brand-700'
+                        }
                       >
                         {u.isActive ? 'Suspend' : 'Activate'}
                       </button>

@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { LayoutDashboard, PlusCircle, ScanLine } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -10,9 +11,9 @@ import { Attendee } from '@/types';
 import { formatDateTime, formatTicketCategory } from '@/lib/format';
 
 const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: '\u{1F4CA}' },
-  { label: 'Create Event', href: '/organizer/events/create', icon: '➕' },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
+  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
+  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
+  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
 ];
 
 function toCsv(attendees: Attendee[]) {
@@ -56,19 +57,19 @@ function AttendeesContent() {
   return (
     <DashboardLayout items={NAV}>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Attendees</h1>
+        <h1 className="text-2xl font-bold text-navy-900">Attendees</h1>
         <button
           onClick={downloadCsv}
           disabled={!attendees || attendees.length === 0}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-navy-700 hover:bg-navy-900/5 disabled:opacity-50"
         >
           Export CSV
         </button>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+          <thead className="bg-surface text-left text-xs uppercase text-muted">
             <tr>
               <th className="px-4 py-3">Ticket Code</th>
               <th className="px-4 py-3">Attendee</th>
@@ -77,34 +78,34 @@ function AttendeesContent() {
               <th className="px-4 py-3">Checked In</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-navy-400">
                   Loading...
                 </td>
               </tr>
             ) : !attendees || attendees.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={5} className="px-4 py-6 text-center text-navy-400">
                   No tickets sold yet.
                 </td>
               </tr>
             ) : (
               attendees.map((a) => (
                 <tr key={a.ticketCode}>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-500">{a.ticketCode}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted">{a.ticketCode}</td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{a.attendeeName}</p>
-                    <p className="text-xs text-gray-400">{a.email}</p>
+                    <p className="font-medium text-navy-900">{a.attendeeName}</p>
+                    <p className="text-xs text-navy-400">{a.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-navy-600">
                     {a.ticketType} ({formatTicketCategory(a.category)})
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={a.status} />
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{a.checkedInAt ? formatDateTime(a.checkedInAt) : '—'}</td>
+                  <td className="px-4 py-3 text-muted">{a.checkedInAt ? formatDateTime(a.checkedInAt) : '—'}</td>
                 </tr>
               ))
             )}

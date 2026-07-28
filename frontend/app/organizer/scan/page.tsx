@@ -3,16 +3,19 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { LayoutDashboard, PlusCircle, ScanLine } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
 import QrScanner from '@/components/QrScanner';
+import Button from '@/components/ui/Button';
+import { Select } from '@/components/ui/Input';
 import { EventItem } from '@/types';
 
 const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: '\u{1F4CA}' },
-  { label: 'Create Event', href: '/organizer/events/create', icon: '➕' },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
+  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
+  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
+  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
 ];
 
 type ScanStatus = 'VALID' | 'USED' | 'INVALID' | 'CANCELLED' | 'REFUNDED' | 'PAYMENT_NOT_CONFIRMED';
@@ -137,8 +140,8 @@ function ScanContent() {
 
   return (
     <DashboardLayout items={NAV}>
-      <h1 className="text-2xl font-bold text-gray-900">Scan Tickets</h1>
-      <p className="mt-1 text-gray-500">
+      <h1 className="text-2xl font-bold text-navy-900">Scan Tickets</h1>
+      <p className="mt-1 text-muted">
         Select an event, then scan a QR code or enter a ticket code manually.
         A preview shows ticket info before you confirm entry.
       </p>
@@ -146,58 +149,51 @@ function ScanContent() {
       <div className="mt-6 max-w-xl space-y-6">
         {/* Event selector */}
         <div>
-          <label className="text-sm font-medium text-gray-700">Event</label>
-          <select
+          <label className="text-sm font-medium text-navy-700">Event</label>
+          <Select
             value={eventId}
             onChange={(e) => { setEventId(e.target.value); reset(); setScanning(false); }}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+            className="mt-1"
           >
             <option value="">Select a published event</option>
             {events?.map((e) => (
               <option key={e.id} value={e.id}>{e.title}</option>
             ))}
-          </select>
+          </Select>
         </div>
 
         {eventId && !verifyResult && (
           <>
             {/* Camera scanner */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+            <div className="rounded-2xl border border-line bg-white p-5">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900">Camera Scanner</h2>
-                <button
-                  onClick={() => setScanning((s) => !s)}
-                  className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white"
-                >
+                <h2 className="font-semibold text-navy-900">Camera Scanner</h2>
+                <Button size="sm" variant="secondary" onClick={() => setScanning((s) => !s)}>
                   {scanning ? 'Stop camera' : 'Start camera'}
-                </button>
+                </Button>
               </div>
               <div className="mt-3">
                 <QrScanner active={scanning} onScan={handleQrScan} />
               </div>
               {verifyMutation.isPending && (
-                <p className="mt-2 text-sm text-gray-500 animate-pulse">Verifying ticket…</p>
+                <p className="mt-2 text-sm text-muted animate-pulse">Verifying ticket…</p>
               )}
             </div>
 
             {/* Manual entry */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-5">
-              <h2 className="font-semibold text-gray-900">Manual Check-in</h2>
+            <div className="rounded-2xl border border-line bg-white p-5">
+              <h2 className="font-semibold text-navy-900">Manual Check-in</h2>
               <form onSubmit={handleManualVerify} className="mt-3 flex gap-2">
                 <input
                   required
                   value={manualCode}
                   onChange={(e) => setManualCode(e.target.value)}
                   placeholder="TFK-XXXXXXXXXX"
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+                  className="h-11 flex-1 rounded-btn border border-line bg-white px-3.5 text-sm font-mono text-navy-900 transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 />
-                <button
-                  type="submit"
-                  disabled={verifyMutation.isPending}
-                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
-                >
+                <Button type="submit" disabled={verifyMutation.isPending}>
                   Verify
-                </button>
+                </Button>
               </form>
             </div>
           </>
@@ -249,7 +245,7 @@ function ScanContent() {
                   )}
                   <button
                     onClick={reset}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-white"
+                    className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-navy-700 hover:bg-white"
                   >
                     Scan another
                   </button>

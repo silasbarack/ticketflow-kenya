@@ -28,7 +28,7 @@ export default function TicketTierSelector({
         return (
           <div
             key={tt.id}
-            className={`rounded-2xl border p-4 transition ${qty > 0 ? 'border-brand-300 bg-brand-50/40' : 'border-line'} ${soldOut ? 'opacity-60' : ''}`}
+            className={`rounded-2xl border p-4 transition-colors duration-200 ${qty > 0 ? 'border-brand-300 bg-brand-50/40' : 'border-line'} ${soldOut ? 'opacity-60' : ''}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

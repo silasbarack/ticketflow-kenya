@@ -23,7 +23,7 @@ export default function HeroSearch() {
   return (
     <form
       onSubmit={submit}
-      className="flex w-full flex-col gap-2.5 rounded-2xl border border-line bg-white p-3 shadow-card sm:flex-row sm:items-center sm:gap-1.5 sm:p-2"
+      className="flex w-full flex-col gap-2.5 rounded-2xl border border-line bg-white p-3 shadow-card transition-shadow focus-within:shadow-elevated sm:flex-row sm:items-center sm:gap-1.5 sm:p-2"
     >
       <label className="flex flex-1 items-center gap-2.5 rounded-xl px-3 py-2.5 sm:border-r sm:border-line">
         <Search className="h-5 w-5 shrink-0 text-navy-400" aria-hidden="true" />

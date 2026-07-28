@@ -5,17 +5,20 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { LayoutDashboard, PlusCircle, ScanLine } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatusBadge from '@/components/StatusBadge';
+import Button from '@/components/ui/Button';
+import { Input, Select } from '@/components/ui/Input';
 import { EventItem, TicketTypeCategory } from '@/types';
 import { formatCurrency, formatTicketCategory } from '@/lib/format';
 
 const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: '\u{1F4CA}' },
-  { label: 'Create Event', href: '/organizer/events/create', icon: '➕' },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: '\u{1F4F1}' },
+  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
+  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
+  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
 ];
 
 const CATEGORIES: TicketTypeCategory[] = ['REGULAR', 'VIP', 'VVIP', 'STUDENT', 'EARLY_BIRD'];
@@ -96,7 +99,7 @@ function ManageEventContent() {
   if (isLoading || !event) {
     return (
       <DashboardLayout items={NAV}>
-        <p className="text-gray-500">Loading event...</p>
+        <p className="text-muted">Loading event...</p>
       </DashboardLayout>
     );
   }
@@ -106,71 +109,69 @@ function ManageEventContent() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">{event.title}</h1>
+            <h1 className="text-2xl font-bold text-navy-900">{event.title}</h1>
             <StatusBadge status={event.status} />
           </div>
-          <p className="mt-1 text-gray-500">
+          <p className="mt-1 text-muted">
             {event.venue}, {event.city}
           </p>
           {event.rejectionReason && (
-            <p className="mt-1 text-sm text-red-600">Rejected: {event.rejectionReason}</p>
+            <p className="mt-1 text-sm text-danger-600">Rejected: {event.rejectionReason}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/organizer/events/${event.id}/attendees`}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            className="rounded-lg border border-line px-4 py-2 text-sm font-semibold text-navy-700 hover:bg-navy-900/5"
           >
             View Attendees
           </Link>
           {['DRAFT', 'REJECTED'].includes(event.status) && (
-            <button
-              onClick={() => submitForApproval.mutate()}
-              disabled={submitForApproval.isPending}
-              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-            >
+            <Button size="sm" onClick={() => submitForApproval.mutate()} disabled={submitForApproval.isPending}>
               Submit for Approval
-            </button>
+            </Button>
           )}
           {!['CANCELLED', 'COMPLETED'].includes(event.status) && (
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => cancelEvent.mutate()}
               disabled={cancelEvent.isPending}
-              className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
             >
               Cancel Event
-            </button>
+            </Button>
           )}
           {event.status === 'DRAFT' && (
-            <button
+            <Button
+              variant="danger"
+              size="sm"
               onClick={() => deleteEvent.mutate()}
               disabled={deleteEvent.isPending}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-500 hover:bg-gray-50"
             >
               Delete
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
-      <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Ticket Types</h2>
+      <section className="mt-8 rounded-2xl border border-line bg-white p-6">
+        <h2 className="text-lg font-semibold text-navy-900">Ticket Types</h2>
         <div className="mt-4 space-y-2">
-          {event.ticketTypes.length === 0 && <p className="text-sm text-gray-500">No ticket types yet.</p>}
+          {event.ticketTypes.length === 0 && <p className="text-sm text-muted">No ticket types yet.</p>}
           {event.ticketTypes.map((tt) => (
-            <div key={tt.id} className="flex items-center justify-between rounded-xl border border-gray-100 p-3">
+            <div key={tt.id} className="flex items-center justify-between rounded-xl border border-line p-3">
               <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {tt.name} <span className="text-gray-400">({formatTicketCategory(tt.category)})</span>
+                <p className="text-sm font-semibold text-navy-900">
+                  {tt.name} <span className="text-navy-400">({formatTicketCategory(tt.category)})</span>
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted">
                   {formatCurrency(tt.price)} &middot; {tt.quantitySold}/{tt.quantity} sold
                 </p>
               </div>
               <button
                 onClick={() => deleteTicketType.mutate(tt.id)}
                 disabled={tt.quantitySold > 0}
-                className="text-sm font-semibold text-red-500 hover:text-red-700 disabled:opacity-40"
+                className="text-sm font-semibold text-danger-600 hover:text-danger-700 disabled:opacity-40"
                 title={tt.quantitySold > 0 ? 'Cannot delete — already sold' : 'Delete'}
               >
                 Remove
@@ -184,51 +185,44 @@ function ManageEventContent() {
             e.preventDefault();
             addTicketType.mutate();
           }}
-          className="mt-5 grid gap-3 border-t border-gray-100 pt-5 sm:grid-cols-5"
+          className="mt-5 grid gap-3 border-t border-line pt-5 sm:grid-cols-5"
         >
-          <input
+          <Input
             required
             placeholder="Name (e.g. VIP)"
             value={ttForm.name}
             onChange={(e) => setTtForm((f) => ({ ...f, name: e.target.value }))}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm sm:col-span-2"
+            className="sm:col-span-2"
           />
-          <select
+          <Select
             value={ttForm.category}
             onChange={(e) => setTtForm((f) => ({ ...f, category: e.target.value as TicketTypeCategory }))}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {formatTicketCategory(c)}
               </option>
             ))}
-          </select>
-          <input
+          </Select>
+          <Input
             required
             type="number"
             min={0}
             placeholder="Price (KES)"
             value={ttForm.price}
             onChange={(e) => setTtForm((f) => ({ ...f, price: e.target.value }))}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
-          <input
+          <Input
             required
             type="number"
             min={1}
             placeholder="Quantity"
             value={ttForm.quantity}
             onChange={(e) => setTtForm((f) => ({ ...f, quantity: e.target.value }))}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
-          <button
-            type="submit"
-            disabled={addTicketType.isPending}
-            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 sm:col-span-5"
-          >
+          <Button type="submit" variant="secondary" disabled={addTicketType.isPending} className="sm:col-span-5">
             + Add Ticket Type
-          </button>
+          </Button>
         </form>
       </section>
     </DashboardLayout>

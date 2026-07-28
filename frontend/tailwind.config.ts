@@ -5,33 +5,47 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Primary action colour — emerald green (#087F5B)
+        // Primary action colour — TicketFlow red (#E31845), matching the real logo
         brand: {
-          50: '#ecfbf6',
-          100: '#d2f5e9',
-          200: '#a6ebd3',
-          300: '#6fdbb9',
-          400: '#3ec59d',
-          500: '#16a883',
-          600: '#087f5b',
-          700: '#066b4c',
-          800: '#06553e',
-          900: '#054433',
-          950: '#022a20',
+          50: '#fff0f4',
+          100: '#ffe0e8',
+          200: '#ffbecd',
+          300: '#ff90ab',
+          400: '#fa5c85',
+          500: '#ef2f5f',
+          600: '#e31845',
+          700: '#b90f33',
+          800: '#8f0c29',
+          900: '#6b0a1f',
+          950: '#3d0611',
         },
-        // Secondary accent — warm coral (#F25F4C)
+        // Warning / urgency accent — amber-orange (reversible states only: sold out, low stock, pending)
         accent: {
-          50: '#fff3f1',
-          100: '#ffe1dc',
-          200: '#ffc5ba',
-          300: '#ffa290',
-          400: '#fa8065',
-          500: '#f25f4c',
-          600: '#dc432f',
-          700: '#b93321',
-          800: '#8f2a1c',
-          900: '#74271b',
-          950: '#3e110b',
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+          950: '#431407',
+        },
+        // Destructive-action colour — dark brick red, deliberately distinct from brand red
+        danger: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+          950: '#450a0a',
         },
         // Primary dark colour — deep navy (#0E1B2A). Also used for headings/body text.
         navy: {

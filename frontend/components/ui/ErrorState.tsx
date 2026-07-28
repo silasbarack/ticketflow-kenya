@@ -15,9 +15,9 @@ export default function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center rounded-2xl border border-accent-200 bg-accent-50 px-6 py-14 text-center"
+      className="flex flex-col items-center rounded-2xl border border-danger-200 bg-danger-50 px-6 py-14 text-center"
     >
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white text-accent-600">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white text-danger-600">
         <AlertTriangle className="h-6 w-6" aria-hidden="true" />
       </div>
       <p className="text-base font-semibold text-navy-900">{title}</p>

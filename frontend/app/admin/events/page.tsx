@@ -3,18 +3,21 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { LayoutDashboard, CheckCircle2, Users, CreditCard } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatusBadge from '@/components/StatusBadge';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import { EventItem } from '@/types';
 import { formatDate } from '@/lib/format';
 
 const NAV = [
-  { label: 'Overview', href: '/admin/dashboard', icon: '\u{1F4CA}' },
-  { label: 'Event Approvals', href: '/admin/events', icon: '✅' },
-  { label: 'Users', href: '/admin/users', icon: '\u{1F465}' },
-  { label: 'Payments', href: '/admin/payments', icon: '\u{1F4B3}' },
+  { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+  { label: 'Event Approvals', href: '/admin/events', icon: CheckCircle2 },
+  { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Payments', href: '/admin/payments', icon: CreditCard },
 ];
 
 const STATUS_FILTERS = ['PENDING_APPROVAL', 'PUBLISHED', 'REJECTED', 'CANCELLED', 'DRAFT', 'COMPLETED'];
@@ -65,7 +68,7 @@ function AdminEventsContent() {
 
   return (
     <DashboardLayout items={NAV}>
-      <h1 className="text-2xl font-bold text-gray-900">Event Approvals</h1>
+      <h1 className="text-2xl font-bold text-navy-900">Event Approvals</h1>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {STATUS_FILTERS.map((s) => (
@@ -73,7 +76,7 @@ function AdminEventsContent() {
             key={s}
             onClick={() => setStatus(s)}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-              status === s ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              status === s ? 'bg-brand-600 text-white' : 'bg-navy-900/5 text-navy-700 hover:bg-navy-900/10'
             }`}
           >
             {s.replace('_', ' ')}
@@ -83,22 +86,22 @@ function AdminEventsContent() {
 
       <div className="mt-6 space-y-3">
         {isLoading ? (
-          <p className="text-gray-500">Loading...</p>
+          <p className="text-muted">Loading...</p>
         ) : !events || events.length === 0 ? (
-          <p className="text-gray-500">No events with this status.</p>
+          <p className="text-muted">No events with this status.</p>
         ) : (
           events.map((event) => (
-            <div key={event.id} className="rounded-2xl border border-gray-200 bg-white p-5">
+            <Card key={event.id} className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">{event.title}</h3>
+                    <h3 className="font-semibold text-navy-900">{event.title}</h3>
                     <StatusBadge status={event.status} />
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-1 text-sm text-muted">
                     {event.venue}, {event.city} &middot; {formatDate(event.startDateTime)}
                   </p>
-                  <p className="mt-1 text-xs text-gray-400">
+                  <p className="mt-1 text-xs text-navy-400">
                     Organizer: {event.organizer?.user?.firstName} {event.organizer?.user?.lastName}
                   </p>
                 </div>
@@ -111,28 +114,32 @@ function AdminEventsContent() {
                       >
                         Approve
                       </button>
-                      <button
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        className="h-auto min-h-0 px-3 py-1.5 text-xs"
                         onClick={() => {
                           const reason = window.prompt('Reason for rejection?') || 'Did not meet guidelines';
                           reject.mutate({ id: event.id, reason });
                         }}
-                        className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
                       >
                         Reject
-                      </button>
+                      </Button>
                     </>
                   )}
                   {event.status === 'PUBLISHED' && (
-                    <button
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="h-auto min-h-0 px-3 py-1.5 text-xs"
                       onClick={() => suspend.mutate(event.id)}
-                      className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
                     >
                       Suspend
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>

@@ -47,6 +47,22 @@ body {
   }
 }
 
+/* Hero entrance — staggered via inline animation-delay; neutralized above for reduced motion. */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
 /*
  * Text that sits directly on the page background (no card of its own) must flip with the
  * chosen theme, or it goes invisible on black. Text inside an explicitly-coloured surface
@@ -165,7 +181,7 @@ html[data-theme='dark']
 }
 
 .prose-legal a {
-  color: #066b4c;
+  color: theme('colors.brand.700');
   text-decoration: underline;
 }
 

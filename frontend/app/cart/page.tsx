@@ -202,7 +202,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.ticketTypeId)}
-                    className="text-navy-300 hover:text-accent-600"
+                    className="text-navy-300 hover:text-danger-600"
                     aria-label={`Remove ${item.ticketTypeName} from cart`}
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
