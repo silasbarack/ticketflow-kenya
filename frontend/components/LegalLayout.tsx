@@ -7,6 +7,7 @@ import clsx from 'clsx';
 
 const POLICIES = [
   { label: 'Privacy Policy', href: '/legal/privacy-policy' },
+  { label: 'Mobile App Privacy Policy', href: '/legal/mobile-privacy-policy' },
   { label: 'Terms and Conditions', href: '/legal/terms-and-conditions' },
   { label: 'Payment Policy', href: '/legal/payment-policy' },
   { label: 'Ticket Purchase Policy', href: '/legal/ticket-purchase-policy' },

@@ -16,6 +16,7 @@ const LEGAL_LINKS = [
 ];
 
 const MORE_LEGAL_LINKS = [
+  { label: 'Mobile App Privacy Policy', href: '/legal/mobile-privacy-policy' },
   { label: 'Event Organizer Policy', href: '/legal/event-organizer-policy' },
   { label: 'Ticket Purchase Policy', href: '/legal/ticket-purchase-policy' },
   { label: 'Cookie Policy', href: '/legal/cookie-policy' },
