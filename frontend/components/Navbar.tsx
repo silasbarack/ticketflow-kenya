@@ -48,8 +48,19 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between gap-3 sm:h-[72px]">
+        {/*
+          The full lockup is 218px wide, and with the 140px mobile icon cluster
+          it pushed the header past the viewport on a 320-360px phone. Below
+          420px the mark stands on its own; the wordmark returns as soon as
+          there is room for it.
+        */}
         <Link href="/" className="shrink-0" aria-label="TicketFlow Kenya home">
-          <Logo className="h-8 sm:h-9" />
+          <span className="inline-flex min-[420px]:hidden">
+            <Logo variant="icon" className="h-8" />
+          </span>
+          <span className="hidden min-[420px]:inline-flex">
+            <Logo className="h-8 sm:h-9" />
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-7 text-[15px] font-medium text-navy-700 lg:flex">

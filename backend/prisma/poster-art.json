@@ -1,0 +1,38 @@
+{
+  "_comment": [
+    "Art direction for each event's poster photograph, keyed by event slug.",
+    "DEVELOPMENT DATA ONLY: this file lives under backend/prisma/ alongside the",
+    "seed, is never written to the database, and is never served to a browser.",
+    "It must not be moved under frontend/public/.",
+    "",
+    "Consumed by frontend/scripts/generate-event-posters.py, which renders each",
+    "prompt through an image-generation provider and writes the optimised WebP",
+    "to frontend/public/events/posters/<slug>.webp.",
+    "",
+    "House rules for every prompt: photographic, not illustrated; realistic human",
+    "proportions; a Kenyan setting where the event has one; and no logos, no",
+    "watermarks and no text, so the artwork never fakes a sponsor, a brand or an",
+    "endorsement, and never duplicates the card's live title/date/price UI."
+  ],
+  "spec": {
+    "width": 1600,
+    "height": 1200,
+    "format": "webp",
+    "targetBytes": [
+      153600,
+      512000
+    ]
+  },
+  "events": {
+    "campus-vibe-fest-2026": "University festival photography: a daytime outdoor student music festival in Nakuru, Kenya. Young Kenyan students in casual streetwear dancing in front of an open-air stage, hands raised, banners and festival flags, dry-season grass and acacia trees behind, bright afternoon sun with warm haze, shallow depth of field, candid documentary energy, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "punchline-live-2026": "Comedy theatre photography: a stand-up comedian mid-performance on an intimate theatre stage in Nairobi, handheld microphone, warm amber spotlight, deep red curtain behind, laughing audience silhouettes in the darkened foreground, cinematic depth of field, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "kisumu-lakeside-cultural-festival-2026": "Cultural festival photography: a lakeside cultural celebration on the shore of Lake Victoria, Kenya. Traditional Luo dancers in beaded regalia performing with drums, wooden fishing boats and open water behind, golden late-afternoon light, crowd watching, authentic East African atmosphere, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "rhumba-and-riddim-nairobi-live-2026": "Concert photography: a large open-air night concert in Nairobi, Kenya. A live band with brass and guitars performing on a wide festival stage, dramatic beams of stage lighting cutting through haze, huge crowd with hands and phone lights raised, LED screens glowing behind the stage, cinematic depth of field, premium nightlife aesthetic, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "kulture-iii-2026": "A premium African cultural music event taking place in Nairobi, sophisticated indoor ballroom atmosphere, stylish Kenyan attendees, live African musicians performing on an elegant stage, warm amber and golden concert lighting, subtle red accent lighting, premium event photography, cinematic depth of field, high-end nightlife aesthetic, authentic East African atmosphere, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "mombasa-spice-and-seafood-festival-2026": "Food festival photography: an outdoor coastal food festival on the Kenyan coast at Mombasa. Grilled prawns and crab over open charcoal, bowls of spices and biryani in the foreground, food stalls with string lights, people socialising along a palm-lined waterfront at golden hour, premium food photography, shallow depth of field, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "nairobi-digital-economy-summit-2026": "Technology conference photography: a modern Nairobi conference hall, a speaker presenting on stage in front of a large LED screen showing abstract data visuals, seated professional African audience with laptops, cool blue and teal stage lighting, contemporary corporate atmosphere, cinematic depth of field, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "naivasha-sundowner-music-festival-2026": "Music festival photography: an outdoor lakeside music festival beside Lake Naivasha, Kenya, at sunset. Crowd dancing on grass in front of a stage, DJ booth silhouetted against an orange and violet sky, fever trees and flat-topped acacias along the shoreline, warm rim lighting and dust in the air, premium festival aesthetic, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "uhuru-run-nairobi-half-marathon-2026": "Road race photography: an early-morning charity half marathon in Nairobi, Kenya. A dense pack of Kenyan runners in athletic kit striding along a city road, low golden sunrise light behind them, motion blur in the background, spectators cheering at the roadside, dynamic sports photography, realistic human proportions, professional event photograph, no logos, no watermarks, no text.",
+    "jamhuri-family-carnival-2026": "Family festival photography: a bright daytime outdoor family carnival on open parkland in Nairobi, Kenya. Kenyan families with children enjoying colourful funfair rides and a carousel, balloons and striped tents, picnic blankets on green grass, clear blue sky, cheerful natural daylight, candid documentary style, realistic human proportions, professional event photograph, no logos, no watermarks, no text."
+  }
+}

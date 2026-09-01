@@ -46,25 +46,42 @@ export interface TicketType {
   quantity: number;
   quantitySold: number;
   description?: string | null;
+  /** Optional sales window — a tier outside it cannot be bought. */
+  salesStart?: string | null;
+  salesEnd?: string | null;
 }
 
 export interface EventItem {
   id: string;
   slug: string;
   title: string;
+  subtitle?: string | null;
   description: string;
   posterUrl?: string | null;
+  posterAlt?: string | null;
   venue: string;
   city: string;
+  county?: string | null;
   address?: string | null;
   startDateTime: string;
   endDateTime: string;
   status: EventStatus;
   rejectionReason?: string | null;
   isFeatured?: boolean;
+  /** False for listings that are visible but not authorised to take money. */
+  salesEnabled?: boolean;
+  /** True for TicketFlow's own sample listings. */
+  isDemo?: boolean;
+  /**
+   * Computed server-side by `isEventBookable` and attached to public event
+   * payloads: published, sales on, organizer verified, and not yet started.
+   * The API re-checks the same conditions on order creation, so this is only
+   * ever a hint for rendering.
+   */
+  isBookable?: boolean;
   category: EventCategory;
   ticketTypes: TicketType[];
-  organizer?: { companyName: string; description?: string | null };
+  organizer?: { companyName: string; description?: string | null; isVerified?: boolean };
   /** Present on API responses (Prisma default scalar) even though it wasn't previously declared here. */
   createdAt?: string;
 }

@@ -17,6 +17,35 @@ function slugify(text: string) {
   );
 }
 
+/**
+ * The single rule for "can this event take money right now", shared by the
+ * catalogue and the detail page so the UI never offers a checkout the API
+ * would reject.
+ *
+ * This is a convenience for rendering only — `OrdersService#create` re-checks
+ * the same conditions against the database, because a client can call the
+ * orders endpoint without ever reading this flag.
+ */
+export function isEventBookable(event: {
+  status: string;
+  salesEnabled: boolean;
+  startDateTime: Date;
+  organizer?: { isVerified?: boolean } | null;
+}): boolean {
+  return (
+    event.status === 'PUBLISHED' &&
+    event.salesEnabled &&
+    event.organizer?.isVerified === true &&
+    // Sales close when the doors open — the same cut-off OrdersService uses.
+    event.startDateTime.getTime() > Date.now()
+  );
+}
+
+/** Attaches the computed `isBookable` flag to a public event payload. */
+function withBookability<T extends Parameters<typeof isEventBookable>[0]>(event: T) {
+  return { ...event, isBookable: isEventBookable(event) };
+}
+
 @Injectable()
 export class EventsService {
   constructor(
@@ -82,6 +111,13 @@ export class EventsService {
       status: 'PUBLISHED',
     };
 
+    // An event that has already finished is not part of the public catalogue.
+    // Filtering on endDateTime rather than startDateTime keeps a multi-day
+    // festival listed while it is actually running.
+    if (!query.includePast) {
+      where.endDateTime = { gte: new Date() };
+    }
+
     if (query.search) {
       where.OR = [
         { title: { contains: query.search, mode: 'insensitive' } },
@@ -108,7 +144,11 @@ export class EventsService {
     const [events, total] = await this.prisma.$transaction([
       this.prisma.event.findMany({
         where,
-        include: { category: true, ticketTypes: true, organizer: { select: { companyName: true } } },
+        include: {
+          category: true,
+          ticketTypes: true,
+          organizer: { select: { companyName: true, isVerified: true } },
+        },
         orderBy: { startDateTime: 'asc' },
         take,
         skip,
@@ -116,7 +156,7 @@ export class EventsService {
       this.prisma.event.count({ where }),
     ]);
 
-    return { events, total, take, skip };
+    return { events: events.map((e) => withBookability(e)), total, take, skip };
   }
 
   async findOnePublic(idOrSlug: string) {
@@ -125,10 +165,14 @@ export class EventsService {
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
         status: 'PUBLISHED',
       },
-      include: { category: true, ticketTypes: true, organizer: { select: { companyName: true, description: true } } },
+      include: {
+        category: true,
+        ticketTypes: true,
+        organizer: { select: { companyName: true, description: true, isVerified: true } },
+      },
     });
     if (!event) throw new NotFoundException('Event not found');
-    return event;
+    return withBookability(event);
   }
 
   async findOneForOrganizer(userId: string, id: string) {

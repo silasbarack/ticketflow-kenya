@@ -40,3 +40,7 @@ backend/prisma/dev.db
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Python bytecode (poster generation script)
+__pycache__/
+*.pyc

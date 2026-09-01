@@ -20,13 +20,42 @@ export class OrdersService {
 
   async create(userId: string, dto: CreateOrderDto) {
     return this.prisma.$transaction(async (tx) => {
-      const event = await tx.event.findUnique({ where: { id: dto.eventId } });
+      const event = await tx.event.findUnique({
+        where: { id: dto.eventId },
+        include: { organizer: { select: { isVerified: true } } },
+      });
       if (!event) throw new NotFoundException('Event not found');
       if (!['PUBLISHED'].includes(event.status)) {
         throw new BadRequestException('This event is not currently selling tickets');
       }
       if (event.startDateTime < new Date()) {
         throw new BadRequestException('This event has already started or ended');
+      }
+
+      // Payment safety: a listing may be visible without being authorised to
+      // collect money. `salesEnabled` is off for demo listings and for real
+      // events whose organizer has not been onboarded, and an unverified
+      // organizer can never sell. Checked here — not only in the UI — because
+      // this endpoint is reachable directly.
+      if (!event.salesEnabled) {
+        throw new BadRequestException(
+          'Tickets for this event are not on sale through TicketFlow Kenya.',
+        );
+      }
+      if (!event.organizer?.isVerified) {
+        throw new BadRequestException(
+          "This event's organizer has not completed verification, so tickets cannot be sold yet.",
+        );
+      }
+
+      // Demo listings are TicketFlow's own sample events. They stay bookable
+      // against the Daraja sandbox and the mock endpoint so the whole purchase
+      // flow can be exercised, but they must never reach a real customer's
+      // money: with production Daraja credentials configured, they are refused.
+      if (event.isDemo && this.configService.get<string>('MPESA_ENV') === 'production') {
+        throw new BadRequestException(
+          'This is a sample listing and cannot be purchased.',
+        );
       }
 
       let ticketSubtotal = 0;
@@ -40,6 +69,17 @@ export class OrdersService {
         const available = ticketType.quantity - ticketType.quantitySold;
         if (available < item.quantity) {
           throw new BadRequestException(`Not enough tickets available for "${ticketType.name}"`);
+        }
+
+        // A tier can open late (early-bird release) or close before the event
+        // (student pricing that ends a week out). Outside its window it is not
+        // purchasable even though the event itself is on sale.
+        const now = new Date();
+        if (ticketType.salesStart && ticketType.salesStart > now) {
+          throw new BadRequestException(`"${ticketType.name}" is not on sale yet`);
+        }
+        if (ticketType.salesEnd && ticketType.salesEnd < now) {
+          throw new BadRequestException(`Sales for "${ticketType.name}" have closed`);
         }
 
         const unitPrice = Number(ticketType.price);

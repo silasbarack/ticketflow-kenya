@@ -123,16 +123,30 @@ model Event {
   category        EventCategory    @relation(fields: [categoryId], references: [id])
   title           String
   slug            String           @unique
+  subtitle        String?
   description     String
   posterUrl       String?
+  posterAlt       String?
   venue           String
   city            String
+  county          String?
   address         String?
   startDateTime   DateTime
   endDateTime     DateTime
   status          EventStatus      @default(DRAFT)
   rejectionReason String?
   isFeatured      Boolean          @default(false)
+
+  /// Master switch for taking money for this event. An event may be PUBLISHED
+  /// (visible in the catalogue) while sales are off — that is how a listing
+  /// whose organizer has not been onboarded, or a demo listing, is shown
+  /// without ever being able to collect a shilling. Enforced server-side in
+  /// OrdersService#create, not just hidden in the UI.
+  salesEnabled    Boolean          @default(true)
+
+  /// True for TicketFlow's own sample/demo listings (invented events used to
+  /// exercise the product). Never set on a real organizer's event.
+  isDemo          Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
