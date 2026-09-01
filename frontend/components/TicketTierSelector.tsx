@@ -2,7 +2,7 @@
 
 import { Minus, Plus } from 'lucide-react';
 import { TicketType } from '@/types';
-import { formatCurrency, formatTicketCategory } from '@/lib/format';
+import { formatCurrency, formatDate, formatTicketCategory } from '@/lib/format';
 import { totalWithServiceFee } from '@/lib/fees';
 
 export default function TicketTierSelector({
@@ -18,17 +18,30 @@ export default function TicketTierSelector({
     return <p className="text-sm text-muted">No tickets available yet — check back soon.</p>;
   }
 
+  // Cheapest first, matching the price strip on the event card. The API
+  // returns tiers in insertion order, which put VVIP above VIP on events whose
+  // ladder was edited after creation.
+  const tiers = [...ticketTypes].sort((a, b) => Number(a.price) - Number(b.price));
+
   return (
     <div className="space-y-3">
-      {ticketTypes.map((tt) => {
+      {tiers.map((tt) => {
         const available = tt.quantity - tt.quantitySold;
         const soldOut = available <= 0;
         const qty = quantities[tt.id] || 0;
 
+        // A tier can open late (an early-bird release) or close before the
+        // event (student pricing that ends a week out). The API enforces this
+        // on order creation; the UI must not offer what it would reject.
+        const now = Date.now();
+        const notYetOpen = Boolean(tt.salesStart && new Date(tt.salesStart).getTime() > now);
+        const closed = Boolean(tt.salesEnd && new Date(tt.salesEnd).getTime() < now);
+        const unavailable = soldOut || notYetOpen || closed;
+
         return (
           <div
             key={tt.id}
-            className={`rounded-2xl border p-4 transition-colors duration-200 ${qty > 0 ? 'border-brand-300 bg-brand-50/40' : 'border-line'} ${soldOut ? 'opacity-60' : ''}`}
+            className={`rounded-2xl border p-4 transition-colors duration-200 ${qty > 0 ? 'border-brand-300 bg-brand-50/40' : 'border-line'} ${unavailable ? 'opacity-60' : ''}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -43,8 +56,14 @@ export default function TicketTierSelector({
             </div>
 
             <div className="mt-3 flex items-center justify-between">
-              <span className={`text-xs font-medium ${soldOut ? 'text-accent-600' : available <= 15 ? 'text-accent-600' : 'text-muted'}`}>
-                {soldOut ? 'Sold out' : `${available} left`}
+              <span className={`text-xs font-medium ${unavailable ? 'text-accent-600' : available <= 15 ? 'text-accent-600' : 'text-muted'}`}>
+                {soldOut
+                  ? 'Sold out'
+                  : notYetOpen
+                    ? `On sale from ${formatDate(tt.salesStart as string)}`
+                    : closed
+                      ? 'Sales closed'
+                      : `${available} left`}
               </span>
 
               <div className="flex items-center gap-3">
@@ -64,7 +83,7 @@ export default function TicketTierSelector({
                   type="button"
                   aria-label={`Increase quantity for ${tt.name}`}
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-navy-600 transition hover:border-navy-300 disabled:opacity-30"
-                  disabled={soldOut || available <= qty}
+                  disabled={unavailable || available <= qty}
                   onClick={() => onChange(tt.id, qty + 1)}
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />

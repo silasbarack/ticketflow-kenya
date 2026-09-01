@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { Calendar, Clock, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -11,12 +10,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { useFavorites } from '@/hooks/useFavorites';
 import { EventItem } from '@/types';
-import { formatDate, formatDateTime } from '@/lib/format';
-import { resolvePosterUrl } from '@/lib/posters';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import Container from '@/components/ui/Container';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import EventGrid from '@/components/EventGrid';
+import EventPoster from '@/components/EventPoster';
 import TicketTierSelector from '@/components/TicketTierSelector';
 import BookingSummary from '@/components/BookingSummary';
 import Link from 'next/link';
@@ -28,7 +27,6 @@ export default function EventDetailClient() {
   const { items: cartItems, addToCart, totalItems } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [imageFailed, setImageFailed] = useState(false);
 
   const { data: event, isLoading } = useQuery({
     queryKey: ['event', params.id],
@@ -153,18 +151,53 @@ export default function EventDetailClient() {
     );
   }
 
-  const showImage = Boolean(event.posterUrl) && !imageFailed;
+  // Absent on older payloads — treat that as bookable so nothing regresses.
+  const bookable = event.isBookable !== false;
+
   const bookingPanel = (
     <div className="rounded-2xl border border-line bg-white p-5 shadow-soft">
-      <h2 className="scroll-mt-24 text-lg font-bold text-navy-900">Select Tickets</h2>
-      <div className="mt-4">
-        <TicketTierSelector
-          ticketTypes={event.ticketTypes}
-          quantities={quantities}
-          onChange={(id, qty) => setQuantities((q) => ({ ...q, [id]: qty }))}
-        />
-      </div>
-      <BookingSummary subtotal={total} totalSelected={totalSelected} onAddToCart={handleAddToCart} cartCount={totalItems} />
+      <h2 className="scroll-mt-24 text-lg font-bold text-navy-900">
+        {bookable ? 'Select Tickets' : 'Ticket information'}
+      </h2>
+
+      {bookable ? (
+        <>
+          <div className="mt-4">
+            <TicketTierSelector
+              ticketTypes={event.ticketTypes}
+              quantities={quantities}
+              onChange={(id, qty) => setQuantities((q) => ({ ...q, [id]: qty }))}
+            />
+          </div>
+          <BookingSummary subtotal={total} totalSelected={totalSelected} onAddToCart={handleAddToCart} cartCount={totalItems} />
+        </>
+      ) : (
+        // Not a disabled button: an event TicketFlow is not authorised to sell
+        // for has no checkout at all, so there is nothing to click through.
+        <div className="mt-4 space-y-4">
+          <div className="rounded-xl border border-line bg-surface p-4">
+            <p className="text-sm font-semibold text-navy-900">Not on sale through TicketFlow Kenya</p>
+            <p className="mt-1.5 text-sm text-muted">
+              {event.organizer?.companyName
+                ? `Tickets for this event are sold by ${event.organizer.companyName} through their own channels.`
+                : 'Tickets for this event are sold by the organizer through their own channels.'}{' '}
+              We are showing the details here for reference only and cannot take payment for it.
+            </p>
+          </div>
+          {event.ticketTypes.length > 0 && (
+            <ul className="space-y-2">
+              {[...event.ticketTypes]
+                .sort((a, b) => Number(a.price) - Number(b.price))
+                .map((tt) => (
+                  <li key={tt.id} className="flex items-center justify-between rounded-xl border border-line px-4 py-3">
+                    <span className="text-sm font-semibold text-navy-900">{tt.name}</span>
+                    <span className="text-sm font-bold text-navy-900">{formatCurrency(Number(tt.price))}</span>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -173,14 +206,16 @@ export default function EventDetailClient() {
       {/* Top section */}
       <div className="border-b border-line bg-white">
         <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[1.6fr_1fr] lg:items-start">
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-navy-100">
-            {showImage ? (
-              <Image src={resolvePosterUrl(event.posterUrl as string)} alt={event.title} fill unoptimized className="object-cover" onError={() => setImageFailed(true)} />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy-800 to-navy-950 p-8">
-                <span className="text-center text-xl font-bold text-white/90">{event.title}</span>
-              </div>
-            )}
+          {/* Same artwork as the card, shown larger — cover-cropped, never stretched. */}
+          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-navy-900">
+            <EventPoster
+              src={event.posterUrl}
+              alt={event.posterAlt || `${event.title} event poster`}
+              // The hero poster is this page's largest contentful paint.
+              priority
+              sizes="(min-width: 1024px) 62vw, 100vw"
+              objectPosition="center 40%"
+            />
           </div>
 
           <div>
@@ -190,6 +225,14 @@ export default function EventDetailClient() {
             </div>
 
             <h1 className="mt-3 text-[26px] font-bold leading-tight text-navy-900 sm:text-[32px]">{event.title}</h1>
+            {event.subtitle && <p className="mt-1.5 text-[15px] text-muted">{event.subtitle}</p>}
+
+            {event.isDemo && (
+              <p className="mt-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-muted">
+                <span className="font-semibold text-navy-900">Sample listing.</span> This is demonstration data on a
+                development build of TicketFlow Kenya, not a ticket sale by the named organizer.
+              </p>
+            )}
 
             <div className="mt-4 space-y-2.5 text-[15px] text-navy-700">
               <p className="flex items-center gap-2">

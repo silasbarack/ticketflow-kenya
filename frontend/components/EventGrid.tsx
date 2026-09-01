@@ -40,8 +40,9 @@ export default function EventGrid({
 
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {events.map((event) => (
-        <EventCard key={event.id} event={event} />
+      {/* The first row (three cards at lg) is above the fold at every width. */}
+      {events.map((event, index) => (
+        <EventCard key={event.id} event={event} priority={index < 3} />
       ))}
     </div>
   );

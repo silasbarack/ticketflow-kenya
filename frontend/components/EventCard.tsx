@@ -1,29 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Heart, MapPin, Share2, ShieldCheck, Ticket, Zap } from 'lucide-react';
 import { EventItem, TicketType } from '@/types';
 import { formatCurrency } from '@/lib/format';
-import { resolvePosterUrl } from '@/lib/posters';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCountdown } from '@/hooks/useCountdown';
 import Logo from '@/components/Logo';
-
-const GRADIENTS = [
-  'from-navy-800 to-navy-950',
-  'from-brand-700 to-navy-900',
-  'from-accent-700 to-navy-900',
-  'from-navy-700 to-brand-900',
-];
-
-function gradientFor(seed: string) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % GRADIENTS.length;
-  return GRADIENTS[hash];
-}
+import EventPoster from '@/components/EventPoster';
 
 // Poster chip colours per tier, matching the official card design.
 const TIER_CHIP_COLORS: Record<string, string> = {
@@ -36,8 +22,15 @@ const TIER_CHIP_COLORS: Record<string, string> = {
 
 const TIER_ORDER = ['EARLY_BIRD', 'REGULAR', 'STUDENT', 'VIP', 'VVIP'];
 
+/**
+ * Cheapest first, so the strip reads as a price ladder however an event names
+ * or orders its tiers — a KES 700 Student sits left of a KES 1,000 Early Bird.
+ * Category order only breaks ties between tiers at the same price.
+ */
 function sortTiers(ticketTypes: TicketType[]) {
   return [...ticketTypes].sort((a, b) => {
+    const byPrice = Number(a.price) - Number(b.price);
+    if (byPrice !== 0) return byPrice;
     const ai = TIER_ORDER.indexOf(a.category);
     const bi = TIER_ORDER.indexOf(b.category);
     return (ai === -1 ? TIER_ORDER.length : ai) - (bi === -1 ? TIER_ORDER.length : bi);
@@ -57,19 +50,32 @@ function formatDateRange(startIso: string, endIso?: string) {
   return `${start.getDate()} ${month(start)} - ${end.getDate()} ${month(end)} ${end.getFullYear()}`;
 }
 
-export default function EventCard({ event }: { event: EventItem }) {
-  const [imageFailed, setImageFailed] = useState(false);
+export default function EventCard({
+  event,
+  /**
+   * Set on the first card in a grid. Its poster is the largest contentful
+   * paint, and lazy-loading it delays the LCP (Next warns about exactly this);
+   * every other poster stays lazy so below-the-fold cards cost nothing.
+   */
+  priority = false,
+}: {
+  event: EventItem;
+  priority?: boolean;
+}) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const countdown = useCountdown(event.startDateTime);
+  const countdown = useCountdown(event.startDateTime, event.endDateTime);
 
   const favorite = isFavorite(event.id);
-  const showImage = Boolean(event.posterUrl) && !imageFailed;
   const eventUrl = `/events/${event.slug}`;
 
   const tiers = sortTiers(event.ticketTypes);
   const totalAvailable = event.ticketTypes.reduce((sum, t) => sum + Math.max(0, t.quantity - t.quantitySold), 0);
   const soldOut = event.ticketTypes.length > 0 && totalAvailable <= 0;
   const sellingFast = !soldOut && totalAvailable > 0 && totalAvailable <= 15;
+
+  // `isBookable` is absent on older payloads; treat that as bookable so the
+  // card keeps behaving as it always has rather than silently going read-only.
+  const bookable = event.isBookable !== false;
 
   function handleToggleFavorite(e: React.MouseEvent) {
     e.preventDefault();
@@ -110,21 +116,13 @@ export default function EventCard({ event }: { event: EventItem }) {
       <div className="relative">
         <Link href={eventUrl} className="block focus-visible:outline-none">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-navy-900">
-            {showImage ? (
-              <Image
-                src={resolvePosterUrl(event.posterUrl as string)}
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                loading="lazy"
-                unoptimized
-                className="object-cover transition duration-500 group-hover:scale-105"
-                style={{ objectPosition: 'center 30%' }}
-                onError={() => setImageFailed(true)}
-              />
-            ) : (
-              <div className={`h-full w-full bg-gradient-to-br ${gradientFor(event.title)}`} />
-            )}
+            <EventPoster
+              src={event.posterUrl}
+              alt={event.posterAlt || `${event.title} event poster`}
+              priority={priority}
+              objectPosition="center 40%"
+              className="transition duration-500 group-hover:scale-105"
+            />
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-navy-950 via-navy-950/55 to-transparent" aria-hidden="true" />
             <h3 className="absolute inset-x-0 bottom-0 line-clamp-2 px-4 pb-2.5 text-xl font-extrabold leading-snug text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
               {event.title}
@@ -132,14 +130,26 @@ export default function EventCard({ event }: { event: EventItem }) {
           </div>
         </Link>
 
-        <span className="pointer-events-none absolute left-3 top-3">
+        <span className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
           <span
             className={`rounded-md px-2 py-1 text-[9px] font-extrabold uppercase tracking-wide text-white ${
-              soldOut ? 'bg-navy-900/90' : sellingFast ? 'bg-accent-600' : 'bg-emerald-600'
+              !bookable
+                ? 'bg-navy-900/90'
+                : soldOut
+                  ? 'bg-navy-900/90'
+                  : sellingFast
+                    ? 'bg-accent-600'
+                    : 'bg-emerald-600'
             }`}
           >
-            {soldOut ? 'Sold Out' : sellingFast ? 'Selling Fast' : 'Tickets Available'}
+            {/* Never advertise availability for a listing that cannot sell. */}
+            {!bookable ? 'Not on sale here' : soldOut ? 'Sold Out' : sellingFast ? 'Selling Fast' : 'Tickets Available'}
           </span>
+          {event.isDemo && (
+            <span className="rounded-md bg-white/90 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wide text-navy-900">
+              Sample
+            </span>
+          )}
         </span>
 
         <div className="absolute right-3 top-3 flex gap-1.5">
@@ -169,8 +179,12 @@ export default function EventCard({ event }: { event: EventItem }) {
           <span className="rounded-md bg-white px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-navy-900">
             {formatDateRange(event.startDateTime, event.endDateTime)}
           </span>
-          <span className="rounded-md bg-brand-600 px-2 py-1 text-[10px] font-extrabold text-white">
-            {countdown.isPast ? 'Happening now' : `${countdown.label} to go`}
+          <span
+            className={`rounded-md px-2 py-1 text-[10px] font-extrabold text-white ${
+              countdown.phase === 'ended' ? 'bg-navy-700' : countdown.phase === 'live' ? 'bg-emerald-600' : 'bg-brand-600'
+            }`}
+          >
+            {countdown.phase === 'upcoming' ? `${countdown.label} to go` : countdown.label}
           </span>
         </div>
 
@@ -181,16 +195,23 @@ export default function EventCard({ event }: { event: EventItem }) {
 
         {/* Ticket price tiers — live prices, site font (Noto Sans) */}
         {tiers.length > 0 ? (
-          <ul className="mt-3 flex gap-1" aria-label="Ticket prices">
+          // auto-fit keeps every chip at least 66px wide, so a five-tier ladder
+          // stays on one row where there is room and reflows to two rows on a
+          // narrow phone instead of squeezing "EARLY BIRD" into a column of
+          // single letters or pushing the price out of its chip.
+          <ul
+            className="mt-3 grid gap-1 [grid-template-columns:repeat(auto-fit,minmax(62px,1fr))]"
+            aria-label="Ticket prices"
+          >
             {tiers.map((tt) => (
               <li
                 key={tt.id}
-                className={`min-w-0 flex-1 rounded-md px-1 py-1.5 text-center text-white ${
+                className={`min-w-0 rounded-md px-1 py-1.5 text-center text-white ${
                   TIER_CHIP_COLORS[tt.category] ?? 'bg-navy-700'
                 }`}
               >
                 <p className="truncate text-[8px] font-extrabold uppercase leading-tight tracking-wide">{tt.name}</p>
-                <p className="mt-0.5 whitespace-nowrap text-[10px] font-extrabold leading-tight tracking-tight">
+                <p className="mt-0.5 truncate text-[10px] font-extrabold leading-tight tracking-tight">
                   {formatCurrency(Number(tt.price))}
                 </p>
               </li>
@@ -213,13 +234,15 @@ export default function EventCard({ event }: { event: EventItem }) {
             </span>
           </div>
 
-          {/* Red clickable Book Now */}
+          {/* Red clickable Book Now — always routed to this event's own page */}
           <Link
             href={eventUrl}
-            aria-label={`Book tickets for ${event.title}`}
-            className="mt-3 flex h-11 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white transition hover:bg-brand-700"
+            aria-label={bookable ? `Book tickets for ${event.title}` : `View event information for ${event.title}`}
+            className={`mt-3 flex h-11 items-center justify-center rounded-lg text-sm font-bold text-white transition ${
+              bookable ? 'bg-brand-600 hover:bg-brand-700' : 'bg-navy-700 hover:bg-navy-600'
+            }`}
           >
-            Book Now
+            {bookable ? 'Book Now' : 'View event info'}
           </Link>
 
           <p className="mt-3 text-center text-[10px] text-white/70">
