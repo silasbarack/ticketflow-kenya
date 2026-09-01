@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { Calendar, Clock, ExternalLink, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
+import { BadgeCheck, Calendar, Clock, ExternalLink, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useFavorites } from '@/hooks/useFavorites';
 import { EventItem } from '@/types';
@@ -190,16 +190,15 @@ export default function EventDetailClient() {
               {!externalBooking && event.organizer?.description && (
                 <p className="mt-1 text-sm text-muted">{event.organizer.description}</p>
               )}
-              {event.verificationSourceUrl && (
-                <a
-                  href={event.verificationSourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:text-brand-800"
-                >
-                  Event details verified with {event.verificationSource || 'the official source'}
-                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
+              {/*
+                Provenance is stated, but not linked: the verification source is
+                the event's other seller, and TicketFlow tickets are bought here.
+              */}
+              {event.verificationSource && (
+                <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                  <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                  Event details verified with {event.verificationSource}
+                </p>
               )}
             </section>
           )}

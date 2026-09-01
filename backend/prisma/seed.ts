@@ -69,6 +69,23 @@ type SeedEvent = {
 
 const VERIFIED_AT = new Date('2026-09-01T00:00:00+03:00');
 
+const LISTINGS_COMPANY = 'TicketFlow Kenya';
+const LISTINGS_DESCRIPTION = 'Events ticketed and sold directly by TicketFlow Kenya.';
+
+/**
+ * Stock released per tier when TicketFlow holds the inventory. Mirrors the
+ * allocation in migration 20260901190000_sell_catalogue_through_ticketflow so
+ * a seeded database and a migrated one agree.
+ */
+const DEFAULT_TIER_ALLOCATION = 200;
+const TIER_ALLOCATION: Partial<Record<TicketTypeCategory, number>> = {
+  [TicketTypeCategory.EARLY_BIRD]: 150,
+  [TicketTypeCategory.REGULAR]: 400,
+  [TicketTypeCategory.STUDENT]: 200,
+  [TicketTypeCategory.VIP]: 150,
+  [TicketTypeCategory.VVIP]: 60,
+};
+
 // Verified on 1 September 2026 (Africa/Nairobi). These are editorial listings
 // for real third-party events. TicketFlow is not their seller: every Book Now
 // action goes to the listed authorised platform and server-side sales stay off.
@@ -386,7 +403,7 @@ async function main() {
 
   const listingsUser = await prisma.user.upsert({
     where: { email: 'listings@ticketflow.co.ke' },
-    update: { isActive: false },
+    update: { isActive: true },
     create: {
       email: 'listings@ticketflow.co.ke',
       phone: '+254700000005',
@@ -394,19 +411,21 @@ async function main() {
       firstName: 'TicketFlow',
       lastName: 'Listings',
       role: UserRole.ORGANIZER,
-      isActive: false,
+      isActive: true,
     },
   });
 
   const listingsProfile = await prisma.organizerProfile.upsert({
     where: { userId: listingsUser.id },
-    update: { isVerified: false },
+    // Verified, because tickets for this catalogue are now sold on TicketFlow
+    // itself — `isEventBookable` and OrdersService both refuse an unverified
+    // organizer.
+    update: { isVerified: true, companyName: LISTINGS_COMPANY, description: LISTINGS_DESCRIPTION },
     create: {
       userId: listingsUser.id,
-      companyName: 'TicketFlow Kenya Listings Desk',
-      description:
-        'Editorial event listings. Ticket sales remain with each event organizer or authorised external seller.',
-      isVerified: false,
+      companyName: LISTINGS_COMPANY,
+      description: LISTINGS_DESCRIPTION,
+      isVerified: true,
     },
   });
 
@@ -430,13 +449,15 @@ async function main() {
       timezone: 'Africa/Nairobi',
       status: EventStatus.PUBLISHED,
       isFeatured: true,
-      bookingMode: EventBookingMode.EXTERNAL,
-      bookingUrl: seedEvent.bookingUrl,
+      // Ticketing happens on TicketFlow Kenya only. No listing carries an
+      // outbound booking URL, so nothing can route a buyer off-site.
+      bookingMode: EventBookingMode.INTERNAL,
+      bookingUrl: null,
       verificationSource: seedEvent.verificationSource,
       verificationSourceUrl: seedEvent.verificationSourceUrl,
       secondaryVerificationSourceUrl: seedEvent.secondaryVerificationSourceUrl,
       verifiedAt: VERIFIED_AT,
-      salesEnabled: false,
+      salesEnabled: true,
       isDemo: false,
     };
 
@@ -450,12 +471,17 @@ async function main() {
       const existing = await prisma.ticketType.findFirst({
         where: { eventId: event.id, name: tier.name },
       });
+      // TicketFlow now holds the inventory, so an open tier needs a real
+      // allocation. Tiers the catalogue records as sold out or closed keep
+      // zero stock rather than being given invented inventory.
+      const allocation =
+        tier.availabilityStatus === TicketAvailabilityStatus.AVAILABLE
+          ? TIER_ALLOCATION[tier.category] ?? DEFAULT_TIER_ALLOCATION
+          : 0;
       const tierData = {
         category: tier.category,
         price: tier.price,
-        // External listings have no TicketFlow inventory. Availability comes
-        // only from the explicit status copied from the official seller.
-        quantity: existing?.quantitySold ?? 0,
+        quantity: Math.max(allocation, existing?.quantitySold ?? 0),
         availabilityStatus: tier.availabilityStatus,
         description: tier.description,
         salesEnd: tier.salesEnd ? new Date(tier.salesEnd) : null,
@@ -502,7 +528,7 @@ async function main() {
     console.log(`Archived stale listing "${event.title}".`);
   }
 
-  console.log(`Seed complete: ${eventSeeds.length} verified external events are published.`);
+  console.log(`Seed complete: ${eventSeeds.length} verified events are published and bookable on TicketFlow.`);
   console.log('--- Login credentials ---');
   console.log('Admin:     admin@ticketflow.co.ke / Admin@123');
   console.log('Organizer: organizer@ticketflow.co.ke / Organizer@123');
