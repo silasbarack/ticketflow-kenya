@@ -74,8 +74,19 @@ or card payments: create a sibling `src/flutterwave` (etc.) module exposing the 
 
 ## Mock payments (local development only)
 
-Real Daraja sandbox calls require a publicly reachable HTTPS callback URL (e.g. via ngrok).
-For local testing without that setup, `ENABLE_MOCK_PAYMENTS=true` in `.env` enables:
+> **The Daraja sandbox spends real money.** A sandbox STK push to a real Safaricom line
+> debits that line's actual M-Pesa balance and pays it to the shared test shortcode `174379`
+> ("Daraja-Sandbox"), which this project cannot refund from — only Safaricom can reverse it.
+> `MpesaService#assertPhoneAllowedForSandbox` blocks non-production pushes to any number that
+> is not `254708374149` or listed in `MPESA_TEST_PHONES`.
+
+Real Daraja sandbox calls no longer require a publicly reachable callback URL: a `PENDING`
+M-Pesa payment is settled by querying Safaricom for its outcome whenever the payment is
+polled (`PaymentsService#reconcilePending`), so a real STK push completes end-to-end from a
+local machine. Payments settled that way carry no `mpesaReceiptNumber` — only the callback
+supplies one.
+
+To skip Safaricom altogether, `ENABLE_MOCK_PAYMENTS=true` in `.env` enables:
 
 ```
 POST /api/payments/mock/:paymentId/success

@@ -155,7 +155,9 @@ export class PaymentsService {
     if (role !== 'ADMIN' && payment.order.userId !== userId) {
       throw new ForbiddenException('You do not have access to this payment');
     }
-    return payment;
+
+    const settled = await this.reconcilePending(payment);
+    return settled ? { ...payment, ...settled } : payment;
   }
 
   async findByOrder(userId: string, role: string, orderId: string) {
@@ -164,7 +166,63 @@ export class PaymentsService {
     if (role !== 'ADMIN' && order.userId !== userId) {
       throw new ForbiddenException('You do not have access to this order');
     }
-    return this.prisma.payment.findMany({ where: { orderId }, orderBy: { createdAt: 'desc' } });
+    const payments = await this.prisma.payment.findMany({ where: { orderId }, orderBy: { createdAt: 'desc' } });
+
+    return Promise.all(
+      payments.map(async (payment) => {
+        const settled = await this.reconcilePending(payment);
+        return settled ? { ...payment, ...settled } : payment;
+      }),
+    );
+  }
+
+  /**
+   * Daraja is allowed roughly 30 status queries per minute per app before it
+   * spike-arrests, and the apps poll a payment every 3s. Remembering when we
+   * last asked keeps a single checkout well inside that budget.
+   */
+  private readonly lastQueriedAt = new Map<string, number>();
+  private static readonly QUERY_MIN_INTERVAL_MS = 8_000;
+
+  /**
+   * Brings a PENDING payment up to date by asking Safaricom for its outcome,
+   * for the case where the STK callback never arrives — which is every local
+   * run, since Safaricom cannot reach a development machine.
+   *
+   * This does not weaken the rule that the client never decides a payment's
+   * fate: the verdict still comes from Safaricom over an authenticated call,
+   * and the client only triggers the lookup by polling. Returns the settled
+   * payment, or null if nothing changed.
+   */
+  private async reconcilePending(payment: { id: string; status: string; checkoutRequestId: string | null }) {
+    if (payment.status !== 'PENDING' || !payment.checkoutRequestId) return null;
+
+    const last = this.lastQueriedAt.get(payment.id) ?? 0;
+    if (Date.now() - last < PaymentsService.QUERY_MIN_INTERVAL_MS) return null;
+    this.lastQueriedAt.set(payment.id, Date.now());
+
+    const result = await this.mpesaService.queryStkStatus(payment.checkoutRequestId);
+    if (!result.settled) return null;
+
+    // Re-read under the lock of the status check: a callback may have landed
+    // while the query was in flight, and success must only be applied once.
+    const current = await this.prisma.payment.findUnique({ where: { id: payment.id } });
+    if (!current || current.status !== 'PENDING') return null;
+
+    await this.prisma.payment.update({
+      where: { id: payment.id },
+      data: { resultCode: result.resultCode, resultDesc: result.resultDesc },
+    });
+
+    this.lastQueriedAt.delete(payment.id);
+    this.logger.log(`Payment ${payment.id} settled by STK query: ${result.resultCode} ${result.resultDesc}`);
+
+    // The query API confirms the outcome but does not return the M-Pesa
+    // receipt number — only the callback carries that — so it stays null on
+    // payments settled this way.
+    return Number(result.resultCode) === 0
+      ? await this.markPaymentSuccess(payment.id)
+      : await this.markPaymentFailed(payment.id);
   }
 
   /**

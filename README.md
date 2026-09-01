@@ -61,8 +61,10 @@ Edit `backend/.env` if needed:
 - Leave `ENABLE_MOCK_PAYMENTS=true` for local testing (see "Testing the M-Pesa flow" below).
 - M-Pesa Daraja sandbox credentials (`MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`,
   `MPESA_SHORTCODE`, `MPESA_PASSKEY`) are only required if you want to trigger a real STK push —
-  get them from https://developer.safaricom.co.ke. `MPESA_CALLBACK_URL` must be a public HTTPS
-  URL (e.g. via `ngrok http 4000`) for Safaricom to reach your callback endpoint.
+  get them from https://developer.safaricom.co.ke. `MPESA_CALLBACK_URL` should be a public HTTPS
+  URL so Safaricom can reach your callback endpoint, but it is no longer required locally — the
+  backend also settles pending payments by querying Daraja directly (see "Testing the M-Pesa
+  flow" below).
 
 ```powershell
 npx prisma generate
@@ -114,9 +116,15 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
 6. **Customer buys a ticket**: log in as a customer, open the event on `/events/[id]`, pick a
    ticket quantity, click "Buy Ticket" → redirected to `/checkout/[orderId]`.
 7. **Pay via M-Pesa (sandbox) or mock**:
-   - Real sandbox: enter a Safaricom test MSISDN and click "Pay with M-Pesa"; approve the STK
-     prompt on the test phone. Safaricom calls your `MPESA_CALLBACK_URL`, which marks the
-     payment `SUCCESS`.
+   - Real sandbox: enter a Safaricom test MSISDN and click "Pay with M-Pesa", then approve the
+     STK prompt on the test phone. Safaricom calls your `MPESA_CALLBACK_URL`, which marks the
+     payment `SUCCESS`. If that URL is not publicly reachable (any local run), the backend
+     instead settles the payment by querying Daraja for the result while the page polls —
+     the flow still completes, just without an `mpesaReceiptNumber`.
+
+     **A sandbox push to a real Safaricom line debits real money** and pays it to shortcode
+     `174379`, which cannot be refunded from here. Outside production only `254708374149` and
+     numbers listed in `MPESA_TEST_PHONES` are accepted.
    - Local/no public URL: click "Dev only: simulate successful callback" after initiating the
      push (or even without a real consumer key/secret, since the mock endpoint bypasses Daraja
      entirely).

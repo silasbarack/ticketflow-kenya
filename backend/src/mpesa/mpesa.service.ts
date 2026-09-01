@@ -71,6 +71,8 @@ export class MpesaService {
     accountReference: string;
     transactionDesc: string;
   }): Promise<StkPushResult> {
+    this.assertPhoneAllowedForSandbox(params.phone);
+
     const accessToken = await this.generateAccessToken();
     const timestamp = this.generateTimestamp();
     const password = this.generatePassword(timestamp);
@@ -110,6 +112,87 @@ export class MpesaService {
   }
 
   /**
+   * Result codes Daraja returns while an STK push is still in flight, not as
+   * its verdict. `4999` is what a query gets back in the seconds after the
+   * push, before the customer has acted; `1001` means another transaction is
+   * already locking the subscriber. Both mean "no answer yet".
+   *
+   * Every other non-zero code (1032 cancelled, 1037 not reachable, 1
+   * insufficient funds, 2001 wrong PIN, 1019 expired, ...) is final.
+   */
+  private static readonly IN_PROGRESS_RESULT_CODES = new Set(['1001', '4999']);
+
+  /**
+   * Step 3 (fallback): ask Daraja for the final outcome of an STK push
+   * instead of waiting to be told.
+   *
+   * The callback is the fast path, but it only arrives if Safaricom can reach
+   * our `MPESA_CALLBACK_URL` over the public internet. On a development
+   * machine it cannot, so without this every local payment would sit PENDING
+   * forever even after the customer entered their PIN. This closes the loop
+   * from our side, and in production it also recovers payments whose callback
+   * was lost or delivered while the service was restarting.
+   *
+   * `settled: false` means "no verdict yet" — the customer still has the
+   * prompt open, or Daraja rate-limited us. It is never a failure, and the
+   * caller must leave the payment PENDING and ask again later.
+   */
+  async queryStkStatus(checkoutRequestId: string): Promise<{
+    settled: boolean;
+    resultCode?: string;
+    resultDesc?: string;
+  }> {
+    const accessToken = await this.generateAccessToken();
+    const timestamp = this.generateTimestamp();
+    const password = this.generatePassword(timestamp);
+    const shortcode = this.configService.get<string>('MPESA_SHORTCODE');
+
+    try {
+      const response = await axios.post(
+        `${this.baseUrl}/mpesa/stkpushquery/v1/query`,
+        { BusinessShortCode: shortcode, Password: password, Timestamp: timestamp, CheckoutRequestID: checkoutRequestId },
+        { headers: { Authorization: `Bearer ${accessToken}` }, timeout: 20_000 },
+      );
+
+      const resultCode = response.data?.ResultCode;
+      // A missing ResultCode means the query itself was accepted but the
+      // transaction has no verdict yet — treat it as still in flight.
+      if (resultCode === undefined || resultCode === null) return { settled: false };
+
+      const code = String(resultCode);
+      const desc: string = response.data?.ResultDesc ?? '';
+
+      // Daraja answers every query, including while the customer still has the
+      // PIN prompt open — it just reports an in-progress code. Settling on
+      // those would fail a payment that is about to succeed, releasing the
+      // held stock while the customer's money is still on its way, so an
+      // in-progress answer must be read as "ask again later".
+      if (MpesaService.IN_PROGRESS_RESULT_CODES.has(code) || /still under processing|being processed/i.test(desc)) {
+        return { settled: false };
+      }
+
+      return { settled: true, resultCode: code, resultDesc: desc || undefined };
+    } catch (error: any) {
+      const data = error?.response?.data;
+
+      // "The transaction is being processed" — the customer has not finished
+      // with the prompt. Daraja reports this as a 500 with its own error code,
+      // not as a ResultCode, so it must not be mistaken for a failed payment.
+      if (data?.errorCode === '500.001.1001') return { settled: false };
+
+      // Spike arrest: Daraja allows ~30 queries/minute per app. Backing off
+      // and retrying on the next poll is correct; failing the payment is not.
+      if (error?.response?.status === 429) {
+        this.logger.warn(`STK query rate-limited for ${checkoutRequestId}; will retry`);
+        return { settled: false };
+      }
+
+      this.logger.warn(`STK query failed for ${checkoutRequestId}: ${JSON.stringify(data) || error.message}`);
+      return { settled: false };
+    }
+  }
+
+  /**
    * Daraja processes the request through an XML pipeline that breaks on
    * XML-special characters (e.g. the "&" in "R&B" returns an
    * XSLEvaluationFailed 500), and the API spec caps AccountReference at 12
@@ -118,6 +201,45 @@ export class MpesaService {
   sanitizeField(text: string, maxLength: number): string {
     const cleaned = text.replace(/[^A-Za-z0-9 ._-]/g, ' ').replace(/\s+/g, ' ').trim();
     return (cleaned || 'Payment').slice(0, maxLength);
+  }
+
+  /**
+   * Safaricom's test MSISDNs. Pushes to these are safe because no real
+   * subscriber is behind them.
+   */
+  private static readonly SAFARICOM_TEST_MSISDNS = ['254708374149'];
+
+  /**
+   * Refuses to charge a real phone from a non-production Daraja app.
+   *
+   * The sandbox is not a simulation for the person holding the handset: an
+   * STK push sent with sandbox credentials to a real Safaricom line debits
+   * that line's actual M-Pesa balance, and the funds are paid to the shared
+   * test shortcode 174379 ("Daraja-Sandbox"), which no developer controls and
+   * cannot issue a refund from. Only Safaricom can reverse it.
+   *
+   * So outside production a push may only target a number someone has
+   * explicitly declared as safe to charge. Testing against your own line stays
+   * possible — it just has to be a deliberate act, not an accident.
+   */
+  private assertPhoneAllowedForSandbox(phone: string) {
+    if ((this.configService.get<string>('MPESA_ENV') || 'sandbox') === 'production') return;
+
+    const normalized = this.normalizePhone(phone);
+    const declared = (this.configService.get<string>('MPESA_TEST_PHONES') || '')
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .map((p) => this.normalizePhone(p));
+
+    if ([...MpesaService.SAFARICOM_TEST_MSISDNS, ...declared].includes(normalized)) return;
+
+    throw new Error(
+      `Refusing to send a sandbox STK push to ${normalized}: it is not a declared test number. ` +
+        'Sandbox pushes debit REAL money from real Safaricom lines and pay it to shortcode 174379, ' +
+        'which this project cannot refund. To charge this number anyway, add it to MPESA_TEST_PHONES ' +
+        'in backend/.env — and expect the money to actually leave the account.',
+    );
   }
 
   /** Normalizes 07xxxxxxxx / 01xxxxxxxx / +254xxxxxxxxx / 254xxxxxxxxx to 254xxxxxxxxx. */
