@@ -27,7 +27,9 @@ export default function TicketTierSelector({
     <div className="space-y-3">
       {tiers.map((tt) => {
         const available = tt.quantity - tt.quantitySold;
-        const soldOut = available <= 0;
+        const soldOut = tt.availabilityStatus === 'SOLD_OUT' || (!tt.availabilityStatus && available <= 0);
+        const explicitlyClosed = tt.availabilityStatus === 'CLOSED';
+        const explicitlyNotOnSale = tt.availabilityStatus === 'NOT_YET_ON_SALE';
         const qty = quantities[tt.id] || 0;
 
         // A tier can open late (an early-bird release) or close before the
@@ -36,7 +38,7 @@ export default function TicketTierSelector({
         const now = Date.now();
         const notYetOpen = Boolean(tt.salesStart && new Date(tt.salesStart).getTime() > now);
         const closed = Boolean(tt.salesEnd && new Date(tt.salesEnd).getTime() < now);
-        const unavailable = soldOut || notYetOpen || closed;
+        const unavailable = soldOut || explicitlyClosed || explicitlyNotOnSale || notYetOpen || closed;
 
         return (
           <div
@@ -59,6 +61,10 @@ export default function TicketTierSelector({
               <span className={`text-xs font-medium ${unavailable ? 'text-accent-600' : available <= 15 ? 'text-accent-600' : 'text-muted'}`}>
                 {soldOut
                   ? 'Sold out'
+                  : explicitlyClosed
+                    ? 'Sales closed'
+                    : explicitlyNotOnSale
+                      ? 'Not yet on sale'
                   : notYetOpen
                     ? `On sale from ${formatDate(tt.salesStart as string)}`
                     : closed

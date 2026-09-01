@@ -1,5 +1,6 @@
 export function formatEventDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-KE', {
+    timeZone: 'Africa/Nairobi',
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -8,7 +9,11 @@ export function formatEventDate(iso: string): string {
 }
 
 export function formatEventTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('en-KE', { hour: 'numeric', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString('en-KE', {
+    timeZone: 'Africa/Nairobi',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 export function formatEventDateTime(iso: string): string {

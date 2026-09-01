@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { Colors } from '@/constants/colors';
 import { FontSize, Radius, Spacing } from '@/constants/spacing';
 import { EventItem, isSoldOut, lowestPrice } from '@/types/event';
@@ -17,6 +18,15 @@ interface EventCardProps {
 export function EventCard({ event }: EventCardProps) {
   const soldOut = isSoldOut(event);
   const from = lowestPrice(event);
+  const externalBookingUrl = event.bookingMode === 'EXTERNAL' ? event.bookingUrl : null;
+
+  const handleBookNow = () => {
+    if (externalBookingUrl) {
+      void Linking.openURL(externalBookingUrl);
+      return;
+    }
+    router.push(`/events/${event.id}`);
+  };
 
   return (
     <Pressable
@@ -29,7 +39,7 @@ export function EventCard({ event }: EventCardProps) {
 
       <View style={styles.badgeRow}>
         <View style={[styles.badge, soldOut ? styles.badgeSoldOut : styles.badgeAvailable]}>
-          <Text style={styles.badgeText}>{soldOut ? 'Sold Out' : 'Tickets Available'}</Text>
+          <Text style={styles.badgeText}>{soldOut ? 'Sales Closed' : 'Tickets Available'}</Text>
         </View>
       </View>
 
@@ -56,8 +66,8 @@ export function EventCard({ event }: EventCardProps) {
         </View>
 
         <AppButton
-          label={soldOut ? 'View Event' : 'Book Now'}
-          onPress={() => router.push(`/events/${event.id}`)}
+          label={externalBookingUrl ? 'Book Now' : soldOut ? 'View Event' : 'Book Now'}
+          onPress={handleBookNow}
           variant={soldOut ? 'secondary' : 'primary'}
           size="sm"
           style={styles.bookButton}

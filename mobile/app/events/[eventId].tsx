@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
+import * as Linking from 'expo-linking';
 import { Feather } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import { AppButton } from '@/components/AppButton';
 import { resolvePosterSource } from '@/data/poster-assets';
 import { formatEventDate, formatEventTime } from '@/utils/date';
 import { formatCurrency } from '@/utils/currency';
+import { isTierAvailable, TicketType } from '@/types/event';
 
 export default function EventDetailsScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
@@ -22,9 +24,10 @@ export default function EventDetailsScreen() {
   const setEvent = useCheckoutStore((s) => s.setEvent);
   const quantities = useCheckoutStore((s) => s.quantities);
   const setQuantity = useCheckoutStore((s) => s.setQuantity);
+  const isExternal = event?.bookingMode === 'EXTERNAL';
 
   useEffect(() => {
-    if (event) setEvent(event);
+    if (event && event.bookingMode === 'INTERNAL') setEvent(event);
   }, [event, setEvent]);
 
   const { totalTickets, totalAmount } = useMemo(() => {
@@ -79,17 +82,38 @@ export default function EventDetailsScreen() {
           <Text style={styles.sectionTitle}>About this event</Text>
           <Text style={styles.description}>{event.description}</Text>
 
-          <View style={styles.refundCard}>
-            <Feather name="info" size={16} color={Colors.textSecondary} />
-            <Text style={styles.refundText}>
-              Tickets are refundable up to 48 hours before the event if it is cancelled or rescheduled by the
-              organizer. Otherwise, all sales are final.
-            </Text>
-          </View>
+          {isExternal ? (
+            <View style={styles.refundCard}>
+              <Feather name="external-link" size={16} color={Colors.textSecondary} />
+              <View style={styles.sourceCopy}>
+                <Text style={styles.refundText}>
+                  Booking and payment are completed by the official seller. Its terms, availability and refund
+                  policy apply.
+                </Text>
+                {!!event.verificationSourceUrl && (
+                  <Pressable onPress={() => void Linking.openURL(event.verificationSourceUrl!)}>
+                    <Text style={styles.sourceLink}>
+                      Verified via {event.verificationSource ?? 'official listing'}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.refundCard}>
+              <Feather name="info" size={16} color={Colors.textSecondary} />
+              <Text style={styles.refundText}>
+                Tickets are refundable up to 48 hours before the event if it is cancelled or rescheduled by the
+                organizer. Otherwise, all sales are final.
+              </Text>
+            </View>
+          )}
 
-          <Text style={styles.sectionTitle}>Select tickets</Text>
+          <Text style={styles.sectionTitle}>{isExternal ? 'Ticket options' : 'Select tickets'}</Text>
           {event.ticketTypes.length === 0 ? (
             <Text style={styles.description}>Ticket sales for this event haven&apos;t opened yet.</Text>
+          ) : isExternal ? (
+            event.ticketTypes.map((tier) => <ExternalTicketTier key={tier.id} tier={tier} />)
           ) : (
             event.ticketTypes.map((tier) => (
               <TicketTierCard
@@ -105,18 +129,62 @@ export default function EventDetailsScreen() {
 
       <View style={styles.footer}>
         <View style={styles.footerInfo}>
-          <Text style={styles.footerCount}>{totalTickets > 0 ? `${totalTickets} ticket${totalTickets > 1 ? 's' : ''}` : 'Select tickets'}</Text>
-          {totalTickets > 0 && <Text style={styles.footerAmount}>{formatCurrency(totalAmount)}</Text>}
+          <Text style={styles.footerCount}>
+            {isExternal
+              ? 'Official seller checkout'
+              : totalTickets > 0
+                ? `${totalTickets} ticket${totalTickets > 1 ? 's' : ''}`
+                : 'Select tickets'}
+          </Text>
+          {!isExternal && totalTickets > 0 && <Text style={styles.footerAmount}>{formatCurrency(totalAmount)}</Text>}
         </View>
-        <AppButton
-          label="Continue"
-          onPress={() => router.push(`/checkout/${event.id}`)}
-          disabled={totalTickets === 0}
-          fullWidth={false}
-          style={styles.footerButton}
-        />
+        {isExternal ? (
+          <AppButton
+            label="Book Now"
+            onPress={() => event.bookingUrl && void Linking.openURL(event.bookingUrl)}
+            disabled={!event.bookingUrl}
+            fullWidth={false}
+            accessibilityHint="Opens the official ticket seller"
+            style={styles.footerButton}
+          />
+        ) : (
+          <AppButton
+            label="Continue"
+            onPress={() => router.push(`/checkout/${event.id}`)}
+            disabled={totalTickets === 0}
+            fullWidth={false}
+            style={styles.footerButton}
+          />
+        )}
       </View>
     </SafeAreaView>
+  );
+}
+
+function tierAvailabilityLabel(tier: TicketType): string {
+  if (tier.availabilityStatus === 'SOLD_OUT') return 'Sold out';
+  if (tier.availabilityStatus === 'CLOSED') return 'Closed';
+  if (tier.availabilityStatus === 'NOT_YET_ON_SALE') return 'Not yet on sale';
+  if (tier.salesStart && new Date() < new Date(tier.salesStart)) return 'Not yet on sale';
+  if (tier.salesEnd && new Date() > new Date(tier.salesEnd)) return 'Closed';
+  return 'Available';
+}
+
+function ExternalTicketTier({ tier }: { tier: TicketType }) {
+  const available = isTierAvailable(tier);
+  return (
+    <View style={[styles.externalTier, !available && styles.externalTierInactive]}>
+      <View style={styles.externalTierInfo}>
+        <Text style={styles.externalTierName}>{tier.name}</Text>
+        {!!tier.description && <Text style={styles.externalTierDescription}>{tier.description}</Text>}
+      </View>
+      <View style={styles.externalTierPriceBlock}>
+        <Text style={styles.externalTierPrice}>{formatCurrency(tier.price)}</Text>
+        <Text style={[styles.externalTierStatus, available && styles.externalTierAvailable]}>
+          {tierAvailabilityLabel(tier)}
+        </Text>
+      </View>
+    </View>
   );
 }
 
@@ -187,6 +255,28 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   refundText: { flex: 1, fontSize: FontSize.xs, color: Colors.textSecondary, lineHeight: 18 },
+  sourceCopy: { flex: 1 },
+  sourceLink: { color: Colors.primary, fontSize: FontSize.xs, fontWeight: '700', marginTop: Spacing.xs },
+  externalTier: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+    backgroundColor: Colors.surface,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  externalTierInactive: { opacity: 0.55 },
+  externalTierInfo: { flex: 1 },
+  externalTierName: { fontSize: FontSize.base, fontWeight: '700', color: Colors.text },
+  externalTierDescription: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2 },
+  externalTierPriceBlock: { alignItems: 'flex-end' },
+  externalTierPrice: { fontSize: FontSize.md, fontWeight: '800', color: Colors.text },
+  externalTierStatus: { fontSize: FontSize.xs, color: Colors.textSecondary, marginTop: 2 },
+  externalTierAvailable: { color: Colors.success, fontWeight: '700' },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',

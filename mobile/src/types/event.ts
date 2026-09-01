@@ -3,6 +3,17 @@ import { z } from 'zod';
 export const EventStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'SOLD_OUT', 'CANCELLED', 'COMPLETED']);
 export type EventStatus = z.infer<typeof EventStatusSchema>;
 
+export const EventBookingModeSchema = z.enum(['INTERNAL', 'EXTERNAL']);
+export type EventBookingMode = z.infer<typeof EventBookingModeSchema>;
+
+export const TicketAvailabilityStatusSchema = z.enum([
+  'AVAILABLE',
+  'SOLD_OUT',
+  'CLOSED',
+  'NOT_YET_ON_SALE',
+]);
+export type TicketAvailabilityStatus = z.infer<typeof TicketAvailabilityStatusSchema>;
+
 /** Display names for ticket tiers. The backend may send other free-text names too. */
 export const TICKET_TIER_NAMES = ['Student', 'Early Bird', 'Regular', 'VIP', 'VVIP'] as const;
 export type TicketTierName = (typeof TICKET_TIER_NAMES)[number];
@@ -17,6 +28,7 @@ export const TicketTypeSchema = z.object({
   quantityRemaining: z.number(),
   salesStart: z.string().optional().nullable(),
   salesEnd: z.string().optional().nullable(),
+  availabilityStatus: TicketAvailabilityStatusSchema,
 });
 export type TicketType = z.infer<typeof TicketTypeSchema>;
 
@@ -42,6 +54,10 @@ export const EventSchema = z.object({
   startsAt: z.string(),
   endsAt: z.string(),
   organizerName: z.string(),
+  bookingMode: EventBookingModeSchema,
+  bookingUrl: z.string().optional().nullable(),
+  verificationSource: z.string().optional().nullable(),
+  verificationSourceUrl: z.string().optional().nullable(),
   category: z.string(),
   status: EventStatusSchema,
   featured: z.boolean(),
@@ -56,17 +72,17 @@ export const EventListResponseSchema = z.object({
 export type EventListResponse = z.infer<typeof EventListResponseSchema>;
 
 export function isTierAvailable(tier: TicketType, now: Date = new Date()): boolean {
-  if (tier.quantityRemaining <= 0) return false;
+  if (tier.availabilityStatus !== 'AVAILABLE') return false;
   if (tier.salesStart && now < new Date(tier.salesStart)) return false;
   if (tier.salesEnd && now > new Date(tier.salesEnd)) return false;
   return true;
 }
 
 export function lowestPrice(event: Pick<EventItem, 'ticketTypes'>): number | undefined {
-  if (event.ticketTypes.length === 0) return undefined;
-  return Math.min(...event.ticketTypes.map((t) => t.price));
+  const availablePrices = event.ticketTypes.filter((tier) => isTierAvailable(tier)).map((tier) => tier.price);
+  return availablePrices.length > 0 ? Math.min(...availablePrices) : undefined;
 }
 
 export function isSoldOut(event: Pick<EventItem, 'ticketTypes'>): boolean {
-  return event.ticketTypes.length > 0 && event.ticketTypes.every((t) => t.quantityRemaining <= 0);
+  return event.ticketTypes.length > 0 && event.ticketTypes.every((tier) => !isTierAvailable(tier));
 }

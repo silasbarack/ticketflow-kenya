@@ -2,6 +2,10 @@ export type UserRole = 'CUSTOMER' | 'ORGANIZER' | 'ADMIN';
 
 export type EventStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'PUBLISHED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
 
+export type EventBookingMode = 'INTERNAL' | 'EXTERNAL';
+
+export type TicketAvailabilityStatus = 'AVAILABLE' | 'SOLD_OUT' | 'CLOSED' | 'NOT_YET_ON_SALE';
+
 export type TicketTypeCategory = 'REGULAR' | 'VIP' | 'VVIP' | 'STUDENT' | 'EARLY_BIRD';
 
 export type OrderStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
@@ -45,6 +49,8 @@ export interface TicketType {
   price: string | number;
   quantity: number;
   quantitySold: number;
+  /** Seller-published state; essential for external listings with no TicketFlow inventory. */
+  availabilityStatus?: TicketAvailabilityStatus;
   description?: string | null;
   /** Optional sales window — a tier outside it cannot be bought. */
   salesStart?: string | null;
@@ -63,11 +69,20 @@ export interface EventItem {
   city: string;
   county?: string | null;
   address?: string | null;
+  organizerName?: string | null;
   startDateTime: string;
   endDateTime: string;
+  timezone?: string;
   status: EventStatus;
   rejectionReason?: string | null;
   isFeatured?: boolean;
+  bookingMode?: EventBookingMode;
+  bookingUrl?: string | null;
+  verificationSource?: string | null;
+  verificationSourceUrl?: string | null;
+  secondaryVerificationSourceUrl?: string | null;
+  verifiedAt?: string | null;
+  posterSourceUrl?: string | null;
   /** False for listings that are visible but not authorised to take money. */
   salesEnabled?: boolean;
   /** True for TicketFlow's own sample listings. */

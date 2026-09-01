@@ -2,30 +2,12 @@ import { ImageSourcePropType } from 'react-native';
 import { WEB_URL } from '@/constants/config';
 
 /**
- * Event posters bundled into the app.
- *
- * Bundling means the catalogue renders instantly and works with no network at
- * all — the remote copies live on a free Render instance that sleeps when idle,
- * so relying on those URLs left every card showing a grey placeholder.
- *
- * STALE: these six files are the posters of the August 2026 events that the
- * backend has since archived, so none of them match a poster URL the API
- * returns today — they only still serve the (equally stale) mock catalogue in
- * `mock-events.ts`. The current lineup's artwork lives at
- * `frontend/public/events/posters/<slug>.webp`; once those files exist, copy
- * them into `assets/posters/` and re-key this map to the new slugs. Until then
- * every real poster is fetched from `WEB_URL`.
+ * Verified events use the official seller's absolute poster URLs. Archived
+ * local artwork must never substitute for a current real-world listing.
  */
-const BUNDLED_POSTERS: Record<string, ImageSourcePropType> = {
-  'august-nights-afro-fusion-live.jpg': require('../../assets/posters/august-nights-afro-fusion-live.jpg'),
-  'coast-sevens-rugby-festival.jpg': require('../../assets/posters/coast-sevens-rugby-festival.jpg'),
-  'nairobi-coffee-culture-festival.jpg': require('../../assets/posters/nairobi-coffee-culture-festival.jpg'),
-  'nairobi-fintech-ai-summit-2026.jpg': require('../../assets/posters/nairobi-fintech-ai-summit-2026.jpg'),
-  'sanaa-live-spoken-word-theatre-night.jpg': require('../../assets/posters/sanaa-live-spoken-word-theatre-night.jpg'),
-  'watamu-ocean-seafood-festival.jpg': require('../../assets/posters/watamu-ocean-seafood-festival.jpg'),
-};
+const BUNDLED_POSTERS: Record<string, ImageSourcePropType> = {};
 
-/** Origin serving the web app's static assets. */
+/** Origin serving the web app's static assets for internal event posters. */
 function webOrigin(): string | undefined {
   if (!WEB_URL) return undefined;
   try {
@@ -36,16 +18,9 @@ function webOrigin(): string | undefined {
 }
 
 /**
- * Turns whatever `posterUrl` we were given into something `<Image>` can render.
- *
- * Handles all three shapes the app sees:
- *  - `/events/posters/<slug>.webp` — what the backend stores. The file is a
- *    static asset of the *web* app rather than something the API serves, so it
- *    resolves against the web origin, not the API one. A bundled copy wins
- *    when there is one.
- *  - `https://…` — an absolute URL (organizer-uploaded posters) → used as-is.
- *  - anything unrecognised → `undefined`, so callers can fall back to a
- *    placeholder instead of rendering a broken image.
+ * Turns a stored poster URL into something Expo Image can render.
+ * Absolute official-seller URLs are used as-is. Root-relative internal event
+ * assets are resolved against the configured web origin.
  */
 export function resolvePosterSource(posterUrl?: string | null): ImageSourcePropType | undefined {
   if (!posterUrl) return undefined;

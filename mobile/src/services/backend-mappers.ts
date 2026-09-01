@@ -1,5 +1,5 @@
 import { User } from '@/types/auth';
-import { EventItem, TicketType } from '@/types/event';
+import { EventItem, EventStatus, TicketAvailabilityStatus, TicketType } from '@/types/event';
 import { Order, OrderStatus } from '@/types/order';
 import { PaymentStatus } from '@/types/payment';
 import { Ticket, TicketStatus } from '@/types/ticket';
@@ -48,6 +48,16 @@ export function mapUser(raw: Raw): User {
 export function mapTicketType(raw: Raw, eventId: string): TicketType {
   const quantityAvailable = num(raw.quantity);
   const quantitySold = num(raw.quantitySold);
+  const rawAvailability = String(raw.availabilityStatus ?? '');
+  const availabilityStatus: TicketAvailabilityStatus =
+    rawAvailability === 'AVAILABLE' ||
+    rawAvailability === 'SOLD_OUT' ||
+    rawAvailability === 'CLOSED' ||
+    rawAvailability === 'NOT_YET_ON_SALE'
+      ? rawAvailability
+      : quantityAvailable - quantitySold > 0
+        ? 'AVAILABLE'
+        : 'SOLD_OUT';
   return {
     id: String(raw.id ?? ''),
     eventId,
@@ -58,12 +68,22 @@ export function mapTicketType(raw: Raw, eventId: string): TicketType {
     quantityRemaining: Math.max(0, quantityAvailable - quantitySold),
     salesStart: raw.salesStart ?? null,
     salesEnd: raw.salesEnd ?? null,
+    availabilityStatus,
   };
 }
 
 export function mapEvent(raw: Raw): EventItem {
   const id = String(raw.id ?? '');
   const description = String(raw.description ?? '');
+  const rawStatus = String(raw.status ?? 'PUBLISHED');
+  const status: EventStatus =
+    rawStatus === 'DRAFT' ||
+    rawStatus === 'PUBLISHED' ||
+    rawStatus === 'SOLD_OUT' ||
+    rawStatus === 'CANCELLED' ||
+    rawStatus === 'COMPLETED'
+      ? rawStatus
+      : 'PUBLISHED';
   return {
     id,
     title: String(raw.title ?? 'Untitled event'),
@@ -75,9 +95,14 @@ export function mapEvent(raw: Raw): EventItem {
     city: String(raw.city ?? ''),
     startsAt: iso(raw.startDateTime),
     endsAt: iso(raw.endDateTime ?? raw.startDateTime),
-    organizerName: String(raw.organizer?.companyName ?? 'TicketFlow Kenya'),
+    organizerName: String(raw.organizerName ?? raw.organizer?.companyName ?? 'TicketFlow Kenya'),
+    bookingMode: raw.bookingMode === 'EXTERNAL' ? 'EXTERNAL' : 'INTERNAL',
+    bookingUrl: typeof raw.bookingUrl === 'string' ? raw.bookingUrl : null,
+    verificationSource: typeof raw.verificationSource === 'string' ? raw.verificationSource : null,
+    verificationSourceUrl:
+      typeof raw.verificationSourceUrl === 'string' ? raw.verificationSourceUrl : null,
     category: String(raw.category?.name ?? 'Events'),
-    status: raw.status === 'PUBLISHED' ? 'PUBLISHED' : raw.status === 'CANCELLED' ? 'CANCELLED' : 'PUBLISHED',
+    status,
     featured: Boolean(raw.isFeatured),
     ticketTypes: Array.isArray(raw.ticketTypes) ? raw.ticketTypes.map((t: Raw) => mapTicketType(t, id)) : [],
   };

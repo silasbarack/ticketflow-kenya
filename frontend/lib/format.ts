@@ -1,3 +1,5 @@
+export const KENYA_TIME_ZONE = 'Africa/Nairobi';
+
 export function formatCurrency(amount: string | number): string {
   const value = typeof amount === 'string' ? parseFloat(amount) : amount;
   return new Intl.NumberFormat('en-KE', {
@@ -9,11 +11,15 @@ export function formatCurrency(amount: string | number): string {
 }
 
 export function formatDate(date: string | Date): string {
-  return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium' }).format(new Date(date));
+  return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium', timeZone: KENYA_TIME_ZONE }).format(new Date(date));
 }
 
 export function formatDateTime(date: string | Date): string {
-  return new Intl.DateTimeFormat('en-KE', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(date));
+  return new Intl.DateTimeFormat('en-KE', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: KENYA_TIME_ZONE,
+  }).format(new Date(date));
 }
 
 export function formatTicketCategory(category: string): string {
@@ -24,15 +30,38 @@ export function formatTicketCategory(category: string): string {
 export function formatDateRange(start: string | Date, end: string | Date): string {
   const startDate = new Date(start);
   const endDate = new Date(end);
-  const sameDay = startDate.toDateString() === endDate.toDateString();
+  const keyFormatter = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: KENYA_TIME_ZONE,
+  });
+  const monthKeyFormatter = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    timeZone: KENYA_TIME_ZONE,
+  });
+  const sameDay = keyFormatter.format(startDate) === keyFormatter.format(endDate);
 
   if (sameDay) {
-    return new Intl.DateTimeFormat('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }).format(startDate);
+    return new Intl.DateTimeFormat('en-KE', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: KENYA_TIME_ZONE,
+    }).format(startDate);
   }
 
-  const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear();
-  const startDay = new Intl.DateTimeFormat('en-KE', { day: 'numeric' }).format(startDate);
-  const endLabel = new Intl.DateTimeFormat('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }).format(endDate);
+  const sameMonth = monthKeyFormatter.format(startDate) === monthKeyFormatter.format(endDate);
+  const startDay = new Intl.DateTimeFormat('en-KE', { day: 'numeric', timeZone: KENYA_TIME_ZONE }).format(startDate);
+  const endLabel = new Intl.DateTimeFormat('en-KE', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: KENYA_TIME_ZONE,
+  }).format(endDate);
 
-  return sameMonth ? `${startDay}-${endLabel}` : `${startDay} ${new Intl.DateTimeFormat('en-KE', { month: 'short' }).format(startDate)} - ${endLabel}`;
+  return sameMonth
+    ? `${startDay}-${endLabel}`
+    : `${startDay} ${new Intl.DateTimeFormat('en-KE', { month: 'short', timeZone: KENYA_TIME_ZONE }).format(startDate)} - ${endLabel}`;
 }

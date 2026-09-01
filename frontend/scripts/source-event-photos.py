@@ -43,43 +43,9 @@ MAX_BYTES = 500 * 1024
 ACCEPTED = ("cc0", "public domain", "cc by", "cc-by", "pd-", "pdm")
 REJECTED = ("nc", "nd", "fair use", "non-free")
 
-# Curated searches. The long-form art direction in
-# backend/prisma/poster-art.json describes the ideal image; these are its
-# searchable essence, biased toward Kenyan and East African subjects where
-# Commons actually has coverage.
-QUERIES = {
-    "campus-vibe-fest-2026": [
-        "students dancing outdoor party Africa", "university student festival crowd",
-        "open air music festival crowd audience",
-    ],
-    "punchline-live-2026": [
-        "theatre stage spotlight performer", "microphone stand stage performance",
-        "theatre auditorium stage curtain",
-    ],
-    "kisumu-lakeside-cultural-festival-2026": ["Kenya traditional dancers performance", "African traditional dance drums"],
-    "rhumba-and-riddim-nairobi-live-2026": [
-        "concert crowd silhouette stage lights", "audience hands concert lights night",
-        "music concert crowd cheering",
-    ],
-    "kulture-iii-2026": [
-        "orchestra concert hall performance", "band performing indoor stage musicians",
-        "saxophone player performing stage",
-    ],
-    "mombasa-spice-and-seafood-festival-2026": ["grilled seafood fish market", "seafood street food market"],
-    "nairobi-digital-economy-summit-2026": [
-        "conference audience auditorium seats", "technology conference audience hall",
-        "conference speaker presentation audience",
-    ],
-    "naivasha-sundowner-music-festival-2026": [
-        "festival crowd field sunset", "outdoor concert crowd sunset silhouette",
-        "music festival field crowd",
-    ],
-    "uhuru-run-nairobi-half-marathon-2026": [
-        "marathon start line runners crowd", "road running race many runners",
-        "half marathon runners street",
-    ],
-    "jamhuri-family-carnival-2026": ["funfair ferris wheel amusement park", "carnival fairground rides"],
-}
+# No active event uses substitute photography. Real-event artwork must come
+# from the organiser or official seller and be recorded in CREDITS.md.
+QUERIES = {}
 
 
 def strip_html(s):
