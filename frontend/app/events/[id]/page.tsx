@@ -70,8 +70,8 @@ export default async function EventDetailsPage({ params }: { params: { id: strin
             addressCountry: 'KE',
           },
         },
-        organizer: event.organizer
-          ? { '@type': 'Organization', name: event.organizer.companyName }
+        organizer: event.organizerName || event.organizer
+          ? { '@type': 'Organization', name: event.organizerName || event.organizer?.companyName }
           : { '@type': 'Organization', name: 'TicketFlow Kenya' },
         offers: event.ticketTypes.map((tt) => ({
           '@type': 'Offer',
@@ -79,8 +79,14 @@ export default async function EventDetailsPage({ params }: { params: { id: strin
           price: tt.price,
           priceCurrency: 'KES',
           availability:
-            tt.quantity - tt.quantitySold > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
-          url: `${SITE_URL}/events/${event.slug}`,
+            tt.availabilityStatus === 'AVAILABLE' || (!tt.availabilityStatus && tt.quantity - tt.quantitySold > 0)
+              ? 'https://schema.org/InStock'
+              : tt.availabilityStatus === 'SOLD_OUT'
+                ? 'https://schema.org/SoldOut'
+                : 'https://schema.org/Discontinued',
+          url: event.bookingMode === 'EXTERNAL' && event.bookingUrl
+            ? event.bookingUrl
+            : `${SITE_URL}/events/${event.slug}`,
         })),
       }
     : null;

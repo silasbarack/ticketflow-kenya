@@ -32,6 +32,12 @@ export class OrdersService {
         throw new BadRequestException('This event has already started or ended');
       }
 
+      if (event.bookingMode === 'EXTERNAL') {
+        throw new BadRequestException(
+          'This event is sold by an external authorised ticket provider.',
+        );
+      }
+
       // Payment safety: a listing may be visible without being authorised to
       // collect money. `salesEnabled` is off for demo listings and for real
       // events whose organizer has not been onboarded, and an unverified

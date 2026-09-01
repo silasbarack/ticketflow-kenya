@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Generates the photographic event posters in frontend/public/events/posters/.
+Legacy utility for non-production art briefs in backend/prisma/poster-art.json.
 
 Reads the per-event art direction from backend/prisma/poster-art.json, renders
 each prompt through whichever image-generation provider has an API key in the
@@ -10,7 +10,9 @@ the event cards.
     cd frontend
     python scripts/generate-event-posters.py                 # only missing posters
     python scripts/generate-event-posters.py --force         # redo everything
-    python scripts/generate-event-posters.py kulture-iii-2026  # one event
+The production catalogue intentionally has no generation briefs: artwork for a
+real event must come from its organizer or official seller. With the current
+empty art-direction file this command performs no generation.
 
 Set exactly one of these before running:
 

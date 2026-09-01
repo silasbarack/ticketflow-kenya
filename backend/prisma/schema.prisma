@@ -24,6 +24,18 @@ enum EventStatus {
   COMPLETED
 }
 
+enum EventBookingMode {
+  INTERNAL
+  EXTERNAL
+}
+
+enum TicketAvailabilityStatus {
+  AVAILABLE
+  SOLD_OUT
+  CLOSED
+  NOT_YET_ON_SALE
+}
+
 enum TicketTypeCategory {
   REGULAR
   VIP
@@ -116,39 +128,48 @@ model EventCategory {
 }
 
 model Event {
-  id              String           @id @default(uuid())
-  organizerId     String
-  organizer       OrganizerProfile @relation(fields: [organizerId], references: [id], onDelete: Cascade)
-  categoryId      String
-  category        EventCategory    @relation(fields: [categoryId], references: [id])
-  title           String
-  slug            String           @unique
-  subtitle        String?
-  description     String
-  posterUrl       String?
-  posterAlt       String?
-  venue           String
-  city            String
-  county          String?
-  address         String?
-  startDateTime   DateTime
-  endDateTime     DateTime
-  status          EventStatus      @default(DRAFT)
-  rejectionReason String?
-  isFeatured      Boolean          @default(false)
+  id                             String           @id @default(uuid())
+  organizerId                    String
+  organizer                      OrganizerProfile @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  categoryId                     String
+  category                       EventCategory    @relation(fields: [categoryId], references: [id])
+  title                          String
+  slug                           String           @unique
+  subtitle                       String?
+  description                    String
+  posterUrl                      String?
+  posterAlt                      String?
+  venue                          String
+  city                           String
+  county                         String?
+  address                        String?
+  organizerName                  String?
+  startDateTime                  DateTime
+  endDateTime                    DateTime
+  timezone                       String           @default("Africa/Nairobi")
+  status                         EventStatus      @default(DRAFT)
+  rejectionReason                String?
+  isFeatured                     Boolean          @default(false)
+  bookingMode                    EventBookingMode @default(INTERNAL)
+  bookingUrl                     String?
+  verificationSource             String?
+  verificationSourceUrl          String?
+  secondaryVerificationSourceUrl String?
+  verifiedAt                     DateTime?
+  posterSourceUrl                String?
 
   /// Master switch for taking money for this event. An event may be PUBLISHED
   /// (visible in the catalogue) while sales are off — that is how a listing
   /// whose organizer has not been onboarded, or a demo listing, is shown
   /// without ever being able to collect a shilling. Enforced server-side in
   /// OrdersService#create, not just hidden in the UI.
-  salesEnabled    Boolean          @default(true)
+  salesEnabled Boolean @default(true)
 
   /// True for TicketFlow's own sample/demo listings (invented events used to
   /// exercise the product). Never set on a real organizer's event.
-  isDemo          Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   ticketTypes TicketType[]
   orders      Order[]
@@ -163,19 +184,20 @@ model Event {
 }
 
 model TicketType {
-  id           String             @id @default(uuid())
-  eventId      String
-  event        Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name         String
-  category     TicketTypeCategory @default(REGULAR)
-  price        Decimal            @db.Decimal(10, 2)
-  quantity     Int
-  quantitySold Int                @default(0)
-  description  String?
-  salesStart   DateTime?
-  salesEnd     DateTime?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id                 String                   @id @default(uuid())
+  eventId            String
+  event              Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name               String
+  category           TicketTypeCategory       @default(REGULAR)
+  price              Decimal                  @db.Decimal(10, 2)
+  quantity           Int
+  quantitySold       Int                      @default(0)
+  availabilityStatus TicketAvailabilityStatus @default(AVAILABLE)
+  description        String?
+  salesStart         DateTime?
+  salesEnd           DateTime?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
 
   orderItems OrderItem[]
   tickets    Ticket[]

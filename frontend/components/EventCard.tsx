@@ -5,7 +5,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Heart, MapPin, Share2, ShieldCheck, Ticket, Zap } from 'lucide-react';
 import { EventItem, TicketType } from '@/types';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDateRange } from '@/lib/format';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCountdown } from '@/hooks/useCountdown';
 import Logo from '@/components/Logo';
@@ -19,6 +19,8 @@ const TIER_CHIP_COLORS: Record<string, string> = {
   VIP: 'bg-violet-500',
   VVIP: 'bg-brand-600',
 };
+
+const TIER_PALETTE = ['bg-emerald-600', 'bg-sky-500', 'bg-amber-500', 'bg-violet-500', 'bg-brand-600'];
 
 const TIER_ORDER = ['EARLY_BIRD', 'REGULAR', 'STUDENT', 'VIP', 'VVIP'];
 
@@ -37,17 +39,12 @@ function sortTiers(ticketTypes: TicketType[]) {
   });
 }
 
-function formatDateRange(startIso: string, endIso?: string) {
-  const start = new Date(startIso);
-  const end = endIso ? new Date(endIso) : start;
-  const month = (d: Date) => d.toLocaleString('en-KE', { month: 'short' }).toUpperCase();
-  if (start.toDateString() === end.toDateString()) {
-    return `${start.getDate()} ${month(start)} ${start.getFullYear()}`;
+function getTierStatus(ticket: TicketType) {
+  if (ticket.availabilityStatus === 'AVAILABLE' && ticket.salesEnd && new Date(ticket.salesEnd).getTime() < Date.now()) {
+    return 'CLOSED';
   }
-  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-    return `${start.getDate()}-${end.getDate()} ${month(start)} ${start.getFullYear()}`;
-  }
-  return `${start.getDate()} ${month(start)} - ${end.getDate()} ${month(end)} ${end.getFullYear()}`;
+  if (ticket.availabilityStatus) return ticket.availabilityStatus;
+  return ticket.quantity - ticket.quantitySold > 0 ? 'AVAILABLE' : 'SOLD_OUT';
 }
 
 export default function EventCard({
@@ -69,13 +66,15 @@ export default function EventCard({
   const eventUrl = `/events/${event.slug}`;
 
   const tiers = sortTiers(event.ticketTypes);
-  const totalAvailable = event.ticketTypes.reduce((sum, t) => sum + Math.max(0, t.quantity - t.quantitySold), 0);
-  const soldOut = event.ticketTypes.length > 0 && totalAvailable <= 0;
-  const sellingFast = !soldOut && totalAvailable > 0 && totalAvailable <= 15;
+  const anyAvailable = tiers.some((tier) => getTierStatus(tier) === 'AVAILABLE');
+  const soldOut = tiers.length > 0 && tiers.every((tier) => getTierStatus(tier) === 'SOLD_OUT');
+  const totalAvailable = event.ticketTypes.reduce((sum, tier) => sum + Math.max(0, tier.quantity - tier.quantitySold), 0);
+  const sellingFast = event.bookingMode !== 'EXTERNAL' && anyAvailable && totalAvailable > 0 && totalAvailable <= 15;
 
-  // `isBookable` is absent on older payloads; treat that as bookable so the
-  // card keeps behaving as it always has rather than silently going read-only.
-  const bookable = event.isBookable !== false;
+  const externalBooking = event.bookingMode === 'EXTERNAL' && Boolean(event.bookingUrl);
+  // Preserve the existing TicketFlow checkout behavior for internal listings;
+  // external listings bypass it and go only to their official seller.
+  const internalBookable = event.isBookable !== false;
 
   function handleToggleFavorite(e: React.MouseEvent) {
     e.preventDefault();
@@ -133,21 +132,30 @@ export default function EventCard({
         <span className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
           <span
             className={`rounded-md px-2 py-1 text-[9px] font-extrabold uppercase tracking-wide text-white ${
-              !bookable
+              !externalBooking && !internalBookable
                 ? 'bg-navy-900/90'
                 : soldOut
-                  ? 'bg-navy-900/90'
-                  : sellingFast
-                    ? 'bg-accent-600'
-                    : 'bg-emerald-600'
+                ? 'bg-navy-900/90'
+                : sellingFast
+                  ? 'bg-accent-600'
+                  : anyAvailable
+                    ? 'bg-emerald-600'
+                    : 'bg-navy-900/90'
             }`}
           >
-            {/* Never advertise availability for a listing that cannot sell. */}
-            {!bookable ? 'Not on sale here' : soldOut ? 'Sold Out' : sellingFast ? 'Selling Fast' : 'Tickets Available'}
+            {!externalBooking && !internalBookable
+              ? 'Not on sale here'
+              : soldOut
+                ? 'Sold Out'
+                : sellingFast
+                  ? 'Selling Fast'
+                  : anyAvailable
+                    ? 'Tickets Available'
+                    : 'Sales Closed'}
           </span>
-          {event.isDemo && (
+          {externalBooking && (
             <span className="rounded-md bg-white/90 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wide text-navy-900">
-              Sample
+              Official seller
             </span>
           )}
         </span>
@@ -195,27 +203,33 @@ export default function EventCard({
 
         {/* Ticket price tiers — live prices, site font (Noto Sans) */}
         {tiers.length > 0 ? (
-          // auto-fit keeps every chip at least 66px wide, so a five-tier ladder
-          // stays on one row where there is room and reflows to two rows on a
-          // narrow phone instead of squeezing "EARLY BIRD" into a column of
-          // single letters or pushing the price out of its chip.
           <ul
-            className="mt-3 grid gap-1 [grid-template-columns:repeat(auto-fit,minmax(62px,1fr))]"
+            className="snap-row mt-3 gap-1 pb-1"
             aria-label="Ticket prices"
           >
-            {tiers.map((tt) => (
-              <li
-                key={tt.id}
-                className={`min-w-0 rounded-md px-1 py-1.5 text-center text-white ${
-                  TIER_CHIP_COLORS[tt.category] ?? 'bg-navy-700'
-                }`}
-              >
-                <p className="truncate text-[8px] font-extrabold uppercase leading-tight tracking-wide">{tt.name}</p>
-                <p className="mt-0.5 truncate text-[10px] font-extrabold leading-tight tracking-tight">
-                  {formatCurrency(Number(tt.price))}
-                </p>
-              </li>
-            ))}
+            {tiers.map((tt, index) => {
+              const status = getTierStatus(tt);
+              return (
+                <li
+                  key={tt.id}
+                  className={`min-w-[88px] flex-1 rounded-md px-1.5 py-1.5 text-center text-white ${
+                    externalBooking
+                      ? TIER_PALETTE[index % TIER_PALETTE.length]
+                      : TIER_CHIP_COLORS[tt.category] ?? 'bg-navy-700'
+                  } ${status === 'AVAILABLE' ? '' : 'opacity-60 saturate-50'}`}
+                >
+                  <p className="line-clamp-2 min-h-5 text-[8px] font-extrabold uppercase leading-tight tracking-wide">{tt.name}</p>
+                  <p className="mt-0.5 whitespace-nowrap text-[10px] font-extrabold leading-tight tracking-tight">
+                    {formatCurrency(Number(tt.price))}
+                  </p>
+                  {status !== 'AVAILABLE' && (
+                    <p className="mt-0.5 text-[7px] font-black uppercase leading-none">
+                      {status === 'SOLD_OUT' ? 'Sold out' : status === 'CLOSED' ? 'Closed' : 'Not on sale'}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="mt-3 text-sm font-semibold text-white/70">Tickets TBA</p>
@@ -235,18 +249,34 @@ export default function EventCard({
           </div>
 
           {/* Red clickable Book Now — always routed to this event's own page */}
-          <Link
-            href={eventUrl}
-            aria-label={bookable ? `Book tickets for ${event.title}` : `View event information for ${event.title}`}
-            className={`mt-3 flex h-11 items-center justify-center rounded-lg text-sm font-bold text-white transition ${
-              bookable ? 'bg-brand-600 hover:bg-brand-700' : 'bg-navy-700 hover:bg-navy-600'
-            }`}
-          >
-            {bookable ? 'Book Now' : 'View event info'}
-          </Link>
+          {externalBooking ? (
+            <a
+              href={event.bookingUrl as string}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Book ${event.title} through the official seller (opens in a new tab)`}
+              className="mt-3 flex h-11 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white transition hover:bg-brand-700"
+            >
+              Book Now
+            </a>
+          ) : (
+            <Link
+              href={eventUrl}
+              aria-label={internalBookable ? `Book tickets for ${event.title}` : `View event information for ${event.title}`}
+              className={`mt-3 flex h-11 items-center justify-center rounded-lg text-sm font-bold text-white transition ${
+                internalBookable ? 'bg-brand-600 hover:bg-brand-700' : 'bg-navy-700 hover:bg-navy-600'
+              }`}
+            >
+              {internalBookable ? 'Book Now' : 'View event info'}
+            </Link>
+          )}
 
           <p className="mt-3 text-center text-[10px] text-white/70">
-            Only on <span className="font-bold text-white">TicketFlow Kenya</span>
+            {externalBooking ? (
+              'Verified event · Tickets sold by the official seller'
+            ) : (
+              <>Only on <span className="font-bold text-white">TicketFlow Kenya</span></>
+            )}
           </p>
           <p className="mt-0.5 text-center text-[9px] text-white/45">www.ticketflow.co.ke</p>
         </div>

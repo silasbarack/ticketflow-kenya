@@ -29,11 +29,13 @@ function slugify(text: string) {
 export function isEventBookable(event: {
   status: string;
   salesEnabled: boolean;
+  bookingMode: string;
   startDateTime: Date;
   organizer?: { isVerified?: boolean } | null;
 }): boolean {
   return (
     event.status === 'PUBLISHED' &&
+    event.bookingMode === 'INTERNAL' &&
     event.salesEnabled &&
     event.organizer?.isVerified === true &&
     // Sales close when the doors open — the same cut-off OrdersService uses.
@@ -115,7 +117,7 @@ export class EventsService {
     // Filtering on endDateTime rather than startDateTime keeps a multi-day
     // festival listed while it is actually running.
     if (!query.includePast) {
-      where.endDateTime = { gte: new Date() };
+      where.endDateTime = { gt: new Date() };
     }
 
     if (query.search) {

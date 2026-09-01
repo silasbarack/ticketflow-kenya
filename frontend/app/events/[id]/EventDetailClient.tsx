@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { Calendar, Clock, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
+import { Calendar, Clock, ExternalLink, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
@@ -13,12 +13,20 @@ import { EventItem } from '@/types';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import Container from '@/components/ui/Container';
 import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
+import Button, { buttonVariants } from '@/components/ui/Button';
 import EventGrid from '@/components/EventGrid';
 import EventPoster from '@/components/EventPoster';
 import TicketTierSelector from '@/components/TicketTierSelector';
 import BookingSummary from '@/components/BookingSummary';
 import Link from 'next/link';
+
+function getTierStatus(ticket: EventItem['ticketTypes'][number]) {
+  if (ticket.availabilityStatus === 'AVAILABLE' && ticket.salesEnd && new Date(ticket.salesEnd).getTime() < Date.now()) {
+    return 'CLOSED';
+  }
+  if (ticket.availabilityStatus) return ticket.availabilityStatus;
+  return ticket.quantity - ticket.quantitySold > 0 ? 'AVAILABLE' : 'SOLD_OUT';
+}
 
 export default function EventDetailClient() {
   const params = useParams<{ id: string }>();
@@ -153,11 +161,16 @@ export default function EventDetailClient() {
 
   // Absent on older payloads — treat that as bookable so nothing regresses.
   const bookable = event.isBookable !== false;
+  const externalBooking = event.bookingMode === 'EXTERNAL' && Boolean(event.bookingUrl);
+  const availableTiers = event.ticketTypes.filter((ticket) => getTierStatus(ticket) === 'AVAILABLE');
+  const startingPrice = availableTiers.length
+    ? Math.min(...availableTiers.map((ticket) => Number(ticket.price)))
+    : null;
 
   const bookingPanel = (
     <div className="rounded-2xl border border-line bg-white p-5 shadow-soft">
       <h2 className="scroll-mt-24 text-lg font-bold text-navy-900">
-        {bookable ? 'Select Tickets' : 'Ticket information'}
+        {bookable ? 'Select Tickets' : externalBooking ? 'Official tickets' : 'Ticket information'}
       </h2>
 
       {bookable ? (
@@ -172,29 +185,53 @@ export default function EventDetailClient() {
           <BookingSummary subtotal={total} totalSelected={totalSelected} onAddToCart={handleAddToCart} cartCount={totalItems} />
         </>
       ) : (
-        // Not a disabled button: an event TicketFlow is not authorised to sell
-        // for has no checkout at all, so there is nothing to click through.
         <div className="mt-4 space-y-4">
           <div className="rounded-xl border border-line bg-surface p-4">
             <p className="text-sm font-semibold text-navy-900">Not on sale through TicketFlow Kenya</p>
             <p className="mt-1.5 text-sm text-muted">
-              {event.organizer?.companyName
-                ? `Tickets for this event are sold by ${event.organizer.companyName} through their own channels.`
+              {event.organizerName
+                ? `Tickets for this event are sold by ${event.organizerName} through its authorised channel.`
                 : 'Tickets for this event are sold by the organizer through their own channels.'}{' '}
-              We are showing the details here for reference only and cannot take payment for it.
+              TicketFlow does not take payment for this listing.
             </p>
           </div>
           {event.ticketTypes.length > 0 && (
             <ul className="space-y-2">
               {[...event.ticketTypes]
                 .sort((a, b) => Number(a.price) - Number(b.price))
-                .map((tt) => (
-                  <li key={tt.id} className="flex items-center justify-between rounded-xl border border-line px-4 py-3">
-                    <span className="text-sm font-semibold text-navy-900">{tt.name}</span>
-                    <span className="text-sm font-bold text-navy-900">{formatCurrency(Number(tt.price))}</span>
-                  </li>
-                ))}
+                .map((tt) => {
+                  const status = getTierStatus(tt);
+                  return (
+                    <li key={tt.id} className={`rounded-xl border border-line px-4 py-3 ${status === 'AVAILABLE' ? '' : 'bg-surface opacity-70'}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="text-sm font-semibold text-navy-900">{tt.name}</span>
+                        <span className="shrink-0 text-sm font-bold text-navy-900">{formatCurrency(Number(tt.price))}</span>
+                      </div>
+                      {(tt.description || status !== 'AVAILABLE') && (
+                        <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
+                          <span>{tt.description}</span>
+                          {status !== 'AVAILABLE' && (
+                            <span className="font-bold uppercase text-brand-700">
+                              {status === 'SOLD_OUT' ? 'Sold out' : status === 'CLOSED' ? 'Closed' : 'Not on sale'}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
             </ul>
+          )}
+          {externalBooking && (
+            <a
+              href={event.bookingUrl as string}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: 'primary', size: 'lg', fullWidth: true })}
+            >
+              Book Now with the official seller
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            </a>
           )}
         </div>
       )}
@@ -221,18 +258,13 @@ export default function EventDetailClient() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="brand">{event.category?.name}</Badge>
-              {event.organizer && <span className="text-sm text-muted">by {event.organizer.companyName}</span>}
+              {(event.organizerName || event.organizer) && (
+                <span className="text-sm text-muted">by {event.organizerName || event.organizer?.companyName}</span>
+              )}
             </div>
 
             <h1 className="mt-3 text-[26px] font-bold leading-tight text-navy-900 sm:text-[32px]">{event.title}</h1>
             {event.subtitle && <p className="mt-1.5 text-[15px] text-muted">{event.subtitle}</p>}
-
-            {event.isDemo && (
-              <p className="mt-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-muted">
-                <span className="font-semibold text-navy-900">Sample listing.</span> This is demonstration data on a
-                development build of TicketFlow Kenya, not a ticket sale by the named organizer.
-              </p>
-            )}
 
             <div className="mt-4 space-y-2.5 text-[15px] text-navy-700">
               <p className="flex items-center gap-2">
@@ -298,34 +330,55 @@ export default function EventDetailClient() {
             </div>
           </section>
 
-          {event.organizer && (
+          {(event.organizerName || event.organizer) && (
             <section className="rounded-2xl border border-line bg-white p-5">
               <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
                 <Users className="h-4 w-4 text-brand-600" aria-hidden="true" />
                 Organizer
               </p>
-              <p className="mt-2 text-sm font-medium text-navy-800">{event.organizer.companyName}</p>
-              {event.organizer.description && <p className="mt-1 text-sm text-muted">{event.organizer.description}</p>}
+              <p className="mt-2 text-sm font-medium text-navy-800">
+                {event.organizerName || event.organizer?.companyName}
+              </p>
+              {!externalBooking && event.organizer?.description && (
+                <p className="mt-1 text-sm text-muted">{event.organizer.description}</p>
+              )}
+              {event.verificationSourceUrl && (
+                <a
+                  href={event.verificationSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-700 hover:text-brand-800"
+                >
+                  Event details verified with {event.verificationSource || 'the official source'}
+                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                </a>
+              )}
             </section>
           )}
 
           <section className="rounded-2xl border border-line bg-white p-5">
             <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
               <ShieldCheck className="h-4 w-4 text-brand-600" aria-hidden="true" />
-              Ticket policy &amp; refunds
+              {externalBooking ? 'External ticketing' : 'Ticket policy & refunds'}
             </p>
-            <p className="mt-2 text-sm text-muted">
-              Tickets are delivered instantly as signed QR codes after payment. For full details on
-              cancellations, refunds, and entry requirements, see our{' '}
-              <Link href="/legal/ticket-purchase-policy" className="font-medium text-brand-700 underline">
-                Ticket Purchase Policy
-              </Link>{' '}
-              and{' '}
-              <Link href="/legal/payment-policy" className="font-medium text-brand-700 underline">
-                Payment Policy
-              </Link>
-              .
-            </p>
+            {externalBooking ? (
+              <p className="mt-2 text-sm text-muted">
+                Booking, payment, ticket delivery, entry and refund terms are handled by the official seller. Review its terms before purchase.
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-muted">
+                Tickets are delivered instantly as signed QR codes after payment. For full details on cancellations,
+                refunds, and entry requirements, see our{' '}
+                <Link href="/legal/ticket-purchase-policy" className="font-medium text-brand-700 underline">
+                  Ticket Purchase Policy
+                </Link>{' '}
+                and{' '}
+                <Link href="/legal/payment-policy" className="font-medium text-brand-700 underline">
+                  Payment Policy
+                </Link>
+                .
+              </p>
+            )}
           </section>
 
           {related.length > 0 && (
@@ -348,15 +401,33 @@ export default function EventDetailClient() {
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 p-3 shadow-elevated backdrop-blur lg:hidden">
         <Container className="flex items-center justify-between gap-3 px-0">
           <div className="min-w-0">
-            <p className="text-xs text-muted">{totalSelected > 0 ? `${totalSelected} ticket${totalSelected !== 1 ? 's' : ''} selected` : 'From'}</p>
+            <p className="text-xs text-muted">
+              {externalBooking
+                ? 'Official seller'
+                : totalSelected > 0
+                  ? `${totalSelected} ticket${totalSelected !== 1 ? 's' : ''} selected`
+                  : 'From'}
+            </p>
             <p className="truncate text-base font-bold text-navy-900">
-              {event.ticketTypes.length ? `KES ${Math.min(...event.ticketTypes.map((t) => Number(t.price))).toLocaleString()}` : 'TBA'}
+              {startingPrice != null ? `KES ${startingPrice.toLocaleString()}` : 'Sales closed'}
             </p>
           </div>
-          <Button variant="primary" onClick={handleAddToCart} className="shrink-0">
-            <TicketIcon className="h-4 w-4" aria-hidden="true" />
-            {totalSelected > 0 ? 'Add to Cart' : 'Select Tickets'}
-          </Button>
+          {externalBooking ? (
+            <a
+              href={event.bookingUrl as string}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: 'primary', className: 'shrink-0' })}
+            >
+              Book Now
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            </a>
+          ) : (
+            <Button variant="primary" onClick={handleAddToCart} className="shrink-0">
+              <TicketIcon className="h-4 w-4" aria-hidden="true" />
+              {totalSelected > 0 ? 'Add to Cart' : 'Select Tickets'}
+            </Button>
+          )}
         </Container>
       </div>
     </main>
