@@ -1,18 +1,23 @@
 import { EventItem, TicketType } from '@/types/event';
 
 /**
- * The six TicketFlow Kenya sample events, mirroring `backend/prisma/seed.ts`
- * exactly — same titles, venues, dates, descriptions, tier names and prices.
+ * TicketFlow Kenya sample events for offline development.
  *
- * The price ladders matter: they are printed onto the poster artwork
- * (`frontend/scripts/generate-posters.py`), so if these drift from the seed the
- * app shows one price while the poster behind it shows another. Keep all three
- * in sync.
+ * STALE: these six mirror the August 2026 lineup that `backend/prisma/seed.ts`
+ * has since archived — the seed now carries ten events running September to
+ * December 2026, so every event here is both expired and absent from the real
+ * catalogue. They still render (their poster files are bundled in
+ * `poster-assets.ts`), but re-mirroring them against the current seed is
+ * outstanding work.
  *
  * This is demo data — `USE_MOCK_DATA` must be `false` in production.
  */
 
-/** Matches the backend's stored `posterUrl`; resolved by `resolvePosterSource`. */
+/**
+ * The `posterUrl` shape the old seed stored, which is what the bundled poster
+ * filenames are keyed on. The current seed stores
+ * `/events/posters/<slug>.webp`; both are handled by `resolvePosterSource`.
+ */
 const posterFor = (slug: string) => `/posters/${slug}.jpg`;
 
 function tier(

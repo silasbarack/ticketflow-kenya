@@ -17,3 +17,22 @@ If you run `npx expo install --fix` or any tool suggests moving to SDK 55/56/57,
 - `expo-sharing` and `expo-image` ship **no config plugin** in SDK 54 — they must NOT appear in `app.json`'s `plugins` array (they only gained plugins in SDK 57).
 - `ios.icon` must be a PNG path; the Apple Icon Composer `.icon` bundle format is SDK 57+.
 - `expo-file-system/legacy` **is** available in SDK 54 (19.0.x) and is what `src/services/tickets.service.ts` uses.
+
+## Outstanding: re-bundle the event posters
+
+The backend catalogue was replaced with a September–December 2026 lineup, and
+posters moved to `frontend/public/events/posters/<slug>.webp`. Two things here
+still point at the old August 2026 lineup:
+
+- `src/data/poster-assets.ts` bundles the six **archived** events' posters. None
+  of them match a poster URL the API returns today, so every real poster is
+  currently fetched over the network from `WEB_URL`.
+- `src/data/mock-events.ts` mirrors those same six expired events.
+
+Once the new posters exist in `frontend/public/events/posters/`, copy them into
+`assets/posters/` and re-key `BUNDLED_POSTERS` to the new slugs (Metro needs
+literal `require()` paths, so the map has to be written out by hand). Re-mirror
+`mock-events.ts` against the current seed at the same time.
+
+Poster URLs resolve against `WEB_URL`, not `API_URL` — posters are static assets
+of the web app, so resolving them against the API origin returns a 404.

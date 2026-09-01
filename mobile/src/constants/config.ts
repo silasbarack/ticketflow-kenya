@@ -11,8 +11,16 @@ export const USE_MOCK_DATA = false;
 
 const CONFIGURED_API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-/** Default backend port, used when no URL is configured at all in dev. */
+/**
+ * Origin of the Next.js web app. Poster artwork is a static asset of the *web*
+ * app (`frontend/public/events/posters/…`), not something the API serves, so
+ * resolving a stored `posterUrl` against the API origin gives a 404.
+ */
+const CONFIGURED_WEB_URL = process.env.EXPO_PUBLIC_WEB_URL;
+
+/** Default ports, used when no URL is configured at all in dev. */
 const DEV_API_PORT = 4000;
+const DEV_WEB_PORT = 3000;
 
 /**
  * Host of the machine serving Metro, e.g. `192.168.0.34` — the dev build gets
@@ -50,33 +58,45 @@ function isLocalHost(hostname: string): boolean {
  * deployed backend (an https hostname) still works exactly as written, and
  * release builds never take this path at all.
  */
-function resolveApiUrl(): string | undefined {
-  if (!__DEV__) return CONFIGURED_API_URL;
+function resolveLocalUrl(
+  configured: string | undefined,
+  envVar: string,
+  devPort: number,
+  devPath = '',
+): string | undefined {
+  if (!__DEV__) return configured;
 
-  // Over a tunnel, Metro's host is a public relay that is not the backend, so
+  // Over a tunnel, Metro's host is a public relay that is not our machine, so
   // there is nothing useful to borrow — trust `.env` as written.
   const host = metroHost();
-  if (!host || !isLocalHost(host)) return CONFIGURED_API_URL;
+  if (!host || !isLocalHost(host)) return configured;
 
-  if (!CONFIGURED_API_URL) return `http://${host}:${DEV_API_PORT}/api`;
+  if (!configured) return `http://${host}:${devPort}${devPath}`;
 
   // Matched by hand rather than with `URL`: React Native's URL is a partial
   // implementation and its component setters are not dependable.
-  const parts = /^http:\/\/([^/:]+)(:\d+)?(\/.*)?$/.exec(CONFIGURED_API_URL);
-  if (!parts) return CONFIGURED_API_URL; // https or non-standard — deliberate.
+  const parts = /^http:\/\/([^/:]+)(:\d+)?(\/.*)?$/.exec(configured);
+  if (!parts) return configured; // https or non-standard — deliberate.
 
   const [, configuredHost, port = '', path = ''] = parts;
-  if (!isLocalHost(configuredHost) || configuredHost === host) return CONFIGURED_API_URL;
+  if (!isLocalHost(configuredHost) || configuredHost === host) return configured;
 
   const resolved = `http://${host}${port}${path}`;
   console.log(
-    `[TicketFlow] EXPO_PUBLIC_API_URL points at ${configuredHost}, but Metro is served from ` +
+    `[TicketFlow] ${envVar} points at ${configuredHost}, but Metro is served from ` +
       `${host}. Using ${resolved} for this session — update .env to silence this.`,
   );
   return resolved;
 }
 
-export const API_URL = resolveApiUrl();
+export const API_URL = resolveLocalUrl(CONFIGURED_API_URL, 'EXPO_PUBLIC_API_URL', DEV_API_PORT, '/api');
+
+/**
+ * Origin the web app is served from, used to load poster artwork. Falls back to
+ * the API host on its usual web port so a dev machine running both needs no
+ * extra configuration.
+ */
+export const WEB_URL = resolveLocalUrl(CONFIGURED_WEB_URL, 'EXPO_PUBLIC_WEB_URL', DEV_WEB_PORT);
 
 if (!API_URL && !USE_MOCK_DATA) {
   // Real network calls would fail without a base URL — fail loudly in dev
