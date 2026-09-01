@@ -124,7 +124,7 @@ function CheckoutContent() {
             <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20">
               <PartyPopper className="h-7 w-7 text-brand-300" aria-hidden="true" />
             </span>
-            <h1 className="mt-5 font-display text-[28px] font-extrabold sm:text-4xl">
+            <h1 className="mt-5 text-[28px] font-extrabold sm:text-4xl">
               Payment <span className="ember-text">confirmed</span>
             </h1>
             <p className="mx-auto mt-3 max-w-md text-[15px] text-white/70">
@@ -137,7 +137,7 @@ function CheckoutContent() {
 
         <Container className="max-w-3xl py-8 sm:py-10">
           <div className="rounded-card border border-line bg-white p-5 text-sm leading-relaxed text-navy-700 shadow-card sm:p-6">
-            <p className="font-display text-base font-bold text-navy-900">{order.event.title}</p>
+            <p className="text-base font-bold text-navy-900">{order.event.title}</p>
             <p className="mt-1 text-muted">
               {formatDateTime(order.event.startDateTime)} · {order.event.venue}, {order.event.city}
             </p>
@@ -150,7 +150,7 @@ function CheckoutContent() {
 
           {paidTickets.length > 0 ? (
             <div className="mt-6 space-y-4">
-              <h2 className="font-display text-lg font-bold text-navy-900">
+              <h2 className="text-lg font-bold text-navy-900">
                 Your {paidTickets.length > 1 ? `${paidTickets.length} tickets` : 'ticket'}
               </h2>
               {paidTickets.map((ticket) => (
@@ -244,7 +244,7 @@ function CheckoutContent() {
       <section className="ember-ground text-white">
         <Container className="py-7 sm:py-9">
           <p className="eyebrow text-brand-300">Final step</p>
-          <h1 className="mt-2 font-display text-[26px] font-extrabold leading-tight sm:text-[32px]">
+          <h1 className="mt-2 text-[26px] font-extrabold leading-tight sm:text-[32px]">
             Re-enter your number to <span className="ember-text">send the STK push</span>
           </h1>
           <p className="mt-2 max-w-xl text-[13px] text-white/65">
@@ -359,7 +359,7 @@ function CheckoutContent() {
         {/* Order recap */}
         <aside className="rounded-card border border-line bg-white shadow-card lg:sticky lg:top-28">
           <div className="border-b border-line px-5 py-4">
-            <h2 className="font-display text-base font-bold text-navy-900">{order.event.title}</h2>
+            <h2 className="text-base font-bold text-navy-900">{order.event.title}</h2>
             <p className="mt-0.5 text-xs text-muted">
               {formatDateTime(order.event.startDateTime)} · {order.event.venue}
             </p>
@@ -394,7 +394,7 @@ function CheckoutContent() {
 
           <div className="flex items-baseline justify-between border-t border-line px-5 py-4">
             <span className="font-semibold text-navy-900">Total to pay</span>
-            <span className="tnum font-display text-2xl font-extrabold text-navy-900">
+            <span className="tnum text-2xl font-extrabold text-navy-900">
               {formatCurrency(order.totalAmount)}
             </span>
           </div>

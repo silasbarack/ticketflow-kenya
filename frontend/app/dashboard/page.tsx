@@ -56,7 +56,7 @@ function CustomerDashboardContent() {
       <section className="ember-ground text-white">
         <Container className="py-9 sm:py-12">
           <p className="eyebrow text-brand-300">Your account</p>
-          <h1 className="mt-2 font-display text-[28px] font-extrabold tracking-[-0.02em] sm:text-[36px]">
+          <h1 className="mt-2 text-[28px] font-extrabold tracking-[-0.02em] sm:text-[36px]">
             Welcome, {user?.firstName}
           </h1>
           <p className="mt-2 text-[15px] text-white/60">Your tickets, orders and upcoming events in one place.</p>
@@ -68,7 +68,7 @@ function CustomerDashboardContent() {
                   <stat.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div className="min-w-0">
-                  <p className="tnum truncate font-display text-xl font-extrabold">{stat.value}</p>
+                  <p className="tnum truncate text-xl font-extrabold">{stat.value}</p>
                   <p className="text-[12px] text-white/50">{stat.label}</p>
                 </div>
               </div>
@@ -87,7 +87,7 @@ function CustomerDashboardContent() {
               </span>
               <div className="min-w-0">
                 <p className="eyebrow text-brand-700">Coming up next</p>
-                <p className="mt-1.5 font-display text-base font-bold text-navy-900">{nextEvent.title}</p>
+                <p className="mt-1.5 text-base font-bold text-navy-900">{nextEvent.title}</p>
                 <p className="text-[13px] text-muted">
                   {formatDateTime(nextEvent.startDateTime)} · {nextEvent.venue}, {nextEvent.city}
                 </p>
@@ -120,7 +120,7 @@ function CustomerDashboardContent() {
 
         {/* Recent orders */}
         <div className="mt-10 flex items-end justify-between gap-4">
-          <h2 className="font-display text-lg font-bold text-navy-900">Recent orders</h2>
+          <h2 className="text-lg font-bold text-navy-900">Recent orders</h2>
           {allOrders.length > 0 && (
             <span className="tnum text-xs text-muted">
               {allOrders.length} order{allOrders.length === 1 ? '' : 's'}
@@ -153,7 +153,7 @@ function CustomerDashboardContent() {
                   <p className="tnum mt-1 text-xs text-muted">
                     {order.orderNumber} · {formatDate(order.createdAt)}
                   </p>
-                  <p className="tnum mt-2.5 font-display text-lg font-bold text-navy-900">
+                  <p className="tnum mt-2.5 text-lg font-bold text-navy-900">
                     {formatCurrency(order.totalAmount)}
                   </p>
                 </li>
@@ -215,7 +215,7 @@ function ActionCard({
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 font-display text-base font-bold text-navy-900">
+        <span className="flex items-center gap-1.5 text-base font-bold text-navy-900">
           {title}
           <ArrowRight
             className="h-4 w-4 text-navy-300 transition-transform group-hover:translate-x-0.5 group-hover:text-brand-600"

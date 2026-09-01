@@ -111,7 +111,7 @@ export default function EventDetailClient() {
               )}
             </div>
 
-            <h1 className="mt-3 font-display text-[26px] font-extrabold leading-tight tracking-[-0.02em] text-navy-900 sm:text-[34px]">{event.title}</h1>
+            <h1 className="mt-3 text-[26px] font-extrabold leading-tight tracking-[-0.02em] text-navy-900 sm:text-[34px]">{event.title}</h1>
             {event.subtitle && <p className="mt-1.5 text-[15px] text-muted">{event.subtitle}</p>}
 
             <div className="mt-4 space-y-2.5 text-[15px] text-navy-700">
@@ -155,7 +155,7 @@ export default function EventDetailClient() {
       <Container className="grid gap-10 py-10 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-10">
           <section>
-            <h2 className="font-display text-lg font-bold text-navy-900">About this event</h2>
+            <h2 className="text-lg font-bold text-navy-900">About this event</h2>
             <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-navy-700">{event.description}</p>
           </section>
 
@@ -230,7 +230,7 @@ export default function EventDetailClient() {
 
           {related.length > 0 && (
             <section>
-              <h2 className="font-display text-lg font-bold text-navy-900">Related events</h2>
+              <h2 className="text-lg font-bold text-navy-900">Related events</h2>
               <div className="mt-4">
                 <EventGrid events={related} isLoading={false} />
               </div>
@@ -249,7 +249,7 @@ export default function EventDetailClient() {
         <Container className="flex items-center justify-between gap-3 px-0">
           <div className="min-w-0">
             <p className="text-xs text-muted">{bookable ? 'From' : externalBooking ? 'Official seller' : 'Ticket info'}</p>
-            <p className="tnum truncate font-display text-base font-bold text-navy-900">
+            <p className="tnum truncate text-base font-bold text-navy-900">
               {startingPrice != null ? formatCurrency(startingPrice) : 'Sales closed'}
             </p>
           </div>

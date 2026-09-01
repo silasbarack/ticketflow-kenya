@@ -34,7 +34,7 @@ function MyTicketsContent() {
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Back to dashboard
           </Link>
-          <h1 className="mt-3 font-display text-[26px] font-extrabold tracking-[-0.02em] sm:text-[34px]">My tickets</h1>
+          <h1 className="mt-3 text-[26px] font-extrabold tracking-[-0.02em] sm:text-[34px]">My tickets</h1>
           <p className="mt-2 text-[15px] text-white/60">Tap a ticket to open its QR code for entry.</p>
         </Container>
       </section>
@@ -78,7 +78,7 @@ function MyTicketsContent() {
 
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="min-w-0 font-display text-[15px] font-bold leading-snug text-navy-900">
+                    <h2 className="min-w-0 text-[15px] font-bold leading-snug text-navy-900">
                       {ticket.order.event.title}
                     </h2>
                     <StatusBadge status={ticket.status} />

@@ -75,7 +75,7 @@ export default function LandingPage() {
             </span>
 
             <h1
-              className="animate-fade-in-up mt-6 font-display text-[38px] font-extrabold leading-[1.04] tracking-[-0.03em] sm:text-[56px] lg:text-[64px]"
+              className="animate-fade-in-up mt-6 text-[38px] font-extrabold leading-[1.04] tracking-[-0.03em] sm:text-[56px] lg:text-[64px]"
               style={{ animationDelay: '80ms' }}
             >
               Discover events
@@ -141,7 +141,7 @@ export default function LandingPage() {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-ink-700 to-ink-950 p-8">
-                        <span className="text-center font-display text-xl font-bold text-white/90">
+                        <span className="text-center text-xl font-bold text-white/90">
                           {spotlightEvent.title}
                         </span>
                       </div>
@@ -155,7 +155,7 @@ export default function LandingPage() {
                     </span>
 
                     <div className="absolute inset-x-0 bottom-0 p-5">
-                      <p className="font-display text-xl font-extrabold leading-tight text-white">
+                      <p className="text-xl font-extrabold leading-tight text-white">
                         {spotlightEvent.title}
                       </p>
                       <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-white/70">
@@ -214,7 +214,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="eyebrow text-brand-700">Explore</p>
-                <h2 className="mt-2 font-display text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
+                <h2 className="mt-2 text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
                   Browse by category
                 </h2>
               </div>
@@ -257,7 +257,7 @@ export default function LandingPage() {
       <section className="py-14 sm:py-20">
         <Container>
           <div className="ember-ground flex flex-col items-center gap-5 rounded-panel px-6 py-14 text-center text-white sm:px-12">
-            <h2 className="max-w-2xl font-display text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-4xl">
+            <h2 className="max-w-2xl text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-4xl">
               Ready to find your <span className="ember-text">next night out</span>?
             </h2>
             <p className="max-w-md text-[15px] text-white/65">

@@ -83,7 +83,7 @@ function EventsContent() {
       <div className="border-b border-line bg-white py-8 sm:py-10">
         <Container>
           <p className="eyebrow text-brand-700">{activeCategory ? activeCategory.name : 'All events'}</p>
-          <h1 className="mt-2 font-display text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
+          <h1 className="mt-2 text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
             Browse events
           </h1>
           <p className="mt-1.5 text-muted">Find concerts, conferences, sports, and festivals happening near you.</p>

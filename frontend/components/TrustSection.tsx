@@ -22,7 +22,7 @@ export default function TrustSection({ eventsTotal, citiesCount }: { eventsTotal
                 <s.icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <div className="min-w-0">
-                <p className="tnum font-display text-xl font-extrabold tracking-[-0.02em] text-navy-900">{s.value}</p>
+                <p className="tnum text-xl font-extrabold tracking-[-0.02em] text-navy-900">{s.value}</p>
                 <p className="text-[13px] text-muted">{s.label}</p>
               </div>
             </div>

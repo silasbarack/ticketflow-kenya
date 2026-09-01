@@ -268,7 +268,7 @@ function BookingFlow() {
             Back to event
           </Link>
 
-          <h1 className="mt-3 font-display text-[26px] font-extrabold leading-tight sm:text-[32px]">{event.title}</h1>
+          <h1 className="mt-3 text-[26px] font-extrabold leading-tight sm:text-[32px]">{event.title}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px] text-white/65">
             <span className="flex items-center gap-1.5">
               <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
@@ -301,7 +301,7 @@ function BookingFlow() {
             <>
               <header>
                 <p className="eyebrow text-brand-700">Step 1</p>
-                <h2 className="mt-1.5 font-display text-xl font-bold text-navy-900">Choose your ticket tier</h2>
+                <h2 className="mt-1.5 text-xl font-bold text-navy-900">Choose your ticket tier</h2>
                 <p className="mt-1 text-sm text-muted">
                   Every tier below is a category set by the organizer. Prices shown are the face value — the{' '}
                   {SERVICE_FEE_PERCENT}% service fee is added in the summary.
@@ -316,7 +316,7 @@ function BookingFlow() {
             <>
               <header>
                 <p className="eyebrow text-brand-700">Step 2</p>
-                <h2 className="mt-1.5 font-display text-xl font-bold text-navy-900">Who is coming?</h2>
+                <h2 className="mt-1.5 text-xl font-bold text-navy-900">Who is coming?</h2>
                 <p className="mt-1 text-sm text-muted">
                   You&apos;re buying {totalItems} tickets, so each one needs a named holder. Every ticket is issued as an
                   individual QR code.
@@ -328,7 +328,7 @@ function BookingFlow() {
                   key={`${slot.ticketTypeId}-${i}`}
                   className="rounded-card border border-line bg-white p-4 shadow-soft sm:p-5"
                 >
-                  <p className="mb-3.5 flex items-center gap-2 font-display text-sm font-bold text-navy-900">
+                  <p className="mb-3.5 flex items-center gap-2 text-sm font-bold text-navy-900">
                     <span className="tnum flex h-6 w-6 items-center justify-center rounded-full bg-navy-900/[0.06] text-xs">
                       {i + 1}
                     </span>
@@ -388,7 +388,7 @@ function BookingFlow() {
             <>
               <header>
                 <p className="eyebrow text-brand-700">Step {needsAttendees ? 3 : 2}</p>
-                <h2 className="mt-1.5 font-display text-xl font-bold text-navy-900">Confirm your M-Pesa number</h2>
+                <h2 className="mt-1.5 text-xl font-bold text-navy-900">Confirm your M-Pesa number</h2>
                 <p className="mt-1 text-sm text-muted">
                   This reserves your tickets against the number below. On the next screen you&apos;ll type it once more to
                   release the STK push — no money moves until then.
@@ -479,7 +479,7 @@ function BookingFlow() {
         <aside className="lg:sticky lg:top-28">
           <div className="rounded-card border border-line bg-white shadow-card">
             <div className="border-b border-line px-5 py-4">
-              <h2 className="font-display text-base font-bold text-navy-900">Order summary</h2>
+              <h2 className="text-base font-bold text-navy-900">Order summary</h2>
               <p className="mt-0.5 text-xs text-muted">
                 {totalItems > 0 ? `${totalItems} ticket${totalItems === 1 ? '' : 's'} selected` : 'No tickets selected yet'}
               </p>
@@ -530,7 +530,7 @@ function BookingFlow() {
 
             <div className="flex items-baseline justify-between border-t border-line px-5 py-4">
               <span className="font-semibold text-navy-900">Total to pay</span>
-              <span className="tnum font-display text-2xl font-extrabold text-navy-900">{formatCurrency(finalTotal)}</span>
+              <span className="tnum text-2xl font-extrabold text-navy-900">{formatCurrency(finalTotal)}</span>
             </div>
 
             <div className="flex flex-col gap-2.5 border-t border-line bg-cream/60 px-5 py-4 text-[11px] text-muted">

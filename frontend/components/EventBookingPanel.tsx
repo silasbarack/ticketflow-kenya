@@ -36,11 +36,11 @@ export default function EventBookingPanel({ event }: { event: EventItem }) {
         {fromPrice != null ? (
           <p className="mt-1.5 flex items-baseline gap-1.5">
             <span className="text-xs text-muted">From</span>
-            <span className="tnum font-display text-2xl font-extrabold text-navy-900">{formatCurrency(fromPrice)}</span>
+            <span className="tnum text-2xl font-extrabold text-navy-900">{formatCurrency(fromPrice)}</span>
             <span className="text-xs text-muted">+ {SERVICE_FEE_PERCENT}% fee</span>
           </p>
         ) : (
-          <p className="mt-1.5 font-display text-lg font-bold text-navy-900">
+          <p className="mt-1.5 text-lg font-bold text-navy-900">
             {tiers.length > 0 ? 'Sales closed' : 'Tickets to be announced'}
           </p>
         )}

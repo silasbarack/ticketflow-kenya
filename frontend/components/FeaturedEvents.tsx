@@ -31,7 +31,7 @@ export default function FeaturedEvents() {
             <p className="eyebrow text-brand-700">
               {featured.length > 0 ? 'Handpicked for you' : 'Coming up'}
             </p>
-            <h2 id="featured-events-heading" className="mt-2 font-display text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
+            <h2 id="featured-events-heading" className="mt-2 text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
               Popular events near you
             </h2>
           </div>

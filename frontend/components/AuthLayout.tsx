@@ -33,7 +33,7 @@ export default function AuthLayout({
             <Logo theme="dark" className="h-9" />
           </Link>
 
-          <h2 className="mt-8 font-display text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[34px]">
+          <h2 className="mt-8 text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[34px]">
             {panelTitle}
           </h2>
 
@@ -58,7 +58,7 @@ export default function AuthLayout({
       {/* Form column */}
       <section className="flex items-center justify-center px-5 py-12 sm:px-8 lg:px-14">
         <div className="w-full max-w-md">
-          <h1 className="font-display text-[26px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[30px]">
+          <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[30px]">
             {title}
           </h1>
           <p className="mt-1.5 text-sm text-muted">{subtitle}</p>

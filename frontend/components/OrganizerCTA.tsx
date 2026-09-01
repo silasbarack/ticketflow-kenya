@@ -39,13 +39,13 @@ export default function OrganizerCTA() {
                   <p className="flex items-center gap-1.5 text-xs text-white/60">
                     <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" /> Tickets sold
                   </p>
-                  <p className="tnum mt-1 font-display text-xl font-extrabold">1,284</p>
+                  <p className="tnum mt-1 text-xl font-extrabold">1,284</p>
                 </div>
                 <div className="rounded-xl bg-white/[0.06] p-3.5">
                   <p className="flex items-center gap-1.5 text-xs text-white/60">
                     <Users className="h-3.5 w-3.5" aria-hidden="true" /> Checked in
                   </p>
-                  <p className="tnum mt-1 font-display text-xl font-extrabold">842</p>
+                  <p className="tnum mt-1 text-xl font-extrabold">842</p>
                 </div>
               </div>
 
@@ -67,7 +67,7 @@ export default function OrganizerCTA() {
               <TicketPlus className="h-4 w-4" aria-hidden="true" />
               For Organizers
             </p>
-            <h2 className="mt-3 font-display text-[28px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[40px]">
+            <h2 className="mt-3 text-[28px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[40px]">
               Everything you need to run a
               <span className="ember-text"> successful event</span>.
             </h2>

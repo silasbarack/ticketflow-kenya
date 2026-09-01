@@ -56,13 +56,13 @@ export default function TicketTierSelector({
                 >
                   {tierLabel(tt.category)}
                 </span>
-                <p className="mt-2 font-display text-[15px] font-bold text-navy-900">{tt.name}</p>
+                <p className="mt-2 text-[15px] font-bold text-navy-900">{tt.name}</p>
                 {blurb && <p className="mt-1 text-[13px] leading-relaxed text-muted">{blurb}</p>}
               </div>
 
               {/* Face value and the fee that rides on it, priced per ticket. */}
               <div className="shrink-0 text-right">
-                <p className="tnum font-display text-lg font-bold text-navy-900">{formatCurrency(face)}</p>
+                <p className="tnum text-lg font-bold text-navy-900">{formatCurrency(face)}</p>
                 <p className="tnum text-[11px] text-muted">
                   + {formatCurrency(serviceFeeFor(face))} fee ({SERVICE_FEE_PERCENT}%)
                 </p>
@@ -92,7 +92,7 @@ export default function TicketTierSelector({
                 >
                   <Minus className="h-4 w-4" aria-hidden="true" />
                 </button>
-                <span className="tnum w-6 text-center font-display text-base font-bold text-navy-900" aria-live="polite">
+                <span className="tnum w-6 text-center text-base font-bold text-navy-900" aria-live="polite">
                   {qty}
                 </span>
                 <button

@@ -78,9 +78,9 @@ const config: Config = {
         line: '#e6e4df',
       },
       fontFamily: {
+        // Single family across the product — headings, body copy and figures.
+        // Hierarchy comes from weight, size and tracking, never from a second face.
         sans: ['var(--font-noto-sans)', 'Arial', 'sans-serif'],
-        // Headline face — used for every display heading and numeric figure.
-        display: ['var(--font-sora)', 'var(--font-noto-sans)', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         // Inputs/selects. Buttons opt into a full pill via `rounded-full`.
