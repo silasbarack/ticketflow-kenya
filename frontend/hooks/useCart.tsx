@@ -7,6 +7,8 @@ import { serviceFeeFor, totalWithServiceFee } from '@/lib/fees';
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: CartItem) => void;
+  /** Swap the whole cart for a new set of lines — used by the in-cart tier picker. */
+  replaceCart: (items: CartItem[]) => void;
   removeFromCart: (ticketTypeId: string) => void;
   updateQuantity: (ticketTypeId: string, quantity: number) => void;
   clearCart: () => void;
@@ -56,6 +58,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const replaceCart = (next: CartItem[]) => setItems(next);
+
   const removeFromCart = (ticketTypeId: string) => {
     setItems((prev) => prev.filter((i) => i.ticketTypeId !== ticketTypeId));
   };
@@ -79,7 +83,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalAmount, serviceFee, finalTotal }}
+      value={{
+        items,
+        addToCart,
+        replaceCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        totalAmount,
+        serviceFee,
+        finalTotal,
+      }}
     >
       {children}
     </CartContext.Provider>

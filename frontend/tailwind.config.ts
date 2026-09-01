@@ -61,24 +61,54 @@ const config: Config = {
           900: '#0e1b2a',
           950: '#080f18',
         },
-        cream: '#f7f6f2',
-        surface: '#eef4f1',
+        /*
+         * Ink — the near-black ground for the immersive marketing/booking
+         * surfaces introduced in the 2026 refresh. Cooler and deeper than
+         * navy so a navy card still separates when it sits on top of it.
+         */
+        ink: {
+          700: '#131a24',
+          800: '#0d131b',
+          900: '#080d13',
+          950: '#04070b',
+        },
+        cream: '#f6f5f1',
+        surface: '#eef1ee',
         muted: '#667085',
-        line: '#e4e7ec',
+        line: '#e6e4df',
       },
       fontFamily: {
         sans: ['var(--font-noto-sans)', 'Arial', 'sans-serif'],
+        // Headline face — used for every display heading and numeric figure.
+        display: ['var(--font-sora)', 'var(--font-noto-sans)', 'Arial', 'sans-serif'],
       },
       borderRadius: {
-        btn: '10px',
+        // Inputs/selects. Buttons opt into a full pill via `rounded-full`.
+        btn: '12px',
+        card: '20px',
+        panel: '28px',
       },
       boxShadow: {
-        soft: '0 1px 2px 0 rgba(14,27,42,0.04), 0 1px 3px 0 rgba(14,27,42,0.06)',
-        card: '0 2px 8px -2px rgba(14,27,42,0.08), 0 4px 16px -4px rgba(14,27,42,0.06)',
-        elevated: '0 12px 32px -8px rgba(14,27,42,0.18)',
+        soft: '0 1px 2px 0 rgba(8,13,19,0.04), 0 1px 3px 0 rgba(8,13,19,0.05)',
+        card: '0 1px 2px rgba(8,13,19,0.04), 0 8px 24px -12px rgba(8,13,19,0.12)',
+        elevated: '0 24px 60px -24px rgba(8,13,19,0.35)',
+        // Primary CTA halo — brand red at low alpha, never used to carry meaning.
+        glow: '0 8px 24px -8px rgba(227,24,69,0.55)',
       },
       maxWidth: {
         container: '1280px',
+      },
+      letterSpacing: {
+        eyebrow: '0.18em',
+      },
+      keyframes: {
+        'ember-drift': {
+          '0%, 100%': { transform: 'translate3d(0,0,0) scale(1)' },
+          '50%': { transform: 'translate3d(0,-18px,0) scale(1.06)' },
+        },
+      },
+      animation: {
+        'ember-drift': 'ember-drift 14s ease-in-out infinite',
       },
     },
   },

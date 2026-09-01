@@ -1,9 +1,16 @@
 'use client';
 
 import { Minus, Plus } from 'lucide-react';
-import { TicketType } from '@/types';
-import { formatCurrency, formatDate, formatTicketCategory } from '@/lib/format';
-import { totalWithServiceFee } from '@/lib/fees';
+import { TicketType, TicketTypeCategory } from '@/types';
+import { formatCurrency, formatDate } from '@/lib/format';
+import { SERVICE_FEE_PERCENT, serviceFeeFor } from '@/lib/fees';
+import { TIER_BLURBS, TIER_TINT_COLORS, getTierStatus, sortTiers, tierLabel } from '@/lib/tiers';
+
+const STATUS_COPY: Record<string, string> = {
+  SOLD_OUT: 'Sold out',
+  CLOSED: 'Sales closed',
+  NOT_YET_ON_SALE: 'Not yet on sale',
+};
 
 export default function TicketTierSelector({
   ticketTypes,
@@ -15,80 +22,83 @@ export default function TicketTierSelector({
   onChange: (ticketTypeId: string, quantity: number) => void;
 }) {
   if (ticketTypes.length === 0) {
-    return <p className="text-sm text-muted">No tickets available yet — check back soon.</p>;
+    return (
+      <p className="rounded-card border border-dashed border-line bg-cream/60 p-5 text-sm text-muted">
+        No tickets have been released for this event yet — check back soon.
+      </p>
+    );
   }
 
-  // Cheapest first, matching the price strip on the event card. The API
-  // returns tiers in insertion order, which put VVIP above VIP on events whose
-  // ladder was edited after creation.
-  const tiers = [...ticketTypes].sort((a, b) => Number(a.price) - Number(b.price));
+  const tiers = sortTiers(ticketTypes);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {tiers.map((tt) => {
-        const available = tt.quantity - tt.quantitySold;
-        const soldOut = tt.availabilityStatus === 'SOLD_OUT' || (!tt.availabilityStatus && available <= 0);
-        const explicitlyClosed = tt.availabilityStatus === 'CLOSED';
-        const explicitlyNotOnSale = tt.availabilityStatus === 'NOT_YET_ON_SALE';
+        const status = getTierStatus(tt);
+        const unavailable = status !== 'AVAILABLE';
+        const available = Math.max(0, tt.quantity - tt.quantitySold);
         const qty = quantities[tt.id] || 0;
-
-        // A tier can open late (an early-bird release) or close before the
-        // event (student pricing that ends a week out). The API enforces this
-        // on order creation; the UI must not offer what it would reject.
-        const now = Date.now();
-        const notYetOpen = Boolean(tt.salesStart && new Date(tt.salesStart).getTime() > now);
-        const closed = Boolean(tt.salesEnd && new Date(tt.salesEnd).getTime() < now);
-        const unavailable = soldOut || explicitlyClosed || explicitlyNotOnSale || notYetOpen || closed;
+        const face = Number(tt.price);
+        const tint = TIER_TINT_COLORS[tt.category as TicketTypeCategory] ?? 'bg-navy-900/5 text-navy-700 ring-navy-200';
+        const blurb = tt.description || TIER_BLURBS[tt.category as TicketTypeCategory];
 
         return (
           <div
             key={tt.id}
-            className={`rounded-2xl border p-4 transition-colors duration-200 ${qty > 0 ? 'border-brand-300 bg-brand-50/40' : 'border-line'} ${unavailable ? 'opacity-60' : ''}`}
+            className={`rounded-card border p-4 transition-all duration-200 sm:p-5 ${
+              qty > 0 ? 'border-brand-300 bg-brand-50/50 shadow-soft' : 'border-line bg-white'
+            } ${unavailable ? 'opacity-60' : ''}`}
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-navy-900">{tt.name}</p>
-                <p className="text-xs text-muted">{formatTicketCategory(tt.category)}</p>
-                {tt.description && <p className="mt-1 text-xs text-muted">{tt.description}</p>}
+                <span
+                  className={`eyebrow inline-flex rounded-full px-2 py-1 ring-1 ring-inset ${tint}`}
+                >
+                  {tierLabel(tt.category)}
+                </span>
+                <p className="mt-2 font-display text-[15px] font-bold text-navy-900">{tt.name}</p>
+                {blurb && <p className="mt-1 text-[13px] leading-relaxed text-muted">{blurb}</p>}
               </div>
+
+              {/* Face value and the fee that rides on it, priced per ticket. */}
               <div className="shrink-0 text-right">
-                <p className="text-sm font-bold text-navy-900">{formatCurrency(totalWithServiceFee(Number(tt.price)))}</p>
-                <p className="text-[11px] text-muted">incl. service fee</p>
+                <p className="tnum font-display text-lg font-bold text-navy-900">{formatCurrency(face)}</p>
+                <p className="tnum text-[11px] text-muted">
+                  + {formatCurrency(serviceFeeFor(face))} fee ({SERVICE_FEE_PERCENT}%)
+                </p>
               </div>
             </div>
 
-            <div className="mt-3 flex items-center justify-between">
-              <span className={`text-xs font-medium ${unavailable ? 'text-accent-600' : available <= 15 ? 'text-accent-600' : 'text-muted'}`}>
-                {soldOut
-                  ? 'Sold out'
-                  : explicitlyClosed
-                    ? 'Sales closed'
-                    : explicitlyNotOnSale
-                      ? 'Not yet on sale'
-                  : notYetOpen
-                    ? `On sale from ${formatDate(tt.salesStart as string)}`
-                    : closed
-                      ? 'Sales closed'
-                      : `${available} left`}
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-line/70 pt-3.5">
+              <span
+                className={`text-xs font-semibold ${
+                  unavailable || available <= 15 ? 'text-accent-700' : 'text-muted'
+                }`}
+              >
+                {unavailable
+                  ? status === 'NOT_YET_ON_SALE' && tt.salesStart
+                    ? `On sale from ${formatDate(tt.salesStart)}`
+                    : STATUS_COPY[status] ?? 'Unavailable'
+                  : `${available} left`}
               </span>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   aria-label={`Decrease quantity for ${tt.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-navy-600 transition hover:border-navy-300 disabled:opacity-30"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-navy-700 transition hover:border-navy-300 disabled:opacity-30"
                   disabled={qty === 0}
                   onClick={() => onChange(tt.id, Math.max(0, qty - 1))}
                 >
                   <Minus className="h-4 w-4" aria-hidden="true" />
                 </button>
-                <span className="w-5 text-center text-sm font-semibold text-navy-900" aria-live="polite">
+                <span className="tnum w-6 text-center font-display text-base font-bold text-navy-900" aria-live="polite">
                   {qty}
                 </span>
                 <button
                   type="button"
                   aria-label={`Increase quantity for ${tt.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-navy-600 transition hover:border-navy-300 disabled:opacity-30"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-navy-700 transition hover:border-navy-300 disabled:opacity-30"
                   disabled={unavailable || available <= qty}
                   onClick={() => onChange(tt.id, qty + 1)}
                 >

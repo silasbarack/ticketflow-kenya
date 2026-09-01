@@ -10,17 +10,20 @@ export default function TrustSection({ eventsTotal, citiesCount }: { eventsTotal
   ];
 
   return (
-    <section className="border-y border-line bg-white py-12 sm:py-14">
+    <section className="border-b border-line bg-white py-10 sm:py-12">
       <Container>
-        <div className="grid grid-cols-2 gap-6 lg:grid-cols-4 lg:gap-8">
-          {stats.map((s) => (
-            <div key={s.label} className="flex flex-col items-center gap-2 text-center sm:flex-row sm:text-left">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+          {stats.map((s, i) => (
+            <div
+              key={s.label}
+              className={`flex items-center gap-3.5 ${i > 0 ? 'lg:border-l lg:border-line lg:pl-7' : ''}`}
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-btn bg-brand-50 text-brand-700">
                 <s.icon className="h-5 w-5" aria-hidden="true" />
               </span>
-              <div>
-                <p className="text-lg font-bold text-navy-900 sm:text-xl">{s.value}</p>
-                <p className="text-xs font-medium text-muted sm:text-sm">{s.label}</p>
+              <div className="min-w-0">
+                <p className="tnum font-display text-xl font-extrabold tracking-[-0.02em] text-navy-900">{s.value}</p>
+                <p className="text-[13px] text-muted">{s.label}</p>
               </div>
             </div>
           ))}

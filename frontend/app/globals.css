@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --bg-color: #f7f6f2;
+  --bg-color: #f6f5f1;
   --fg-color: #0e1b2a;
 }
 
@@ -33,7 +33,7 @@ body {
 :focus-visible {
   outline: 2px solid theme('colors.brand.600');
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -92,6 +92,9 @@ html[data-theme='dark']
         [class~='bg-gray-950'],
         [class~='bg-navy-900'],
         [class~='bg-navy-950'],
+        [class~='bg-ink-800'],
+        [class~='bg-ink-900'],
+        [class~='bg-ink-950'],
         [class~='bg-surface']
       )
       *
@@ -142,6 +145,69 @@ html[data-theme='dark']
 
 .snap-row > * {
   scroll-snap-align: start;
+}
+
+/* ------------------------------------------------------------------ */
+/* 2026 refresh — shared surface, label and ornament styles.           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Small uppercase kicker above a section heading. Tracking is wide enough
+ * that it never reads as body copy at 11px.
+ */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+/* Standard light content surface. */
+.panel {
+  border-radius: theme('borderRadius.card');
+  border: 1px solid theme('colors.line');
+  background-color: #ffffff;
+  box-shadow: theme('boxShadow.card');
+}
+
+/* Frosted surface for panels that sit on a photo or the ink ground. */
+.panel-glass {
+  border-radius: theme('borderRadius.card');
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(14px);
+}
+
+/*
+ * Ember ground — the near-black canvas used by the hero, the organizer
+ * pitch and the booking flow header, lit by two soft brand-red pools.
+ */
+.ember-ground {
+  background-color: theme('colors.ink.950');
+  background-image:
+    radial-gradient(60rem 32rem at 12% -10%, rgba(227, 24, 69, 0.4), transparent 60%),
+    radial-gradient(46rem 30rem at 92% 8%, rgba(56, 89, 150, 0.38), transparent 62%);
+}
+
+/* Headline word treated in brand red — used once per heading, never for whole lines. */
+.ember-text {
+  background-image: linear-gradient(96deg, #ff90ab 0%, #ef2f5f 42%, #e31845 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hairline rule that fades out at both ends, for section dividers on ink. */
+.hairline {
+  height: 1px;
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+}
+
+/* Tabular numerals so prices and totals stay column-aligned as they change. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
 .prose-legal h2 {

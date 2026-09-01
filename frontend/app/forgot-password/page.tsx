@@ -4,9 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { api, getApiErrorMessage } from '@/lib/api';
-import Container from '@/components/ui/Container';
-import { Input } from '@/components/ui/Input';
+import AuthLayout from '@/components/AuthLayout';
+import { Input, Label } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+
+const PANEL_POINTS = [
+  'We email a single-use reset link to the address on your account.',
+  'Your tickets and orders stay exactly where they are.',
+  'Nothing changes until you set the new password.',
+];
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -28,40 +34,43 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Container className="flex min-h-[70vh] max-w-md flex-col justify-center py-10">
-      <div className="rounded-2xl border border-line bg-white p-7 shadow-soft sm:p-8">
-        <h1 className="text-2xl font-bold text-navy-900">Forgot password</h1>
-        <p className="mt-1 text-sm text-muted">We&apos;ll send you a reset link.</p>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <AuthLayout
+      title="Forgot password"
+      subtitle="We'll send you a link to set a new one."
+      panelTitle="Locked out? Let's fix that."
+      panelPoints={PANEL_POINTS}
+      footer={
+        <Link href="/login" className="font-semibold text-brand-700 hover:text-brand-800">
+          Back to log in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="forgot-email">Email</Label>
           <Input
+            id="forgot-email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            aria-label="Email address"
           />
-          <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
-            {submitting ? 'Sending...' : 'Send reset link'}
-          </Button>
-        </form>
+        </div>
+        <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
+          {submitting ? 'Sending…' : 'Send reset link'}
+        </Button>
+      </form>
 
-        {devToken && (
-          <div className="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-            Dev mode (no email server configured): reset token is{' '}
-            <Link href={`/reset-password?token=${devToken}`} className="font-semibold underline">
-              {devToken}
-            </Link>
-          </div>
-        )}
-
-        <p className="mt-6 text-center text-sm text-muted">
-          <Link href="/login" className="font-semibold text-brand-700 hover:text-brand-800">
-            Back to login
+      {devToken && (
+        <div className="mt-4 rounded-btn border border-amber-200 bg-amber-50 p-3.5 text-xs leading-relaxed text-amber-800">
+          Dev mode (no email server configured): reset token is{' '}
+          <Link href={`/reset-password?token=${devToken}`} className="font-semibold underline">
+            {devToken}
           </Link>
-        </p>
-      </div>
-    </Container>
+        </div>
+      )}
+    </AuthLayout>
   );
 }

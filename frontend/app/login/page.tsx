@@ -5,9 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/useAuth';
-import Container from '@/components/ui/Container';
+import AuthLayout from '@/components/AuthLayout';
 import { Input, Label } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+
+const PANEL_POINTS = [
+  'Every ticket you have ever bought, in one place.',
+  'Signed QR e-tickets, ready to scan at the gate.',
+  'Re-download any PDF ticket whenever you need it.',
+];
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -33,43 +39,56 @@ export default function LoginPage() {
   }
 
   return (
-    <Container className="flex min-h-[70vh] max-w-md flex-col justify-center py-10">
-      <div className="rounded-2xl border border-line bg-white p-7 shadow-soft sm:p-8">
-        <h1 className="text-2xl font-bold text-navy-900">Log in</h1>
-        <p className="mt-1 text-sm text-muted">Welcome back to TicketFlow Kenya.</p>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <Label htmlFor="login-email">Email</Label>
-            <Input id="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="login-password">Password</Label>
-            <Input
-              id="login-password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end text-sm">
-            <Link href="/forgot-password" className="font-medium text-brand-700 hover:text-brand-800">
-              Forgot password?
-            </Link>
-          </div>
-          <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
-            {submitting ? 'Logging in...' : 'Log in'}
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted">
+    <AuthLayout
+      title="Log in"
+      subtitle="Welcome back to TicketFlow Kenya."
+      panelTitle="Your tickets are waiting."
+      panelPoints={PANEL_POINTS}
+      footer={
+        <>
           Don&apos;t have an account?{' '}
           <Link href="/register" className="font-semibold text-brand-700 hover:text-brand-800">
             Sign up
           </Link>
-        </p>
-      </div>
-    </Container>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="login-email">Email</Label>
+          <Input
+            id="login-email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+          />
+        </div>
+        <div>
+          <Label htmlFor="login-password">Password</Label>
+          <Input
+            id="login-password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div className="flex justify-end text-sm">
+          <Link href="/forgot-password" className="font-medium text-brand-700 hover:text-brand-800">
+            Forgot password?
+          </Link>
+        </div>
+
+        <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
+          {submitting ? 'Logging in…' : 'Log in'}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }

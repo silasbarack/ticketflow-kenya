@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Noto_Sans } from 'next/font/google';
+import { Noto_Sans, Sora } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Providers from './providers';
@@ -9,6 +9,8 @@ import CookieConsentBanner from '@/components/CookieConsentBanner';
 import { BG_COLOR_KEY, BLACK } from '@/lib/appearance';
 
 const notoSans = Noto_Sans({ subsets: ['latin'], variable: '--font-noto-sans' });
+// Display face for headings and figures — pairs with Noto Sans for body copy.
+const sora = Sora({ subsets: ['latin'], variable: '--font-sora', weight: ['500', '600', '700', '800'] });
 
 export const metadata: Metadata = {
   title: 'TicketFlow Kenya | Event Tickets, Sold Simply',
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={notoSans.variable} suppressHydrationWarning>
+    <html lang="en" className={`${notoSans.variable} ${sora.variable}`} suppressHydrationWarning>
       <head>
         <Script
           id="apply-bg-color"

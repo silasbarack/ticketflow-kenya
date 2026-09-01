@@ -1,13 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { api, getApiErrorMessage } from '@/lib/api';
-import Container from '@/components/ui/Container';
-import { Input } from '@/components/ui/Input';
+import AuthLayout from '@/components/AuthLayout';
+import { Input, Label } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+
+const PANEL_POINTS = [
+  'Choose something at least 8 characters long.',
+  'The reset token can only be used once.',
+  'You will be asked to log in again with the new password.',
+];
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -31,26 +37,46 @@ function ResetPasswordForm() {
   }
 
   return (
-    <Container className="flex min-h-[70vh] max-w-md flex-col justify-center py-10">
-      <div className="rounded-2xl border border-line bg-white p-7 shadow-soft sm:p-8">
-        <h1 className="text-2xl font-bold text-navy-900">Reset password</h1>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <Input required value={token} onChange={(e) => setToken(e.target.value)} placeholder="Reset token" aria-label="Reset token" />
+    <AuthLayout
+      title="Reset password"
+      subtitle="Set a new password for your account."
+      panelTitle="One new password, and you're back in."
+      panelPoints={PANEL_POINTS}
+      footer={
+        <Link href="/login" className="font-semibold text-brand-700 hover:text-brand-800">
+          Back to log in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="reset-token">Reset token</Label>
           <Input
+            id="reset-token"
+            required
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            placeholder="Paste the token from your email"
+          />
+        </div>
+        <div>
+          <Label htmlFor="reset-password">New password</Label>
+          <Input
+            id="reset-password"
             type="password"
+            autoComplete="new-password"
             required
             minLength={8}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="New password"
-            aria-label="New password"
+            placeholder="At least 8 characters"
           />
-          <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
-            {submitting ? 'Resetting...' : 'Reset password'}
-          </Button>
-        </form>
-      </div>
-    </Container>
+        </div>
+        <Button type="submit" variant="primary" size="lg" fullWidth loading={submitting}>
+          {submitting ? 'Resetting…' : 'Reset password'}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }
 

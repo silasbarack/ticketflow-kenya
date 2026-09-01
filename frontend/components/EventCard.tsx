@@ -4,48 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Heart, MapPin, Share2, ShieldCheck, Ticket, Zap } from 'lucide-react';
-import { EventItem, TicketType } from '@/types';
+import { EventItem, TicketTypeCategory } from '@/types';
 import { formatCurrency, formatDateRange } from '@/lib/format';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCountdown } from '@/hooks/useCountdown';
 import Logo from '@/components/Logo';
 import EventPoster from '@/components/EventPoster';
-
-// Poster chip colours per tier, matching the official card design.
-const TIER_CHIP_COLORS: Record<string, string> = {
-  EARLY_BIRD: 'bg-emerald-600',
-  REGULAR: 'bg-sky-500',
-  STUDENT: 'bg-amber-500',
-  VIP: 'bg-violet-500',
-  VVIP: 'bg-brand-600',
-};
-
-const TIER_PALETTE = ['bg-emerald-600', 'bg-sky-500', 'bg-amber-500', 'bg-violet-500', 'bg-brand-600'];
-
-const TIER_ORDER = ['EARLY_BIRD', 'REGULAR', 'STUDENT', 'VIP', 'VVIP'];
-
-/**
- * Cheapest first, so the strip reads as a price ladder however an event names
- * or orders its tiers — a KES 700 Student sits left of a KES 1,000 Early Bird.
- * Category order only breaks ties between tiers at the same price.
- */
-function sortTiers(ticketTypes: TicketType[]) {
-  return [...ticketTypes].sort((a, b) => {
-    const byPrice = Number(a.price) - Number(b.price);
-    if (byPrice !== 0) return byPrice;
-    const ai = TIER_ORDER.indexOf(a.category);
-    const bi = TIER_ORDER.indexOf(b.category);
-    return (ai === -1 ? TIER_ORDER.length : ai) - (bi === -1 ? TIER_ORDER.length : bi);
-  });
-}
-
-function getTierStatus(ticket: TicketType) {
-  if (ticket.availabilityStatus === 'AVAILABLE' && ticket.salesEnd && new Date(ticket.salesEnd).getTime() < Date.now()) {
-    return 'CLOSED';
-  }
-  if (ticket.availabilityStatus) return ticket.availabilityStatus;
-  return ticket.quantity - ticket.quantitySold > 0 ? 'AVAILABLE' : 'SOLD_OUT';
-}
+import { TIER_CHIP_COLORS, getTierStatus, sortTiers } from '@/lib/tiers';
 
 export default function EventCard({
   event,
@@ -64,6 +29,8 @@ export default function EventCard({
 
   const favorite = isFavorite(event.id);
   const eventUrl = `/events/${event.slug}`;
+  // Booking never leaves TicketFlow — this is the in-cart tier picker for this event.
+  const bookUrl = `/cart?event=${encodeURIComponent(event.slug)}`;
 
   const tiers = sortTiers(event.ticketTypes);
   const anyAvailable = tiers.some((tier) => getTierStatus(tier) === 'AVAILABLE');
@@ -72,9 +39,10 @@ export default function EventCard({
   const sellingFast = event.bookingMode !== 'EXTERNAL' && anyAvailable && totalAvailable > 0 && totalAvailable <= 15;
 
   const externalBooking = event.bookingMode === 'EXTERNAL' && Boolean(event.bookingUrl);
-  // Preserve the existing TicketFlow checkout behavior for internal listings;
-  // external listings bypass it and go only to their official seller.
-  const internalBookable = event.isBookable !== false;
+  // Listings TicketFlow is not authorised to sell (external sellers, unverified
+  // organizers) have no Book Now — the event page carries the seller's details
+  // instead. No card action ever sends the buyer to another website.
+  const internalBookable = event.isBookable !== false && !externalBooking;
 
   function handleToggleFavorite(e: React.MouseEvent) {
     e.preventDefault();
@@ -207,15 +175,13 @@ export default function EventCard({
             className="snap-row mt-3 gap-1 pb-1"
             aria-label="Ticket prices"
           >
-            {tiers.map((tt, index) => {
+            {tiers.map((tt) => {
               const status = getTierStatus(tt);
               return (
                 <li
                   key={tt.id}
                   className={`min-w-[88px] flex-1 rounded-md px-1.5 py-1.5 text-center text-white ${
-                    externalBooking
-                      ? TIER_PALETTE[index % TIER_PALETTE.length]
-                      : TIER_CHIP_COLORS[tt.category] ?? 'bg-navy-700'
+                    TIER_CHIP_COLORS[tt.category as TicketTypeCategory] ?? 'bg-navy-700'
                   } ${status === 'AVAILABLE' ? '' : 'opacity-60 saturate-50'}`}
                 >
                   <p className="line-clamp-2 min-h-5 text-[8px] font-extrabold uppercase leading-tight tracking-wide">{tt.name}</p>
@@ -248,34 +214,34 @@ export default function EventCard({
             </span>
           </div>
 
-          {/* Red clickable Book Now — always routed to this event's own page */}
-          {externalBooking ? (
-            <a
-              href={event.bookingUrl as string}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Book ${event.title} through the official seller (opens in a new tab)`}
-              className="mt-3 flex h-11 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white transition hover:bg-brand-700"
-            >
-              Book Now
-            </a>
-          ) : (
-            <Link
-              href={eventUrl}
-              aria-label={internalBookable ? `Book tickets for ${event.title}` : `View event information for ${event.title}`}
-              className={`mt-3 flex h-11 items-center justify-center rounded-lg text-sm font-bold text-white transition ${
-                internalBookable ? 'bg-brand-600 hover:bg-brand-700' : 'bg-navy-700 hover:bg-navy-600'
-              }`}
-            >
-              {internalBookable ? 'Book Now' : 'View event info'}
-            </Link>
-          )}
+          {/*
+            Book Now stays inside TicketFlow and opens this event's tier picker
+            in the cart. Listings we cannot sell get an internal info link
+            instead — no card action leaves the site.
+          */}
+          <Link
+            href={internalBookable ? bookUrl : eventUrl}
+            aria-label={
+              internalBookable
+                ? `Book tickets for ${event.title} — choose your tier`
+                : `View event information for ${event.title}`
+            }
+            className={`mt-3 flex h-11 items-center justify-center rounded-full text-sm font-bold text-white transition ${
+              internalBookable
+                ? 'bg-gradient-to-r from-brand-500 to-brand-700 shadow-glow hover:from-brand-600 hover:to-brand-800'
+                : 'bg-white/10 ring-1 ring-inset ring-white/20 hover:bg-white/15'
+            }`}
+          >
+            {internalBookable ? 'Book Now' : externalBooking ? 'View ticket info' : 'View event info'}
+          </Link>
 
           <p className="mt-3 text-center text-[10px] text-white/70">
             {externalBooking ? (
               'Verified event · Tickets sold by the official seller'
             ) : (
-              <>Only on <span className="font-bold text-white">TicketFlow Kenya</span></>
+              <>
+                Book and pay on <span className="font-bold text-white">TicketFlow Kenya</span>
+              </>
             )}
           </p>
           <p className="mt-0.5 text-center text-[9px] text-white/45">www.ticketflow.co.ke</p>

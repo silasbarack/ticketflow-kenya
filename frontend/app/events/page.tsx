@@ -82,14 +82,14 @@ function EventsContent() {
     <main>
       <div className="border-b border-line bg-white py-8 sm:py-10">
         <Container>
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-700">
-            {activeCategory ? activeCategory.name : 'All events'}
-          </p>
-          <h1 className="mt-1 text-[28px] font-bold text-navy-900 sm:text-3xl">Browse Events</h1>
+          <p className="eyebrow text-brand-700">{activeCategory ? activeCategory.name : 'All events'}</p>
+          <h1 className="mt-2 font-display text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
+            Browse events
+          </h1>
           <p className="mt-1.5 text-muted">Find concerts, conferences, sports, and festivals happening near you.</p>
 
           <div className="mt-6">
-            <label className="flex h-12 items-center gap-2.5 rounded-btn border border-line bg-white px-3.5 shadow-soft">
+            <label className="flex h-12 items-center gap-2.5 rounded-full border border-line bg-cream/60 px-4 transition focus-within:border-brand-500 focus-within:bg-white">
               <Search className="h-5 w-5 shrink-0 text-navy-400" aria-hidden="true" />
               <span className="sr-only">Search events</span>
               <input
