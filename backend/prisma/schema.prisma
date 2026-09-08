@@ -56,6 +56,9 @@ enum PaymentStatus {
   SUCCESS
   FAILED
   CANCELLED
+  // The STK push was never answered in time. Distinct from FAILED so the buyer
+  // can be told to request a fresh prompt rather than that their payment failed.
+  EXPIRED
 }
 
 enum PaymentProvider {
@@ -261,11 +264,21 @@ model Payment {
   resultCode         String?
   resultDesc         String?
   rawCallback        Json?
+  // Deadline after which this STK prompt is dead on Safaricom's side. Drives
+  // both the buyer-facing countdown and the reconciliation sweep.
+  stkExpiresAt       DateTime?
+  // Last time we asked Daraja what happened to this request (stkpushquery).
+  lastPolledAt       DateTime?
+  // Daraja answered the status query with "transaction is being processed" —
+  // the customer has submitted the prompt and the result is in flight.
+  isVerifying        Boolean         @default(false)
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
   @@index([orderId])
   @@index([checkoutRequestId])
+  // The reconciliation sweep scans for stale PENDING payments.
+  @@index([status, createdAt])
   @@map("payments")
 }
 

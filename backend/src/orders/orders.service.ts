@@ -141,12 +141,66 @@ export class OrdersService {
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of order.items) {
+        // GREATEST(0, ...) rather than a plain decrement: a counter that goes
+        // negative would silently oversell the tier for the rest of its life.
+        await tx.$executeRaw`UPDATE "ticket_types" SET "quantitySold" = GREATEST(0, "quantitySold" - ${item.quantity}) WHERE "id" = ${item.ticketTypeId}`;
+      }
+    });
+  }
+
+  /**
+   * Takes (or re-takes) the stock for an order's items.
+   *
+   * `allowOversell` is only ever set for a payment that has already succeeded —
+   * the customer's money has left their account, so the ticket is owed to them
+   * even if the tier filled up while the payment was in flight. Every other
+   * caller must fail loudly when the stock is gone.
+   */
+  private async reserveItems(orderId: string, { allowOversell }: { allowOversell: boolean }) {
+    await this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({ where: { id: orderId }, include: { items: true } });
+      if (!order) throw new NotFoundException('Order not found');
+
+      for (const item of order.items) {
+        const ticketType = await tx.ticketType.findUnique({ where: { id: item.ticketTypeId } });
+        if (!ticketType) throw new NotFoundException('A ticket type on this order no longer exists');
+
+        const available = ticketType.quantity - ticketType.quantitySold;
+        if (!allowOversell && available < item.quantity) {
+          throw new BadRequestException(`"${ticketType.name}" has sold out since this order was created`);
+        }
+
         await tx.ticketType.update({
-          where: { id: item.ticketTypeId },
-          data: { quantitySold: { decrement: item.quantity } },
+          where: { id: ticketType.id },
+          data: { quantitySold: { increment: item.quantity } },
         });
       }
     });
+  }
+
+  /**
+   * Puts a failed / cancelled / expired order back on the table so the buyer can
+   * request a fresh STK push. The reservation was released when the payment did
+   * not complete, so it has to be taken again — and the tier may have sold out
+   * in the meantime, which is a real failure the buyer has to be told about.
+   */
+  async reopenForRetry(orderId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId }, include: { event: true } });
+    if (!order) throw new NotFoundException('Order not found');
+
+    if (order.status === 'PENDING') return order; // reservation still held
+    if (order.status === 'PAID') throw new BadRequestException('This order has already been paid for');
+    if (order.status === 'CANCELLED') throw new BadRequestException('This order was cancelled');
+
+    if (order.event.startDateTime < new Date()) {
+      throw new BadRequestException('This event has already started, so it can no longer be paid for');
+    }
+    if (order.event.status !== 'PUBLISHED' || !order.event.salesEnabled) {
+      throw new BadRequestException('Tickets for this event are no longer on sale');
+    }
+
+    await this.reserveItems(orderId, { allowOversell: false });
+    return this.prisma.order.update({ where: { id: orderId }, data: { status: 'PENDING' } });
   }
 
   async findMine(userId: string) {
@@ -170,11 +224,34 @@ export class OrdersService {
   }
 
   async markPaid(orderId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.status === 'PAID') return order;
+
+    // A late success — a Safaricom callback landing after we had already timed
+    // the request out — still has to be honoured: the money has left the
+    // customer's account. The reservation was released when the order was
+    // failed, so take it back before marking it paid.
+    if (order.status !== 'PENDING') {
+      await this.reserveItems(orderId, { allowOversell: true });
+    }
+
     return this.prisma.order.update({ where: { id: orderId }, data: { status: 'PAID' } });
   }
 
   async markFailed(orderId: string) {
+    // Claim the transition atomically. A Safaricom callback and the
+    // reconciliation sweep can both report the same failure, and releasing the
+    // reservation twice would hand the tier back stock it never sold.
+    const claimed = await this.prisma.order.updateMany({
+      where: { id: orderId, status: 'PENDING' },
+      data: { status: 'FAILED' },
+    });
+    if (claimed.count === 0) {
+      return this.prisma.order.findUnique({ where: { id: orderId } });
+    }
+
     await this.releaseReservation(orderId);
-    return this.prisma.order.update({ where: { id: orderId }, data: { status: 'FAILED' } });
+    return this.prisma.order.findUnique({ where: { id: orderId } });
   }
 }

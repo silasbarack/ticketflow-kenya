@@ -33,7 +33,7 @@ function AdminPaymentsContent() {
       <h1 className="text-2xl font-bold text-navy-900">Payments</h1>
 
       <div className="mt-4 flex gap-2">
-        {['', 'PENDING', 'SUCCESS', 'FAILED', 'CANCELLED'].map((s) => (
+        {['', 'PENDING', 'SUCCESS', 'FAILED', 'CANCELLED', 'EXPIRED'].map((s) => (
           <button
             key={s}
             onClick={() => setStatus(s)}

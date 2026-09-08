@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import {
@@ -16,9 +16,9 @@ import {
   Smartphone,
   Ticket as TicketIcon,
 } from 'lucide-react';
-import { api, getApiErrorMessage } from '@/lib/api';
+import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
-import { Order, Payment, Ticket } from '@/types';
+import { Order, Ticket } from '@/types';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { SERVICE_FEE_PERCENT } from '@/lib/fees';
 import {
@@ -28,6 +28,7 @@ import {
   normalizeKenyanPhone,
 } from '@/lib/phone';
 import { tierLabel } from '@/lib/tiers';
+import { payPhoneKey } from '@/lib/payment-flow';
 import Container from '@/components/ui/Container';
 import { Input, Label } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -35,28 +36,17 @@ import BookingSteps from '@/components/BookingSteps';
 
 function CheckoutContent() {
   const params = useParams<{ orderId: string }>();
-  const queryClient = useQueryClient();
+  const router = useRouter();
   const [phone, setPhone] = useState('');
-  const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
+  // Set from the moment Pay is pressed until the route change lands, so the
+  // button cannot be pressed twice into two STK pushes.
+  const [handingOff, setHandingOff] = useState(false);
 
   const { data: order } = useQuery({
     queryKey: ['order', params.orderId],
     queryFn: async () => {
       const { data } = await api.get(`/orders/${params.orderId}`);
       return data as Order;
-    },
-  });
-
-  const { data: payments } = useQuery({
-    queryKey: ['order-payments', params.orderId],
-    queryFn: async () => {
-      const { data } = await api.get(`/payments/order/${params.orderId}`);
-      return data as Payment[];
-    },
-    enabled: !!activePaymentId,
-    refetchInterval: (query) => {
-      const latest = query.state.data?.[0];
-      return latest && latest.status !== 'PENDING' ? false : 3000;
     },
   });
 
@@ -73,37 +63,26 @@ function CheckoutContent() {
     },
   });
 
-  const latestPayment = payments?.[0];
-
-  if (latestPayment?.status === 'SUCCESS') {
-    queryClient.invalidateQueries({ queryKey: ['order', params.orderId] });
-  }
-
-  const stkPush = useMutation({
-    mutationFn: async () => {
-      const { data } = await api.post('/payments/mpesa/stk-push', { orderId: params.orderId, phone });
-      return data as Payment;
-    },
-    onSuccess: (payment) => {
-      setActivePaymentId(payment.id);
-      toast.success('Check your phone for the M-Pesa PIN prompt.');
-    },
-    onError: (error) => toast.error(getApiErrorMessage(error)),
-  });
-
-  const mockSuccess = useMutation({
-    mutationFn: async () => {
-      if (!activePaymentId) throw new Error('No active payment yet');
-      const { data } = await api.post(`/payments/mock/${activePaymentId}/success`);
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['order', params.orderId] });
-      queryClient.invalidateQueries({ queryKey: ['order-tickets', params.orderId] });
-      toast.success('Payment confirmed!');
-    },
-    onError: (error) => toast.error(getApiErrorMessage(error)),
-  });
+  /**
+   * Pressing Pay hands the buyer straight to the payment-processing screen,
+   * which is what actually fires the STK push. The number travels in
+   * sessionStorage rather than the URL so it is never written into browser
+   * history, a referrer header or a shared link.
+   */
+  const startPayment = () => {
+    if (!isValidKenyanPhone(phone)) {
+      toast.error(KENYA_PHONE_MESSAGE);
+      return;
+    }
+    setHandingOff(true);
+    try {
+      window.sessionStorage.setItem(payPhoneKey(params.orderId), phone.trim());
+    } catch {
+      // Private-browsing modes can refuse sessionStorage; the processing screen
+      // falls back to adopting an in-flight payment.
+    }
+    router.push(`/checkout/${params.orderId}/payment`);
+  };
 
   if (!order) {
     return (
@@ -235,7 +214,6 @@ function CheckoutContent() {
     Boolean(confirmedPhone) &&
     isValidKenyanPhone(phone) &&
     normalizeKenyanPhone(phone) !== normalizeKenyanPhone(confirmedPhone);
-  const awaitingCallback = Boolean(activePaymentId) && (latestPayment?.status ?? 'PENDING') === 'PENDING';
   // Attendee details were collected for 2+ tickets, not 2+ tier lines.
   const ticketCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -274,7 +252,10 @@ function CheckoutContent() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="07XXXXXXXX or 01XXXXXXXX"
-                disabled={Boolean(activePaymentId)}
+                disabled={handingOff}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') startPayment();
+                }}
               />
               <p className="mt-2 text-xs text-muted">
                 Entering it a second time makes sure the prompt reaches the right handset.
@@ -297,18 +278,12 @@ function CheckoutContent() {
             size="lg"
             fullWidth
             className="mt-5"
-            loading={stkPush.isPending}
-            disabled={!phone || Boolean(activePaymentId)}
-            onClick={() => {
-              if (!isValidKenyanPhone(phone)) {
-                toast.error(KENYA_PHONE_MESSAGE);
-                return;
-              }
-              stkPush.mutate();
-            }}
+            loading={handingOff}
+            disabled={!phone || handingOff}
+            onClick={startPayment}
           >
-            {stkPush.isPending ? (
-              'Sending STK push…'
+            {handingOff ? (
+              'Opening secure payment…'
             ) : (
               <span className="flex items-center justify-center gap-2">
                 Pay {formatCurrency(order.totalAmount)} with
@@ -316,33 +291,6 @@ function CheckoutContent() {
               </span>
             )}
           </Button>
-
-          {activePaymentId && (
-            <div className="mt-5 rounded-btn border border-line bg-cream/70 p-4">
-              <p className="flex items-center gap-2.5 text-sm font-semibold text-navy-900">
-                {awaitingCallback && (
-                  <span
-                    className="h-4 w-4 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600"
-                    aria-hidden="true"
-                  />
-                )}
-                Payment status: {latestPayment?.status ?? 'PENDING'}
-              </p>
-              <p className="mt-1.5 text-[13px] text-muted">
-                {awaitingCallback
-                  ? 'Enter your M-Pesa PIN on your phone. This page updates itself the moment Safaricom confirms.'
-                  : latestPayment?.resultDesc || 'Safaricom has responded — see the status above.'}
-              </p>
-
-              <button
-                onClick={() => mockSuccess.mutate()}
-                disabled={mockSuccess.isPending}
-                className="mt-3 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-semibold text-navy-700 transition hover:border-navy-300"
-              >
-                Dev only: simulate successful callback
-              </button>
-            </div>
-          )}
 
           <ul className="mt-5 space-y-2 border-t border-line pt-4 text-[12px] text-muted">
             <li className="flex items-center gap-2">

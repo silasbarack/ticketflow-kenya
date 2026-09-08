@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -24,6 +25,9 @@ import { TaxModule } from './tax/tax.module';
   controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Registered once for the whole app — forRoot() is global, and calling it in
+    // two modules would register every @Cron job twice.
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
     AuditLogsModule,
