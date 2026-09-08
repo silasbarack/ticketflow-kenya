@@ -46,14 +46,15 @@ export const POLL_INTERVAL_MS = 3_000;
 /**
  * Projects the backend's payment stage onto the screen's state.
  *
- * `stkSentAt` is when this browser saw the push accepted; it only separates the
- * first few seconds of AWAITING_CUSTOMER from the rest, so a reload lands
- * straight on "waiting for confirmation" rather than replaying "check your
- * phone" for a prompt the buyer has been staring at for a minute.
+ * `stkHoldElapsed` splits AWAITING_CUSTOMER into its two beats: the moment the
+ * prompt lands, and the wait that follows. It is a flag rather than a timestamp
+ * compared against `Date.now()` because React does not re-render on clock ticks
+ * — and while the buyer waits, every poll returns an identical body, so the
+ * screen would sit on "check your phone" forever. The caller owns the timer.
  */
 export function flowStateFor(
   status: PaymentStatusView | undefined,
-  { stkSentAt, now = Date.now() }: { stkSentAt?: number | null; now?: number } = {},
+  { stkHoldElapsed = false }: { stkHoldElapsed?: boolean } = {},
 ): PaymentFlowState {
   if (!status) return 'INITIALIZING';
 
@@ -69,7 +70,7 @@ export function flowStateFor(
     case 'VERIFYING':
       return 'VERIFYING';
     case 'AWAITING_CUSTOMER':
-      return stkSentAt && now - stkSentAt < STK_SENT_HOLD_MS ? 'STK_SENT' : 'WAITING_FOR_CONFIRMATION';
+      return stkHoldElapsed ? 'WAITING_FOR_CONFIRMATION' : 'STK_SENT';
     default:
       return 'INITIALIZING';
   }

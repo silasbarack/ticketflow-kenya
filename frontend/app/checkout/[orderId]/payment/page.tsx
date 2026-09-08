@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Clock, ShieldCheck, XCircle } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
@@ -38,9 +38,13 @@ function PaymentProcessing() {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   /** When this browser saw the prompt accepted — separates "check your phone" from "waiting". */
   const [stkSentAt, setStkSentAt] = useState<number | null>(null);
+  /** Set by a timer, not read off the clock at render: see flowStateFor(). */
+  const [stkHoldElapsed, setStkHoldElapsed] = useState(false);
   const [attemptStartedAt, setAttemptStartedAt] = useState(() => Date.now());
   const [pollCeilingHit, setPollCeilingHit] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
+  /** An STK request is on its way to the backend right now. */
+  const [sending, setSending] = useState(false);
 
   /** The push is fired exactly once per mount, whatever React does with effects. */
   const startedRef = useRef(false);
@@ -55,25 +59,38 @@ function PaymentProcessing() {
     },
   });
 
-  const initiate = useMutation({
-    mutationFn: async (msisdn: string) => {
-      const { data } = await api.post('/payments/mpesa/stk-push', { orderId, phone: msisdn });
-      return data as PaymentStatusView;
-    },
-    onMutate: () => {
+  /**
+   * Sends the prompt and owns its own in-flight flag.
+   *
+   * Deliberately not a useMutation: this fires from an effect on mount, and a
+   * mutation observer torn down and rebuilt around that call (React StrictMode
+   * does exactly this in dev) reports `pending` forever — which would leave the
+   * Try Again button permanently disabled. A plain request with explicit state
+   * behaves the same in development and production.
+   */
+  const sendStkPush = useCallback(
+    async (msisdn: string) => {
+      setSending(true);
       setInitError(null);
       setPollCeilingHit(false);
+      setStkHoldElapsed(false);
       setAttemptStartedAt(Date.now());
+      try {
+        const { data } = await api.post('/payments/mpesa/stk-push', { orderId, phone: msisdn });
+        const next = data as PaymentStatusView;
+        setPaymentId(next.paymentId);
+        // Seed the cache so the screen moves to "check your phone" without
+        // waiting out a full poll interval.
+        queryClient.setQueryData(['payment-status', next.paymentId], next);
+        if (next.checkoutRequestId) setStkSentAt(Date.now());
+      } catch (error) {
+        setInitError(getApiErrorMessage(error));
+      } finally {
+        setSending(false);
+      }
     },
-    onSuccess: (status) => {
-      setPaymentId(status.paymentId);
-      // Seed the cache so the screen moves to "check your phone" without waiting
-      // a full poll interval.
-      queryClient.setQueryData(['payment-status', status.paymentId], status);
-      if (status.checkoutRequestId) setStkSentAt(Date.now());
-    },
-    onError: (error) => setInitError(getApiErrorMessage(error)),
-  });
+    [orderId, queryClient],
+  );
 
   const { data: status } = useQuery({
     queryKey: ['payment-status', paymentId],
@@ -94,7 +111,7 @@ function PaymentProcessing() {
     const stored = window.sessionStorage.getItem(payPhoneKey(orderId));
     if (stored) {
       setPhone(stored);
-      initiate.mutate(stored);
+      void sendStkPush(stored);
       return;
     }
 
@@ -122,6 +139,18 @@ function PaymentProcessing() {
     if (status?.checkoutRequestId && stkSentAt === null) setStkSentAt(Date.now());
   }, [status?.checkoutRequestId, stkSentAt]);
 
+  /* ── …and that moment ends on a timer, not on the next re-render ───────── */
+  useEffect(() => {
+    if (stkSentAt === null) return;
+    const remaining = STK_SENT_HOLD_MS - (Date.now() - stkSentAt);
+    if (remaining <= 0) {
+      setStkHoldElapsed(true);
+      return;
+    }
+    const timer = setTimeout(() => setStkHoldElapsed(true), remaining);
+    return () => clearTimeout(timer);
+  }, [stkSentAt]);
+
   /* ── Client-side ceiling, so an unreachable backend is not a dead end ──── */
   useEffect(() => {
     if (!paymentId || status?.isFinal) return;
@@ -145,7 +174,7 @@ function PaymentProcessing() {
   }, [status?.stage, orderId, queryClient, router]);
 
   /* ── Resolve the one state the screen renders ───────────────────────────── */
-  const backendState = flowStateFor(status, { stkSentAt });
+  const backendState = flowStateFor(status, { stkHoldElapsed });
   let state: PaymentFlowState;
   if (initError) {
     state = 'FAILED';
@@ -154,14 +183,13 @@ function PaymentProcessing() {
   } else if (pollCeilingHit) {
     state = 'TIMEOUT';
   } else {
-    state = initiate.isPending && !status ? 'INITIALIZING' : backendState;
+    state = sending && !status ? 'INITIALIZING' : backendState;
   }
 
   const amount = formatCurrency(status?.amount ?? order?.totalAmount ?? 0);
   const copy = copyFor(state, { amount, phoneMasked: status?.phoneMasked });
   const isFinal = isFinalFlowState(state);
   const retryLabel = retryLabelFor(state);
-  const waiting = state === 'WAITING_FOR_CONFIRMATION' || state === 'STK_SENT';
 
   // Safaricom's own wording is more specific than our generic copy ("wrong PIN",
   // "insufficient balance"), so show it when the payment failed for a reason.
@@ -175,11 +203,13 @@ function PaymentProcessing() {
       router.push(`/checkout/${orderId}`);
       return;
     }
-    initiate.mutate(phone);
+    void sendStkPush(phone);
   };
 
   return (
-    <main className="ember-ground min-h-screen py-10 sm:py-16">
+    // Fills the fold below the navbar without adding a viewport of dead ground
+    // underneath the card.
+    <main className="ember-ground min-h-[calc(100vh-7rem)] py-10 sm:py-14">
       <Container className="max-w-lg">
         <div className="mb-6 flex justify-center">
           <Logo variant="full" theme="dark" className="h-10" wordmarkClassName="text-base" />
@@ -266,7 +296,7 @@ function PaymentProcessing() {
                   variant="primary"
                   size="lg"
                   fullWidth
-                  loading={initiate.isPending}
+                  loading={sending}
                   onClick={handleRetry}
                 >
                   {retryLabel}
