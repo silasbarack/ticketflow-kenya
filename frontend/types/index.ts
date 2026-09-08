@@ -10,7 +10,7 @@ export type TicketTypeCategory = 'REGULAR' | 'VIP' | 'VVIP' | 'STUDENT' | 'EARLY
 
 export type OrderStatus = 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
 
-export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
+export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'EXPIRED';
 
 export type TicketStatus = 'ACTIVE' | 'USED' | 'CANCELLED' | 'REFUNDED';
 
@@ -135,6 +135,43 @@ export interface Payment {
   checkoutRequestId?: string | null;
   mpesaReceiptNumber?: string | null;
   resultDesc?: string | null;
+  createdAt: string;
+}
+
+/**
+ * What the buyer is waiting on. `status` alone cannot express this — PENDING
+ * spans everything from "still talking to Daraja" to "PIN entered, result in
+ * flight". Mirrors backend/src/payments/payment-status.ts.
+ */
+export type PaymentStage =
+  | 'INITIATED'
+  | 'AWAITING_CUSTOMER'
+  | 'VERIFYING'
+  | 'SUCCESS'
+  | 'CANCELLED'
+  | 'FAILED'
+  | 'EXPIRED';
+
+/** Response of GET /payments/:id/status — the payment-processing screen polls this. */
+export interface PaymentStatusView {
+  paymentId: string;
+  orderId: string;
+  orderNumber: string;
+  orderStatus: OrderStatus;
+  status: PaymentStatus;
+  stage: PaymentStage;
+  isFinal: boolean;
+  amount: number;
+  /** Masked for display, e.g. "0712 *** 678". Never the full number. */
+  phoneMasked: string | null;
+  checkoutRequestId: string | null;
+  merchantRequestId: string | null;
+  mpesaReceiptNumber: string | null;
+  resultCode: string | null;
+  resultDesc: string | null;
+  message: string;
+  expiresAt: string | null;
+  ticketsIssued: number;
   createdAt: string;
 }
 

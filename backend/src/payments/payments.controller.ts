@@ -39,6 +39,18 @@ export class PaymentsController {
     return this.paymentsService.findByOrder(user.userId, user.role, orderId);
   }
 
+  /**
+   * Single source of truth for the payment-processing screen. Reconciles with
+   * Safaricom on the way through, so an open tab settles its own payment even
+   * when the callback never arrives.
+   */
+  @UseGuards(RolesGuard)
+  @Roles(Role.CUSTOMER, Role.ORGANIZER, Role.ADMIN)
+  @Get(':id/status')
+  getStatus(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.paymentsService.getStatus(user.userId, user.role, id);
+  }
+
   @UseGuards(RolesGuard)
   @Roles(Role.CUSTOMER, Role.ORGANIZER, Role.ADMIN)
   @Get(':id')

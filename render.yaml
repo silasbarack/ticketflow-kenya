@@ -42,9 +42,16 @@ services:
       # Set to the frontend service's public URL once it's deployed (used for CORS).
       - key: FRONTEND_URL
         sync: false
-      # Set to https://<this-service>.onrender.com/payments/mpesa/callback once this service is deployed.
+      # Set to https://<this-service>.onrender.com/api/payments/mpesa/callback once
+      # this service is deployed. The /api prefix matters: without it Safaricom's
+      # callback 404s and every payment hangs until the sweep expires it.
       - key: MPESA_CALLBACK_URL
         sync: false
+      # Settles payments whose callback never arrived — a free-tier service that
+      # has spun down misses callbacks outright, so this is what keeps orders
+      # from sitting PENDING forever with their stock reserved.
+      - key: MPESA_RECONCILIATION_ENABLED
+        value: "true"
 
   - type: web
     name: ticketflow-frontend

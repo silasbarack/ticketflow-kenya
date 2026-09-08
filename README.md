@@ -113,13 +113,21 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
    click "Approve" (status becomes `PUBLISHED` and it now appears on `/events`).
 6. **Customer buys a ticket**: log in as a customer, open the event on `/events/[id]`, pick a
    ticket quantity, click "Buy Ticket" → redirected to `/checkout/[orderId]`.
-7. **Pay via M-Pesa (sandbox) or mock**:
-   - Real sandbox: enter a Safaricom test MSISDN and click "Pay with M-Pesa"; approve the STK
-     prompt on the test phone. Safaricom calls your `MPESA_CALLBACK_URL`, which marks the
-     payment `SUCCESS`.
-   - Local/no public URL: click "Dev only: simulate successful callback" after initiating the
-     push (or even without a real consumer key/secret, since the mock endpoint bypasses Daraja
-     entirely).
+7. **Pay via M-Pesa (sandbox)**: enter a Safaricom test MSISDN and click
+   "Pay KES … with M-Pesa". The buyer is taken straight to the payment-processing screen at
+   `/checkout/[orderId]/payment`, which sends the STK push and then walks through
+   "Check your phone" → "Waiting for M-Pesa confirmation…" → "Confirming your payment…" →
+   the final state. Approve or decline the prompt on the test phone and watch the screen
+   settle. Cancelling gives you a **Try Again** button; leaving it unanswered gives you
+   **Send M-Pesa Request Again**.
+
+   The screen polls `GET /api/payments/:id/status`, which reconciles with Safaricom directly —
+   so it reaches a correct final state even when the callback never arrives (no public
+   `MPESA_CALLBACK_URL`, a tunnel that has rotated, or a service that was asleep). The same
+   reconciliation runs as a background sweep every 30s for buyers who closed the tab.
+
+   Local/no Daraja credentials at all: `POST /api/payments/mock/:paymentId/success` still
+   simulates the successful callback (requires `ENABLE_MOCK_PAYMENTS=true`).
 8. **Ticket QR is generated**: once the order is `PAID`, go to `/dashboard/tickets` → open a
    ticket → see its QR code at `/tickets/[id]`.
 9. **Organizer scans the ticket**: log in as the organizer, go to `/organizer/scan`, pick the
@@ -140,8 +148,19 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
   order creation time inside a Prisma transaction, and released if the payment fails/cancels —
   this prevents overselling without requiring a separate "reservation" table.
 - **Trust boundary**: the frontend never sets payment status directly. Only
-  `payments.service.ts`, reacting to the M-Pesa callback (or the dev-only mock endpoint), can
-  mark a payment `SUCCESS` and trigger ticket generation.
+  `payments.service.ts` can mark a payment `SUCCESS` and trigger ticket generation, and only on
+  Safaricom's own word — the M-Pesa callback, the `stkpushquery` status query, or the dev-only
+  mock endpoint. A successfully *sent* STK push is never treated as a successful payment.
+- **Settlement never depends on the callback arriving**: `payments.service.ts` also asks Daraja
+  what happened (`stkpushquery`), both when the buyer's screen polls
+  `GET /api/payments/:id/status` and from a 30-second background sweep
+  (`payment-reconciliation.service.ts`). Without it, a callback lost to a sleeping instance or a
+  stale tunnel URL leaves the order `PENDING` forever with its stock reserved. A payment is only
+  written off when Safaricom says so, or at the `MPESA_STK_HARD_EXPIRY_SECONDS` cut-off — and a
+  success landing after that is still honoured, because the money already left the buyer.
+- **One prompt per order**: initiation is serialised per order and reuses any live prompt, so a
+  double-click, a refresh or two tabs cannot ring the buyer's phone twice. A fresh prompt is only
+  sent once the previous one can no longer be paid.
 - **Adding another payment provider**: see `backend/README.md` → "Adding another payment
   provider".
 

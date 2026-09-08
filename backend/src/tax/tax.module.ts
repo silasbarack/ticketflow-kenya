@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { ScheduleModule } from "@nestjs/schedule";
 
 import { TaxEncryptionService } from "./domain/crypto/tax-encryption.service";
 
@@ -56,7 +55,9 @@ import { TaxPermissionsController } from "./infrastructure/controllers/tax-permi
  * models.
  */
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  // ScheduleModule.forRoot() is registered once in AppModule (it is a global
+  // module); registering it again here would double every @Cron job.
+  imports: [],
   controllers: [
     TaxCalculationsController,
     RefundCalculationsController,
