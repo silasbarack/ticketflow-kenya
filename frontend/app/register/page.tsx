@@ -48,8 +48,8 @@ export default function RegisterPage() {
       toast.success('Account created!');
       if (user.role === 'ORGANIZER') router.push('/organizer/dashboard');
       else router.push('/dashboard');
-    } catch (error: any) {
-      toast.error(error.message || 'Registration failed');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Registration failed');
     } finally {
       setSubmitting(false);
     }

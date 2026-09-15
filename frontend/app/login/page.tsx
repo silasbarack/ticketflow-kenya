@@ -31,8 +31,8 @@ export default function LoginPage() {
       if (user.role === 'ADMIN') router.push('/admin/dashboard');
       else if (user.role === 'ORGANIZER') router.push('/organizer/dashboard');
       else router.push('/dashboard');
-    } catch (error: any) {
-      toast.error(error.message || 'Login failed');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Login failed');
     } finally {
       setSubmitting(false);
     }

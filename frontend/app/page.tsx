@@ -44,6 +44,14 @@ export default function LandingPage() {
 
   const events = eventsData?.events ?? [];
   const cities = new Set(events.map((e) => e.city)).size;
+  const cityCounts = Array.from(
+    events.reduce(
+      (counts, event) => counts.set(event.city, (counts.get(event.city) ?? 0) + 1),
+      new Map<string, number>(),
+    ),
+  )
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
   const spotlightEvent = events.find((e) => e.posterUrl) ?? events[0];
 
   const spotlightBookable =
@@ -64,23 +72,23 @@ export default function LandingPage() {
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-ink-950 to-transparent" />
         </div>
 
-        <Container className="relative grid gap-12 py-14 sm:py-16 lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-16 lg:py-24">
-          <div>
+        <Container className="relative grid min-w-0 gap-10 py-12 sm:py-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16 lg:py-20">
+          <div className="min-w-0">
             <span
               className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3.5 py-1.5 text-xs font-semibold backdrop-blur"
               style={{ animationDelay: '0ms' }}
             >
-              <span aria-hidden="true">🇰🇪</span>
-              Built in Kenya, for Kenyan events
+              <Ticket className="h-3.5 w-3.5 text-brand-300" aria-hidden="true" />
+              Kenya&apos;s event marketplace
             </span>
 
             <h1
               className="animate-fade-in-up mt-6 text-[38px] font-extrabold leading-[1.04] tracking-[-0.03em] sm:text-[56px] lg:text-[64px]"
               style={{ animationDelay: '80ms' }}
             >
-              Discover events
+              Find your next
               <br />
-              worth <span className="ember-text">showing up</span> for.
+              <span className="ember-text">unmissable event.</span>
             </h1>
 
             <p
@@ -96,7 +104,7 @@ export default function LandingPage() {
               <HeroSearch />
             </div>
 
-            <div className="animate-fade-in-up mt-7 flex flex-wrap gap-3" style={{ animationDelay: '300ms' }}>
+            <div className="animate-fade-in-up mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap" style={{ animationDelay: '300ms' }}>
               <Link href="/events">
                 <Button variant="primary" size="lg">
                   Explore events
@@ -114,7 +122,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-x-7 gap-y-3 text-[13px] text-white/60">
+            <div className="mt-8 grid gap-3 text-[13px] text-white/60 sm:flex sm:flex-wrap sm:gap-x-7 sm:gap-y-3">
               {HERO_PROMISES.map((promise) => (
                 <span key={promise.text} className="flex items-center gap-2">
                   <promise.icon className="h-4 w-4 text-brand-400" aria-hidden="true" />
@@ -195,8 +203,15 @@ export default function LandingPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex aspect-[4/5] w-full items-center justify-center rounded-panel border border-white/10 bg-gradient-to-br from-ink-700 to-ink-950 shadow-elevated">
-                <Ticket className="h-16 w-16 text-white/20" aria-hidden="true" />
+              <div className="flex min-h-[420px] w-full flex-col justify-end rounded-panel border border-white/10 bg-white/[0.045] p-7 shadow-elevated">
+                <span className="flex h-12 w-12 items-center justify-center rounded-btn bg-brand-500/20 text-brand-300">
+                  <Ticket className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <p className="mt-6 text-2xl font-extrabold tracking-[-0.025em]">One place for every kind of plan.</p>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">Music, sport, theatre, festivals, conferences and community events from across Kenya.</p>
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-white/70">
+                  {['Concerts', 'Festivals', 'Business', 'Theatre', 'Sports'].map((label) => <span key={label} className="rounded-full border border-white/12 px-3 py-1.5">{label}</span>)}
+                </div>
               </div>
             )}
           </div>
@@ -249,6 +264,39 @@ export default function LandingPage() {
         </section>
       )}
 
+      {cityCounts.length > 0 && (
+        <section className="border-y border-line bg-white py-11 sm:py-14" aria-labelledby="locations-heading">
+          <Container>
+            <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+              <div>
+                <p className="page-kicker">Around Kenya</p>
+                <h2 id="locations-heading" className="mt-2 text-[26px] font-extrabold tracking-[-0.025em] text-navy-900 sm:text-[31px]">
+                  Browse by location
+                </h2>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-muted">
+                  Jump straight to events happening in cities represented in our current listings.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2.5 lg:justify-end">
+                {cityCounts.map(([city, count]) => (
+                  <Link
+                    key={city}
+                    href={`/events?city=${encodeURIComponent(city)}`}
+                    className="group inline-flex min-h-12 items-center gap-3 rounded-full border border-line bg-cream px-4 text-sm font-bold text-navy-800 transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
+                  >
+                    <MapPin className="h-4 w-4 text-brand-600" aria-hidden="true" />
+                    {city}
+                    <span className="tnum rounded-full bg-white px-2 py-0.5 text-[11px] text-muted shadow-soft">
+                      {count}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </Container>
+        </section>
+      )}
+
       <FeaturedEvents />
       <ProcessTimeline />
       <OrganizerCTA />
@@ -258,10 +306,10 @@ export default function LandingPage() {
         <Container>
           <div className="ember-ground flex flex-col items-center gap-5 rounded-panel px-6 py-14 text-center text-white sm:px-12">
             <h2 className="max-w-2xl text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-4xl">
-              Ready to find your <span className="ember-text">next night out</span>?
+              There&apos;s more happening. <span className="ember-text">Find your place in it.</span>
             </h2>
             <p className="max-w-md text-[15px] text-white/65">
-              Thousands of Kenyans discover concerts, festivals and conferences on TicketFlow every week.
+              Explore every live listing, compare ticket tiers, and book securely with M-Pesa.
             </p>
             <Link href="/events">
               <Button variant="primary" size="lg" className="mt-1">

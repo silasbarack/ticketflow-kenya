@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
-import { LogOut, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, LogOut, ShieldCheck, type LucideIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import Logo from '@/components/Logo';
 import clsx from 'clsx';
 
 interface NavItem {
@@ -16,58 +17,83 @@ interface NavItem {
 export default function DashboardLayout({ items, children }: { items: NavItem[]; children: ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const workspaceLabel = user?.role === 'ADMIN' ? 'Platform administration' : 'Organizer workspace';
 
   return (
-    <div className="flex min-h-[calc(100vh-70px)] lg:min-h-[calc(100vh-106px)]">
-      <aside className="hidden w-64 flex-col border-r border-line bg-white p-4 md:flex">
-        <div className="mb-6 px-2">
-          <p className="text-sm font-semibold text-navy-900">{user?.firstName} {user?.lastName}</p>
-          <p className="text-xs text-muted">{user?.role}</p>
-        </div>
-        <nav className="flex flex-1 flex-col gap-1">
-          {items.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + '/');
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={clsx(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                  active ? 'bg-brand-50 text-brand-700' : 'text-navy-600 hover:bg-navy-900/5',
-                )}
-              >
-                <item.icon className={clsx('h-4 w-4', active && 'text-brand-600')} aria-hidden="true" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <button
-          onClick={logout}
-          className="mt-4 flex items-center gap-3 rounded-lg border border-line px-3 py-2 text-left text-sm font-medium text-navy-600 hover:bg-navy-900/5"
-        >
-          <LogOut className="h-4 w-4" aria-hidden="true" />
-          Log out
-        </button>
-      </aside>
+    <div className="min-h-[calc(100vh-var(--header-height))] bg-cream">
+      <div className="mx-auto flex max-w-[1600px]">
+        <aside className="sticky top-[var(--header-height)] hidden h-[calc(100vh-var(--header-height))] w-[278px] shrink-0 flex-col bg-ink-950 px-4 py-5 text-white lg:flex">
+          <div className="rounded-card border border-white/10 bg-white/[0.045] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <Logo variant="icon" className="h-9" />
+              <span className="rounded-full border border-brand-400/30 bg-brand-500/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-200">
+                {user?.role === 'ADMIN' ? 'Admin' : 'Organizer'}
+              </span>
+            </div>
+            <p className="mt-4 text-sm font-bold text-white">{user?.firstName} {user?.lastName}</p>
+            <p className="mt-0.5 text-xs text-white/45">{workspaceLabel}</p>
+          </div>
 
-      <div className="flex-1 overflow-x-hidden">
-        <div className="flex gap-2 overflow-x-auto border-b border-line bg-white p-3 md:hidden">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={clsx(
-                'flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium',
-                pathname.startsWith(item.href) ? 'bg-brand-600 text-white' : 'bg-navy-900/5 text-navy-700',
-              )}
-            >
-              <item.icon className="h-3.5 w-3.5" aria-hidden="true" />
-              {item.label}
+          <nav className="mt-5 flex flex-1 flex-col gap-1.5" aria-label={`${workspaceLabel} navigation`}>
+            {items.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + '/');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  className={clsx(
+                    'group flex min-h-11 items-center gap-3 rounded-btn px-3.5 text-sm font-semibold transition',
+                    active ? 'bg-brand-600 text-white shadow-glow' : 'text-white/58 hover:bg-white/[0.07] hover:text-white',
+                  )}
+                >
+                  <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="space-y-1 border-t border-white/10 pt-4">
+            <Link href="/" className="flex min-h-11 items-center gap-3 rounded-btn px-3.5 text-sm font-medium text-white/55 transition hover:bg-white/[0.07] hover:text-white">
+              <ArrowLeft className="h-[18px] w-[18px]" aria-hidden="true" />
+              Back to TicketFlow
             </Link>
-          ))}
+            <button type="button" onClick={logout} className="flex min-h-11 w-full items-center gap-3 rounded-btn px-3.5 text-left text-sm font-medium text-white/55 transition hover:bg-white/[0.07] hover:text-white">
+              <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
+              Log out
+            </button>
+          </div>
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          <div className="sticky top-[var(--header-height)] z-20 border-b border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted">
+              <ShieldCheck className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
+              {workspaceLabel}
+            </div>
+            <nav className="snap-row gap-2" aria-label={`${workspaceLabel} navigation`}>
+              {items.map((item) => {
+                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? 'page' : undefined}
+                    className={clsx('flex min-h-10 shrink-0 items-center gap-2 rounded-full border px-3.5 text-xs font-bold', active ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-white text-navy-700')}
+                  >
+                    <item.icon className="h-3.5 w-3.5" aria-hidden="true" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <main className="mx-auto w-full max-w-[1220px] px-4 py-7 sm:px-6 sm:py-9 xl:px-10 xl:py-11">
+            {children}
+          </main>
         </div>
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

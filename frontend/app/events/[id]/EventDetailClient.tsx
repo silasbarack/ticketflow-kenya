@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { BadgeCheck, Calendar, Clock, ExternalLink, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
+import { BadgeCheck, Calendar, CalendarX, Clock, ExternalLink, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useFavorites } from '@/hooks/useFavorites';
 import { EventItem } from '@/types';
@@ -14,6 +14,8 @@ import Button, { buttonVariants } from '@/components/ui/Button';
 import EventGrid from '@/components/EventGrid';
 import EventPoster from '@/components/EventPoster';
 import EventBookingPanel from '@/components/EventBookingPanel';
+import EmptyState from '@/components/ui/EmptyState';
+import Skeleton from '@/components/ui/Skeleton';
 import { getTierStatus } from '@/lib/tiers';
 import Link from 'next/link';
 
@@ -21,7 +23,7 @@ export default function EventDetailClient() {
   const params = useParams<{ id: string }>();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading, isError, refetch } = useQuery({
     queryKey: ['event', params.id],
     queryFn: async () => {
       const { data } = await api.get(`/events/${params.id}`);
@@ -63,15 +65,21 @@ export default function EventDetailClient() {
 
   if (isLoading) {
     return (
-      <Container className="py-16">
-        <p className="text-muted">Loading event...</p>
+      <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[1.6fr_1fr]">
+        <Skeleton className="aspect-[16/10] rounded-card" />
+        <div className="space-y-4"><Skeleton className="h-5 w-28" /><Skeleton className="h-10 w-full" /><Skeleton className="h-5 w-3/4" /><Skeleton className="mt-8 h-72 rounded-card" /></div>
       </Container>
     );
   }
-  if (!event) {
+  if (isError || !event) {
     return (
-      <Container className="py-16">
-        <p className="text-muted">Event not found.</p>
+      <Container className="max-w-2xl py-16">
+        <EmptyState
+          icon={<CalendarX className="h-6 w-6" aria-hidden="true" />}
+          title={isError ? "We couldn't load this event" : 'Event not found'}
+          description={isError ? 'Check your connection and try again.' : 'The event may have ended or the link may be incorrect.'}
+          action={isError ? <Button onClick={() => refetch()}>Try again</Button> : <Link href="/events" className={buttonVariants()}>Browse events</Link>}
+        />
       </Container>
     );
   }

@@ -9,6 +9,7 @@ import StatusBadge from '@/components/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
+import Skeleton from '@/components/ui/Skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { Order, Ticket } from '@/types';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
@@ -16,7 +17,7 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 function CustomerDashboardContent() {
   const { user } = useAuth();
 
-  const { data: orders } = useQuery({
+  const { data: orders, isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useQuery({
     queryKey: ['my-orders'],
     queryFn: async () => {
       const { data } = await api.get('/orders/my');
@@ -24,7 +25,7 @@ function CustomerDashboardContent() {
     },
   });
 
-  const { data: tickets } = useQuery({
+  const { data: tickets, isLoading: ticketsLoading } = useQuery({
     queryKey: ['my-tickets'],
     queryFn: async () => {
       const { data } = await api.get('/tickets/my');
@@ -49,6 +50,7 @@ function CustomerDashboardContent() {
     { icon: Receipt, label: 'Orders placed', value: String(allOrders.length) },
     { icon: Wallet, label: 'Total spent', value: formatCurrency(totalSpent) },
   ];
+  const overviewLoading = ordersLoading || ticketsLoading;
 
   return (
     <main className="pb-16">
@@ -68,7 +70,7 @@ function CustomerDashboardContent() {
                   <stat.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div className="min-w-0">
-                  <p className="tnum truncate text-xl font-extrabold">{stat.value}</p>
+                  {overviewLoading ? <Skeleton className="h-6 w-20 bg-white/15" /> : <p className="tnum truncate text-xl font-extrabold">{stat.value}</p>}
                   <p className="text-[12px] text-white/50">{stat.label}</p>
                 </div>
               </div>
@@ -128,7 +130,17 @@ function CustomerDashboardContent() {
           )}
         </div>
 
-        {allOrders.length === 0 ? (
+        {ordersLoading ? (
+          <Skeleton className="mt-4 h-64 rounded-card" />
+        ) : ordersError ? (
+          <EmptyState
+            className="mt-4"
+            icon={<Receipt className="h-6 w-6" aria-hidden="true" />}
+            title="We couldn't load your orders"
+            description="Check your connection and try again."
+            action={<Button onClick={() => refetchOrders()}>Try again</Button>}
+          />
+        ) : allOrders.length === 0 ? (
           <EmptyState
             className="mt-4"
             icon={<Receipt className="h-6 w-6" aria-hidden="true" />}

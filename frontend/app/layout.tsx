@@ -11,8 +11,22 @@ import { BG_COLOR_KEY, BLACK } from '@/lib/appearance';
 const notoSans = Noto_Sans({ subsets: ['latin'], variable: '--font-noto-sans' });
 
 export const metadata: Metadata = {
-  title: 'TicketFlow Kenya | Event Tickets, Sold Simply',
-  description: 'Create events, sell tickets, accept M-Pesa payments, and manage check-ins — all in one platform.',
+  title: {
+    default: 'TicketFlow Kenya | Discover Events & Book with M-Pesa',
+    template: '%s | TicketFlow Kenya',
+  },
+  description: 'Discover events across Kenya, book securely with M-Pesa, and access signed QR tickets from your phone.',
+  openGraph: {
+    title: 'TicketFlow Kenya',
+    description: 'Discover events across Kenya and book securely with M-Pesa.',
+    type: 'website',
+    locale: 'en_KE',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TicketFlow Kenya',
+    description: 'Discover events across Kenya and book securely with M-Pesa.',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

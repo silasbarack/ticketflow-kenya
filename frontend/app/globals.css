@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --bg-color: #f6f5f1;
-  --fg-color: #0e1b2a;
+  --bg-color: #f8f7f4;
+  --fg-color: #191918;
+  --header-height: 76px;
 }
 
 html[data-theme='dark'] {
@@ -14,10 +15,12 @@ html[data-theme='dark'] {
 html,
 body {
   background-color: var(--bg-color);
+  min-width: 320px;
 }
 
 body {
   color: var(--fg-color);
+  overflow-x: hidden;
 }
 
 * {
@@ -171,6 +174,110 @@ html[data-theme='dark']
   box-shadow: theme('boxShadow.card');
 }
 
+.page-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: theme('colors.brand.700');
+}
+
+.page-title {
+  margin-top: 0.5rem;
+  font-size: clamp(1.75rem, 2.5vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: theme('colors.navy.900');
+}
+
+.page-description {
+  margin-top: 0.5rem;
+  max-width: 44rem;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: theme('colors.muted');
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  color: theme('colors.navy.900');
+}
+
+.filter-chip {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid theme('colors.line');
+  border-radius: 9999px;
+  background: white;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: theme('colors.navy.600');
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.filter-chip:hover {
+  border-color: theme('colors.navy.300');
+  color: theme('colors.navy.900');
+}
+
+.filter-chip[aria-pressed='true'] {
+  border-color: theme('colors.brand.600');
+  background: theme('colors.brand.600');
+  color: white;
+}
+
+.table-shell {
+  overflow: hidden;
+  border: 1px solid theme('colors.line');
+  border-radius: theme('borderRadius.card');
+  background: white;
+  box-shadow: theme('boxShadow.soft');
+}
+
+.data-table {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.data-table thead {
+  border-bottom: 1px solid theme('colors.line');
+  background: theme('colors.cream');
+  color: theme('colors.muted');
+}
+
+.data-table th {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.data-table td {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+}
+
+.data-table tbody tr + tr {
+  border-top: 1px solid theme('colors.line');
+}
+
+.data-table tbody tr {
+  transition: background-color 160ms ease;
+}
+
+.data-table tbody tr:hover {
+  background: rgb(248 247 244 / 0.75);
+}
+
 /* Frosted surface for panels that sit on a photo or the ink ground. */
 .panel-glass {
   border-radius: theme('borderRadius.card');
@@ -186,16 +293,25 @@ html[data-theme='dark']
 .ember-ground {
   background-color: theme('colors.ink.950');
   background-image:
-    radial-gradient(60rem 32rem at 12% -10%, rgba(227, 24, 69, 0.4), transparent 60%),
-    radial-gradient(46rem 30rem at 92% 8%, rgba(56, 89, 150, 0.38), transparent 62%);
+    radial-gradient(55rem 28rem at 12% -15%, rgba(227, 24, 69, 0.34), transparent 62%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.025), transparent 44%);
 }
 
 /* Headline word treated in brand red — used once per heading, never for whole lines. */
 .ember-text {
-  background-image: linear-gradient(96deg, #ff90ab 0%, #ef2f5f 42%, #e31845 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #ff90ab;
+}
+
+@media print {
+  header,
+  footer,
+  [data-print-hidden='true'] {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
 }
 
 /* Hairline rule that fades out at both ends, for section dividers on ink. */
