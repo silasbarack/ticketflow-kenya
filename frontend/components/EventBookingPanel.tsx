@@ -34,7 +34,7 @@ export default function EventBookingPanel({ event }: { event: EventItem }) {
       <div className="border-b border-line px-5 py-4">
         <p className="eyebrow text-brand-700">{bookable ? 'Book your tickets' : 'Ticket information'}</p>
         {fromPrice != null ? (
-          <p className="mt-1.5 flex items-baseline gap-1.5">
+          <p className="mt-1.5 flex flex-wrap items-baseline gap-1.5">
             <span className="text-xs text-muted">From</span>
             <span className="tnum text-2xl font-extrabold text-navy-900">{formatCurrency(fromPrice)}</span>
             <span className="text-xs text-muted">+ {SERVICE_FEE_PERCENT}% fee</span>

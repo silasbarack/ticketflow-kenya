@@ -38,21 +38,21 @@ function ETicketContent() {
         </div>
 
         <article className="overflow-hidden rounded-panel border border-line bg-white shadow-elevated print:rounded-none print:border-0 print:shadow-none">
-          <header className="ember-ground px-5 py-5 text-white sm:px-7">
+          <header className="border-b border-brand-100 bg-brand-50 px-5 py-5 text-navy-900 sm:px-7">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="page-kicker text-brand-300">TicketFlow Kenya e-ticket</p>
+                <p className="page-kicker">TicketFlow Kenya e-ticket</p>
                 <h1 className="mt-2 text-xl font-extrabold leading-tight sm:text-2xl">{ticket.order.event.title}</h1>
               </div>
-              <Logo variant="icon" theme="dark" className="h-10 shrink-0" />
+              <Logo variant="icon" className="h-10 shrink-0" />
             </div>
           </header>
 
           <div className="px-5 py-6 sm:px-8 sm:py-8">
             <div className="flex flex-col items-center text-center">
               <div className="flex items-center gap-2"><StatusBadge status={ticket.status} /><span className="text-xs text-muted">Present at the entrance</span></div>
-              <div className="mt-5 rounded-card border-2 border-navy-900 bg-white p-3 shadow-soft">
-                <Image src={ticket.qrCodeData} alt={`QR code for ticket ${ticket.ticketCode}`} width={280} height={280} priority unoptimized className="h-auto w-[min(70vw,280px)]" />
+              <div className="mt-5 w-full max-w-[308px] rounded-card border-2 border-navy-900 bg-white p-3 shadow-soft">
+                <Image src={ticket.qrCodeData} alt={`QR code for ticket ${ticket.ticketCode}`} width={280} height={280} priority unoptimized className="h-auto w-full" />
               </div>
               <p className="tnum mt-4 font-mono text-sm font-bold tracking-[0.08em] text-navy-900">{ticket.ticketCode}</p>
               <p className="mt-1 text-xs text-muted">Keep the code unobstructed. Each ticket can be admitted once.</p>

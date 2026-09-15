@@ -124,7 +124,7 @@ function CreateEventContent() {
           </div>
           <div className="rounded-card border border-line bg-white p-5 shadow-soft">
             <p className="text-sm font-bold text-navy-900">Ready to save?</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted">Required fields are checked here. Backend validation remains the final source of truth.</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">Save your draft, then add ticket options before submitting your event for review.</p>
             <Button type="submit" fullWidth className="mt-4" loading={createEvent.isPending}>
               <Send className="h-4 w-4" aria-hidden="true" />Create draft
             </Button>
@@ -148,7 +148,7 @@ function FormSection({ icon: Icon, eyebrow, title, description, children }: { ic
 }
 
 function Field({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {
-  return <div className={className}><Label>{label}</Label>{children}</div>;
+  return <label className={className}><span className="mb-1.5 block text-sm font-medium text-navy-800">{label}</span>{children}</label>;
 }
 
 export default function CreateEventPage() {

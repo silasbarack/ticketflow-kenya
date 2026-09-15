@@ -55,23 +55,23 @@ function CustomerDashboardContent() {
   return (
     <main className="pb-16">
       {/* Greeting + at-a-glance numbers */}
-      <section className="ember-ground text-white">
+      <section className="booking-heading">
         <Container className="py-9 sm:py-12">
-          <p className="eyebrow text-brand-300">Your account</p>
+          <p className="eyebrow text-brand-700">Your account</p>
           <h1 className="mt-2 text-[28px] font-extrabold tracking-[-0.02em] sm:text-[36px]">
             Welcome, {user?.firstName}
           </h1>
-          <p className="mt-2 text-[15px] text-white/60">Your tickets, orders and upcoming events in one place.</p>
+          <p className="mt-2 text-[15px] text-muted">Your tickets, orders and upcoming events in one place.</p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {stats.map((stat) => (
-              <div key={stat.label} className="panel-glass flex items-center gap-3.5 p-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-btn bg-brand-500/20 text-brand-300">
+              <div key={stat.label} className="panel flex items-center gap-3.5 p-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-btn bg-brand-50 text-brand-700">
                   <stat.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div className="min-w-0">
-                  {overviewLoading ? <Skeleton className="h-6 w-20 bg-white/15" /> : <p className="tnum truncate text-xl font-extrabold">{stat.value}</p>}
-                  <p className="text-[12px] text-white/50">{stat.label}</p>
+                  {overviewLoading ? <Skeleton className="h-6 w-20 bg-surface" /> : <p className="tnum truncate text-xl font-extrabold">{stat.value}</p>}
+                  <p className="text-[12px] text-muted">{stat.label}</p>
                 </div>
               </div>
             ))}

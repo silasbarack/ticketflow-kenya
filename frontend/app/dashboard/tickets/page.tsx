@@ -25,17 +25,17 @@ function MyTicketsContent() {
 
   return (
     <main className="pb-16">
-      <section className="ember-ground text-white">
+      <section className="booking-heading">
         <Container className="py-8 sm:py-11">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/60 transition hover:text-white"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted transition hover:text-brand-700"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Back to dashboard
           </Link>
           <h1 className="mt-3 text-[26px] font-extrabold tracking-[-0.02em] sm:text-[34px]">My tickets</h1>
-          <p className="mt-2 text-[15px] text-white/60">Tap a ticket to open its QR code for entry.</p>
+          <p className="mt-2 text-[15px] text-muted">Tap a ticket to open its QR code for entry.</p>
         </Container>
       </section>
 
@@ -66,12 +66,12 @@ function MyTicketsContent() {
                 className="group overflow-hidden rounded-card border border-line bg-white shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-card"
               >
                 {/* Stub header — the tier, the way it reads on the ticket itself */}
-                <div className="flex items-center justify-between gap-2 bg-ink-900 px-4 py-3">
-                  <span className="eyebrow truncate text-brand-300">
+                <div className="flex items-center justify-between gap-2 border-b border-brand-100 bg-brand-50 px-4 py-3">
+                  <span className="eyebrow truncate text-brand-700">
                     {ticket.ticketType.name} · {tierLabel(ticket.ticketType.category)}
                   </span>
                   <QrCode
-                    className="h-4 w-4 shrink-0 text-white/40 transition-colors group-hover:text-white"
+                    className="h-4 w-4 shrink-0 text-brand-600 transition-colors group-hover:text-brand-800"
                     aria-hidden="true"
                   />
                 </div>

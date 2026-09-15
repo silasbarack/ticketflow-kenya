@@ -121,7 +121,7 @@ function ScanContent() {
               <div className="rounded-card border border-line bg-cream/55 p-4 sm:p-5">
                 <div className="flex items-center gap-2"><Keyboard className="h-4 w-4 text-brand-600" aria-hidden="true" /><h2 className="text-sm font-bold text-navy-900">Manual lookup</h2></div>
                 <form onSubmit={(event) => { event.preventDefault(); setPendingQrData(null); verifyMutation.mutate(manualCode.trim()); }} className="mt-3 flex flex-col gap-2.5 sm:flex-row">
-                  <Input required value={manualCode} onChange={(event) => setManualCode(event.target.value)} placeholder="TFK-XXXXXXXXXX" className="font-mono uppercase" />
+                  <Input required aria-label="Ticket code" value={manualCode} onChange={(event) => setManualCode(event.target.value)} placeholder="TFK-XXXXXXXXXX" className="font-mono uppercase" />
                   <Button type="submit" disabled={verifyMutation.isPending}>Verify ticket</Button>
                 </form>
               </div>

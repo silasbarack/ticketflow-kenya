@@ -22,16 +22,16 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
   return (
     <div className="min-h-[calc(100vh-var(--header-height))] bg-cream">
       <div className="mx-auto flex max-w-[1600px]">
-        <aside className="sticky top-[var(--header-height)] hidden h-[calc(100vh-var(--header-height))] w-[278px] shrink-0 flex-col bg-ink-950 px-4 py-5 text-white lg:flex">
-          <div className="rounded-card border border-white/10 bg-white/[0.045] p-4">
+        <aside className="sticky top-[var(--header-height)] hidden h-[calc(100vh-var(--header-height))] w-[240px] shrink-0 flex-col border-r border-line bg-white px-4 py-5 text-navy-900 lg:flex">
+          <div className="border-b border-line px-2 pb-5">
             <div className="flex items-center justify-between gap-3">
               <Logo variant="icon" className="h-9" />
-              <span className="rounded-full border border-brand-400/30 bg-brand-500/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-200">
+              <span className="rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-brand-700">
                 {user?.role === 'ADMIN' ? 'Admin' : 'Organizer'}
               </span>
             </div>
-            <p className="mt-4 text-sm font-bold text-white">{user?.firstName} {user?.lastName}</p>
-            <p className="mt-0.5 text-xs text-white/45">{workspaceLabel}</p>
+            <p className="mt-4 text-sm font-bold text-navy-900">{user?.firstName} {user?.lastName}</p>
+            <p className="mt-0.5 text-xs text-muted">{workspaceLabel}</p>
           </div>
 
           <nav className="mt-5 flex flex-1 flex-col gap-1.5" aria-label={`${workspaceLabel} navigation`}>
@@ -44,7 +44,7 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
                   aria-current={active ? 'page' : undefined}
                   className={clsx(
                     'group flex min-h-11 items-center gap-3 rounded-btn px-3.5 text-sm font-semibold transition',
-                    active ? 'bg-brand-600 text-white shadow-glow' : 'text-white/58 hover:bg-white/[0.07] hover:text-white',
+                    active ? 'bg-brand-50 text-brand-700' : 'text-navy-600 hover:bg-surface hover:text-navy-900',
                   )}
                 >
                   <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -54,12 +54,12 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
             })}
           </nav>
 
-          <div className="space-y-1 border-t border-white/10 pt-4">
-            <Link href="/" className="flex min-h-11 items-center gap-3 rounded-btn px-3.5 text-sm font-medium text-white/55 transition hover:bg-white/[0.07] hover:text-white">
+          <div className="space-y-1 border-t border-line pt-4">
+            <Link href="/" className="flex min-h-11 items-center gap-3 rounded-btn px-3.5 text-sm font-medium text-muted transition hover:bg-surface hover:text-navy-900">
               <ArrowLeft className="h-[18px] w-[18px]" aria-hidden="true" />
               Back to TicketFlow
             </Link>
-            <button type="button" onClick={logout} className="flex min-h-11 w-full items-center gap-3 rounded-btn px-3.5 text-left text-sm font-medium text-white/55 transition hover:bg-white/[0.07] hover:text-white">
+            <button type="button" onClick={logout} className="flex min-h-11 w-full items-center gap-3 rounded-btn px-3.5 text-left text-sm font-medium text-muted transition hover:bg-surface hover:text-navy-900">
               <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
               Log out
             </button>

@@ -9,7 +9,7 @@ import ErrorState from '@/components/ui/ErrorState';
 
 export default function EventGrid({
   events,
-  isLoading,
+  isLoading = false,
   isError,
   onRetry,
   emptyTitle = 'No events found',
@@ -17,7 +17,7 @@ export default function EventGrid({
   skeletonCount = 6,
 }: {
   events: EventItem[] | undefined;
-  isLoading: boolean;
+  isLoading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
   emptyTitle?: string;
@@ -39,7 +39,7 @@ export default function EventGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={`grid grid-cols-1 gap-5 sm:grid-cols-2 ${events.length === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}>
       {/* The first row (three cards at lg) is above the fold at every width. */}
       {events.map((event, index) => (
         <EventCard key={event.id} event={event} priority={index < 3} />

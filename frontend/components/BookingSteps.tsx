@@ -36,12 +36,12 @@ export default function BookingSteps({
         const active = i === currentIndex;
 
         return (
-          <li key={step.id} className="flex min-w-0 flex-1 flex-col gap-2">
+          <li key={step.id} aria-current={active ? 'step' : undefined} className="flex min-w-0 flex-1 flex-col gap-2">
             {/* The rail is the primary progress signal; the label repeats it in words. */}
             <span
               className={clsx(
                 'h-1 rounded-full transition-colors',
-                done ? 'bg-brand-500' : active ? 'bg-brand-600' : 'bg-white/15',
+                done ? 'bg-brand-500' : active ? 'bg-brand-600' : 'bg-navy-200',
               )}
               aria-hidden="true"
             />
@@ -49,7 +49,7 @@ export default function BookingSteps({
               <span
                 className={clsx(
                   'tnum flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
-                  done ? 'bg-brand-500 text-white' : active ? 'bg-white text-ink-900' : 'bg-white/15 text-white/60',
+                  done ? 'bg-brand-500 text-white' : active ? 'bg-brand-600 text-white' : 'bg-navy-100 text-navy-500',
                 )}
               >
                 {done ? <Check className="h-3 w-3" aria-hidden="true" /> : i + 1}
@@ -58,13 +58,13 @@ export default function BookingSteps({
                 <span
                   className={clsx(
                     'block truncate text-[13px] font-semibold leading-tight',
-                    active ? 'text-white' : done ? 'text-white/80' : 'text-white/45',
+                    active ? 'text-brand-700' : done ? 'text-navy-800' : 'text-muted',
                   )}
                 >
                   {step.label}
                   {active && <span className="sr-only"> (current step)</span>}
                 </span>
-                <span className="hidden truncate text-[11px] text-white/40 sm:block">{step.hint}</span>
+                <span className="hidden truncate text-[11px] text-muted sm:block">{step.hint}</span>
               </span>
             </span>
           </li>

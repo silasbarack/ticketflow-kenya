@@ -95,193 +95,39 @@ export default function EventDetailClient() {
   const bookingPanel = <EventBookingPanel event={event} />;
 
   return (
-    <main className="pb-24 lg:pb-16">
-      {/* Top section */}
-      <div className="border-b border-line bg-white">
-        <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[1.6fr_1fr] lg:items-start">
-          {/* Same artwork as the card, shown larger — cover-cropped, never stretched. */}
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-card bg-ink-900">
-            <EventPoster
-              src={event.posterUrl}
-              alt={event.posterAlt || `${event.title} event poster`}
-              // The hero poster is this page's largest contentful paint.
-              priority
-              sizes="(min-width: 1024px) 62vw, 100vw"
-              objectPosition="center 40%"
-            />
-          </div>
-
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="brand">{event.category?.name}</Badge>
-              {(event.organizerName || event.organizer) && (
-                <span className="text-sm text-muted">by {event.organizerName || event.organizer?.companyName}</span>
-              )}
-            </div>
-
-            <h1 className="mt-3 text-[26px] font-extrabold leading-tight tracking-[-0.02em] text-navy-900 sm:text-[34px]">{event.title}</h1>
-            {event.subtitle && <p className="mt-1.5 text-[15px] text-muted">{event.subtitle}</p>}
-
-            <div className="mt-4 space-y-2.5 text-[15px] text-navy-700">
-              <p className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
-                {formatDateTime(event.startDateTime)}
-              </p>
-              <p className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 shrink-0 text-brand-600" aria-hidden="true" />
-                {event.venue}, {event.city}
-              </p>
-            </div>
-
-            <div className="mt-5 flex items-center gap-2.5">
-              <Button variant="outline" size="sm" onClick={handleShare}>
-                <Share2 className="h-4 w-4" aria-hidden="true" />
-                Share
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                aria-pressed={favorite}
-                onClick={() => {
-                  toggleFavorite(event.id);
-                  toast.success(favorite ? 'Removed from favourites' : 'Added to favourites', { duration: 1500 });
-                }}
-              >
-                <Heart className="h-4 w-4" fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />
-                {favorite ? 'Saved' : 'Save'}
-              </Button>
-            </div>
-
-            {/* Booking panel: desktop position (right column, sticky) */}
-            <div id="tickets-desktop" className="mt-6 hidden lg:sticky lg:top-24 lg:block">
-              {bookingPanel}
-            </div>
-          </div>
-        </Container>
-      </div>
-
-      <Container className="grid gap-10 py-10 lg:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-10">
-          <section>
-            <h2 className="text-lg font-bold text-navy-900">About this event</h2>
-            <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-navy-700">{event.description}</p>
-          </section>
-
-          <section className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-card border border-line bg-white p-5 shadow-soft">
-              <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
-                <Clock className="h-4 w-4 text-brand-600" aria-hidden="true" />
-                Date &amp; schedule
-              </p>
-              <p className="mt-2 text-sm text-muted">Starts {formatDateTime(event.startDateTime)}</p>
-              <p className="mt-1 text-sm text-muted">Ends {formatDateTime(event.endDateTime)}</p>
-            </div>
-            <div className="rounded-card border border-line bg-white p-5 shadow-soft">
-              <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
-                <MapPin className="h-4 w-4 text-brand-600" aria-hidden="true" />
-                Venue
-              </p>
-              <p className="mt-2 text-sm text-muted">{event.venue}</p>
-              <p className="text-sm text-muted">{event.address ? `${event.address}, ` : ''}{event.city}</p>
-            </div>
-          </section>
-
-          {(event.organizerName || event.organizer) && (
-            <section className="rounded-card border border-line bg-white p-5 shadow-soft">
-              <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
-                <Users className="h-4 w-4 text-brand-600" aria-hidden="true" />
-                Organizer
-              </p>
-              <p className="mt-2 text-sm font-medium text-navy-800">
-                {event.organizerName || event.organizer?.companyName}
-              </p>
-              {!externalBooking && event.organizer?.description && (
-                <p className="mt-1 text-sm text-muted">{event.organizer.description}</p>
-              )}
-              {/*
-                Provenance is stated, but not linked: the verification source is
-                the event's other seller, and TicketFlow tickets are bought here.
-              */}
-              {event.verificationSource && (
-                <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
-                  <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                  Event details verified with {event.verificationSource}
-                </p>
-              )}
-            </section>
-          )}
-
-          <section className="rounded-card border border-line bg-white p-5 shadow-soft">
-            <p className="flex items-center gap-2 text-sm font-semibold text-navy-900">
-              <ShieldCheck className="h-4 w-4 text-brand-600" aria-hidden="true" />
-              {externalBooking ? 'External ticketing' : 'Ticket policy & refunds'}
-            </p>
-            {externalBooking ? (
-              <p className="mt-2 text-sm text-muted">
-                Booking, payment, ticket delivery, entry and refund terms are handled by the official seller. Review its terms before purchase.
-              </p>
-            ) : (
-              <p className="mt-2 text-sm text-muted">
-                Tickets are delivered instantly as signed QR codes after payment. For full details on cancellations,
-                refunds, and entry requirements, see our{' '}
-                <Link href="/legal/ticket-purchase-policy" className="font-medium text-brand-700 underline">
-                  Ticket Purchase Policy
-                </Link>{' '}
-                and{' '}
-                <Link href="/legal/payment-policy" className="font-medium text-brand-700 underline">
-                  Payment Policy
-                </Link>
-                .
-              </p>
-            )}
-          </section>
-
-          {related.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold text-navy-900">Related events</h2>
-              <div className="mt-4">
-                <EventGrid events={related} isLoading={false} />
-              </div>
-            </section>
-          )}
-        </div>
-
-        {/* Booking panel: mobile/tablet position (stacked, in flow) */}
-        <div id="tickets-mobile" className="lg:hidden">
-          {bookingPanel}
+    <main className="bg-white pb-24 lg:pb-12">
+      <Container className="py-5">
+        <Link href="/events" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-brand-700">&larr; All experiences</Link>
+        <div className="mt-2 flex flex-wrap items-center gap-3"><Badge tone="brand">{event.category?.name}</Badge><span className="text-sm text-muted">{event.city}</span></div>
+        <h1 className="mt-4 max-w-4xl text-[28px] font-extrabold leading-tight tracking-[-0.035em] text-navy-900 sm:text-[40px]">{event.title}</h1>
+        {event.subtitle && <p className="mt-3 text-base text-muted">{event.subtitle}</p>}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <p className="flex items-center gap-2 text-sm text-muted"><Calendar className="h-4 w-4 text-brand-600" aria-hidden="true" />{formatDateTime(event.startDateTime)}</p>
+          <div className="flex gap-2"><Button variant="outline" size="sm" onClick={handleShare}><Share2 className="h-4 w-4" aria-hidden="true" />Share</Button><Button variant="outline" size="sm" aria-pressed={favorite} onClick={() => {toggleFavorite(event.id); toast.success(favorite ? 'Removed from favourites' : 'Added to favourites');}}><Heart className="h-4 w-4" fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />{favorite ? 'Saved' : 'Save'}</Button></div>
         </div>
       </Container>
-
-      {/* Sticky mobile booking bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white/95 p-3 shadow-elevated backdrop-blur lg:hidden">
-        <Container className="flex items-center justify-between gap-3 px-0">
-          <div className="min-w-0">
-            <p className="text-xs text-muted">{bookable ? 'From' : externalBooking ? 'Official seller' : 'Ticket info'}</p>
-            <p className="tnum truncate text-base font-bold text-navy-900">
-              {startingPrice != null ? formatCurrency(startingPrice) : 'Sales closed'}
-            </p>
+      <Container className="grid grid-cols-1 items-start gap-8 pb-8 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)]">
+        <div className="min-w-0">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-panel bg-surface">
+            <EventPoster src={event.posterUrl} alt={event.posterAlt || event.title} priority sizes="(min-width: 1024px) 60vw, 100vw" fit="contain" />
           </div>
-          {bookable ? (
-            <Link href={`/cart?event=${encodeURIComponent(event.slug)}`} className="shrink-0">
-              <Button variant="primary">
-                <TicketIcon className="h-4 w-4" aria-hidden="true" />
-                Book Now
-              </Button>
-            </Link>
-          ) : externalBooking ? (
-            <a
-              href={event.bookingUrl as string}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonVariants({ variant: 'outline', className: 'shrink-0' })}
-            >
-              Official seller
-              <ExternalLink className="h-4 w-4" aria-hidden="true" />
-            </a>
-          ) : null}
+          <div className="mt-7 grid gap-5 border-y border-line py-6 sm:grid-cols-2">
+            <div className="flex gap-3"><Clock className="h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" /><div><h2 className="text-sm font-bold text-navy-900">Date & time</h2><p className="mt-2 text-sm text-muted">{formatDateTime(event.startDateTime)}</p><p className="mt-1 text-xs text-muted">Until {formatDateTime(event.endDateTime)}</p></div></div>
+            <div className="flex gap-3"><MapPin className="h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" /><div><h2 className="text-sm font-bold text-navy-900">Location</h2><p className="mt-2 text-sm text-muted">{event.venue}</p><p className="mt-1 text-xs text-muted">{event.address ? event.address + ', ' : ''}{event.city}</p></div></div>
+          </div>
+          <section className="py-7"><h2 className="text-xl font-bold tracking-tight text-navy-900">The experience</h2><p className="mt-4 whitespace-pre-line text-[15px] leading-7 text-navy-700">{event.description}</p></section>
+          {(event.organizerName || event.organizer) && <section className="flex gap-4 rounded-card border border-line bg-cream p-5"><Users className="h-6 w-6 shrink-0 text-brand-600" aria-hidden="true" /><div><p className="text-xs text-muted">Brought to you by</p><h2 className="mt-1 font-bold text-navy-900">{event.organizerName || event.organizer?.companyName}</h2>{!externalBooking && event.organizer?.description && <p className="mt-2 text-sm text-muted">{event.organizer.description}</p>}{event.verificationSource && <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700"><BadgeCheck className="h-4 w-4" aria-hidden="true" />Details verified with {event.verificationSource}</p>}</div></section>}
+          <section className="mt-6 border-t border-line py-6"><h2 className="flex items-center gap-2 text-sm font-bold text-navy-900"><ShieldCheck className="h-4 w-4 text-brand-600" aria-hidden="true" />Before you book</h2><p className="mt-3 text-sm leading-relaxed text-muted">{externalBooking ? 'Booking, payment, ticket delivery and refunds are handled by the official seller. Review their terms before purchasing.' : <>Your QR ticket is available after payment confirmation. See our <Link href="/legal/ticket-purchase-policy" className="text-brand-700 underline">ticket purchase policy</Link> and <Link href="/legal/payment-policy" className="text-brand-700 underline">payment policy</Link> for entry and refund information.</>}</p></section>
+        </div>
+        <aside id="tickets" className="min-w-0 scroll-mt-24 lg:sticky lg:top-24">{bookingPanel}</aside>
+      </Container>
+      {related.length > 0 && <section className="border-t border-line bg-cream py-9"><Container><h2 className="marketplace-heading mb-6">Keep exploring</h2><EventGrid events={related} /></Container></section>}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white p-3 lg:hidden">
+        <Container className="flex items-center justify-between gap-3 px-0">
+          <div className="min-w-0"><p className="text-xs text-muted">{bookable ? 'Tickets from' : 'Ticket information'}</p><p className="tnum text-base font-bold text-navy-900">{startingPrice !== null ? formatCurrency(startingPrice) : 'Sales closed'}</p></div>
+          {bookable ? <Link href={`/cart?event=${encodeURIComponent(event.slug)}`} className={buttonVariants({className:'shrink-0'})}><TicketIcon className="h-4 w-4" aria-hidden="true" />Choose tickets</Link> : externalBooking ? <a href={event.bookingUrl as string} target="_blank" rel="noopener noreferrer" className={buttonVariants({variant:'outline'})}>Official seller <ExternalLink className="h-4 w-4" aria-hidden="true" /></a> : null}
         </Container>
       </div>
-
     </main>
   );
 }

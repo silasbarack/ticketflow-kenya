@@ -258,18 +258,18 @@ function BookingFlow() {
   return (
     <main className="pb-16">
       {/* ── Flow header: what you're booking, and where you are in it ───── */}
-      <section className="ember-ground text-white">
+      <section className="booking-heading">
         <Container className="py-7 sm:py-9">
           <Link
             href={`/events/${event.slug}`}
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/60 transition hover:text-white"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted transition hover:text-brand-700"
           >
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
             Back to event
           </Link>
 
           <h1 className="mt-3 text-[26px] font-extrabold leading-tight sm:text-[32px]">{event.title}</h1>
-          <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px] text-white/65">
+          <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px] text-muted">
             <span className="flex items-center gap-1.5">
               <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
               {formatDateTime(event.startDateTime)}
@@ -548,7 +548,7 @@ function BookingFlow() {
               </span>
               <span className="flex items-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                Checkout stays on ticketflow.co.ke
+                Secure checkout with TicketFlow
               </span>
               {needsAttendees && (
                 <span className="flex items-center gap-2">

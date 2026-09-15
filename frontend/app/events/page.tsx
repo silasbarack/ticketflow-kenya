@@ -90,14 +90,14 @@ function EventsContent() {
 
   return (
     <main>
-      <div className="border-b border-line bg-white py-8 sm:py-11">
+      <div className="border-b border-line bg-brand-50/40 py-7 sm:py-9">
         <Container>
           <p className="page-kicker">{activeCategory ? activeCategory.name : 'Discover'}</p>
-          <h1 className="page-title">Events across Kenya</h1>
-          <p className="page-description">Search current listings by event name, description, venue or city, then narrow by date, category and price.</p>
+          <h1 className="page-title">Find your kind of experience.</h1>
+          <p className="page-description">A night out, a new idea, a day to remember. See what&apos;s happening across Kenya.</p>
 
           <div className="mt-6">
-            <label className="flex h-12 items-center gap-2.5 rounded-full border border-line bg-cream/60 px-4 transition focus-within:border-brand-500 focus-within:bg-white">
+            <label className="flex h-14 max-w-3xl items-center gap-3 rounded-btn border border-line bg-white px-4 transition focus-within:border-brand-500">
               <Search className="h-5 w-5 shrink-0 text-navy-400" aria-hidden="true" />
               <span className="sr-only">Search events</span>
               <input
@@ -110,12 +110,8 @@ function EventsContent() {
             </label>
           </div>
 
-          {/* Desktop filter row */}
-          <div className="mt-4 hidden lg:block">
-            <EventFilterFields filters={filters} onChange={setFilters} categories={categories} />
-          </div>
 
-          <div className="mt-4 flex items-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
               Filters
@@ -134,13 +130,21 @@ function EventsContent() {
         </Container>
       </div>
 
-      <Container className="py-8 sm:py-10">
+      <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 rounded-card border border-line bg-white p-4">
+            <h2 className="mb-5 flex items-center gap-2 text-sm font-bold text-navy-900"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />Make it your own</h2>
+            <EventFilterFields filters={filters} onChange={setFilters} categories={categories} layout="sidebar" />
+          </div>
+        </aside>
+        <div className="min-w-0">
         {!isLoading && filtered && (
           <p className="mb-5 text-sm text-muted">
             {filtered.length} event{filtered.length === 1 ? '' : 's'} found
           </p>
         )}
         <EventGrid events={filtered} isLoading={isLoading} isError={isError} onRetry={() => refetch()} />
+        </div>
       </Container>
 
       <EventFilterSheet
