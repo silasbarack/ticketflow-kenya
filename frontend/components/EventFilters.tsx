@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { EventCategory } from '@/types';
 import { Input, Label, Select } from '@/components/ui/Input';
@@ -139,12 +139,33 @@ export function EventFilterSheet({
   categories: EventCategory[] | undefined;
   resultCount?: number;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onCloseRef.current();
+      if (event.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), select:not([disabled])'));
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKeyDown);
     };
   }, [open]);
 
@@ -154,6 +175,7 @@ export function EventFilterSheet({
     <div className="fixed inset-0 z-50 lg:hidden">
       <button aria-label="Close filters" onClick={onClose} className="absolute inset-0 bg-navy-900/50" />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Filter events"
@@ -162,7 +184,7 @@ export function EventFilterSheet({
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-line" aria-hidden="true" />
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-lg font-bold text-navy-900">Filters</h2>
-          <button onClick={onClose} aria-label="Close filters" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-navy-900/5">
+          <button ref={closeRef} onClick={onClose} aria-label="Close filters" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-navy-900/5">
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>

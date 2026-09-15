@@ -7,8 +7,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   // Ember gradient + halo. The halo is decoration only — state is always
   // carried by the label, never by the glow.
-  primary:
-    'bg-gradient-to-r from-brand-500 to-brand-700 text-white shadow-glow hover:from-brand-600 hover:to-brand-800 disabled:shadow-none',
+  primary: 'bg-brand-600 text-white shadow-glow hover:bg-brand-700 disabled:shadow-none',
   secondary: 'bg-ink-900 text-white hover:bg-ink-700 shadow-soft disabled:hover:bg-ink-900',
   outline: 'border border-line bg-white text-navy-900 hover:border-navy-300 hover:bg-navy-50/60',
   ghost: 'text-navy-700 hover:bg-navy-900/[0.06]',
@@ -34,8 +33,8 @@ export function buttonVariants({
 } = {}) {
   return clsx(
     'inline-flex min-h-[44px] items-center justify-center rounded-full font-semibold tracking-[-0.01em]',
-    'transition-all duration-200 active:scale-[0.98]',
-    'disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100',
+    'transition-[color,background-color,border-color,box-shadow,transform] duration-200 active:translate-y-px',
+    'disabled:cursor-not-allowed disabled:opacity-50 disabled:active:translate-y-0',
     VARIANT_CLASSES[variant],
     SIZE_CLASSES[size],
     fullWidth && 'w-full',

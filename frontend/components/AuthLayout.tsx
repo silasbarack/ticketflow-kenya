@@ -23,21 +23,20 @@ export default function AuthLayout({
   footer?: ReactNode;
   children: ReactNode;
 }) {
-  // Header is 70px on its own, 106px once the value strip appears at lg.
   return (
-    <main className="grid min-h-[calc(100vh-70px)] lg:min-h-[calc(100vh-106px)] lg:grid-cols-2">
+    <main className="grid min-h-[calc(100vh-var(--header-height))] lg:grid-cols-2">
       {/* Brand panel */}
-      <section className="ember-ground relative flex flex-col justify-center overflow-hidden px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-16">
+      <section className="ember-ground relative flex flex-col justify-center overflow-hidden px-6 py-8 text-white sm:px-10 sm:py-10 lg:px-14 lg:py-16">
         <div className="relative mx-auto w-full max-w-md">
           <Link href="/" aria-label="TicketFlow Kenya home" className="inline-flex">
             <Logo theme="dark" className="h-9" />
           </Link>
 
-          <h2 className="mt-8 text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:text-[34px]">
+          <h2 className="mt-6 text-[26px] font-extrabold leading-tight tracking-[-0.02em] sm:mt-8 sm:text-[34px]">
             {panelTitle}
           </h2>
 
-          <ul className="mt-7 space-y-3.5">
+          <ul className="mt-7 hidden space-y-3.5 sm:block">
             {panelPoints.map((point) => (
               <li key={point} className="flex items-start gap-3 text-[14px] leading-relaxed text-white/70">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-brand-300">
@@ -48,8 +47,8 @@ export default function AuthLayout({
             ))}
           </ul>
 
-          <div className="hairline mt-9" aria-hidden="true" />
-          <p className="mt-5 text-[12px] text-white/40">
+          <div className="hairline mt-9 hidden sm:block" aria-hidden="true" />
+          <p className="mt-5 hidden text-[12px] text-white/40 sm:block">
             Payments are processed by Safaricom M-Pesa. TicketFlow never sees your PIN.
           </p>
         </div>

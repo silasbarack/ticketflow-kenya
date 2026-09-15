@@ -21,9 +21,9 @@ export default function CookieConsentBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white p-4 shadow-lg sm:p-5">
-      <div className="mx-auto flex max-w-7xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-gray-600">
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-white/95 p-3 shadow-elevated backdrop-blur sm:p-4">
+      <div className="mx-auto flex max-w-7xl flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-4xl text-[13px] leading-relaxed text-muted">
           We use strictly necessary cookies to keep you logged in and process payments, plus
           optional functional and analytics cookies to improve TicketFlow Kenya. Read our{' '}
           <Link href="/legal/cookie-policy" className="font-semibold text-brand-600 hover:text-brand-700">
@@ -31,16 +31,16 @@ export default function CookieConsentBanner() {
           </Link>
           .
         </p>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex w-full shrink-0 gap-2 sm:w-auto">
           <button
             onClick={() => choose('necessary')}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            className="min-h-11 flex-1 rounded-btn border border-line px-4 py-2 text-sm font-semibold text-navy-700 hover:bg-cream sm:flex-none"
           >
             Necessary only
           </button>
           <button
             onClick={() => choose('all')}
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+            className="min-h-11 flex-1 rounded-btn bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 sm:flex-none"
           >
             Accept all
           </button>

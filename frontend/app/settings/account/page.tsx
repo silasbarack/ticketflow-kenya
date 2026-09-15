@@ -1,72 +1,48 @@
 'use client';
 
-import { Mail, Phone, ShieldCheck, User as UserIcon } from 'lucide-react';
+import Link from 'next/link';
+import { Mail, Palette, Phone, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import Container from '@/components/ui/Container';
+import RequireRole from '@/components/RequireRole';
 import Badge from '@/components/ui/Badge';
+import Container from '@/components/ui/Container';
+import PageHeader from '@/components/ui/PageHeader';
+import { buttonVariants } from '@/components/ui/Button';
 
-function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function AccountSettingsContent() {
+  const { user } = useAuth();
+  if (!user) return null;
+
+  const rows = [
+    { icon: Mail, label: 'Email', value: user.email },
+    { icon: Phone, label: 'Phone', value: user.phone || 'Not set' },
+    { icon: UserIcon, label: 'Account type', value: user.role },
+    { icon: ShieldCheck, label: 'Access status', value: user.isActive ? 'Active' : 'Suspended' },
+  ];
+
   return (
-    <div className="flex items-center gap-3 border-b border-line py-4 last:border-0">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
-        <p className="truncate text-sm font-semibold text-navy-900">{value}</p>
-      </div>
-    </div>
+    <main className="min-h-[calc(100vh-var(--header-height))] bg-cream py-8 sm:py-11">
+      <Container className="max-w-3xl">
+        <PageHeader eyebrow="Account" title="Profile and settings" description="Review the identity and contact details associated with your TicketFlow account." actions={<Link href="/settings/appearance" className={buttonVariants({ variant: 'outline', size: 'sm' })}><Palette className="h-4 w-4" aria-hidden="true" />Appearance</Link>} />
+
+        <section className="mt-7 overflow-hidden rounded-card border border-line bg-white shadow-soft">
+          <div className="flex items-center gap-4 border-b border-line p-5 sm:p-6">
+            <span className="flex h-14 w-14 items-center justify-center rounded-card bg-ink-950 text-lg font-extrabold text-white">{`${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()}</span>
+            <div><p className="text-lg font-extrabold text-navy-900">{user.firstName} {user.lastName}</p><Badge tone="brand" className="mt-1.5">{user.role}</Badge></div>
+          </div>
+          <dl className="grid sm:grid-cols-2">
+            {rows.map((row, index) => <div key={row.label} className={`flex items-center gap-3 p-5 ${index < 2 ? 'border-b border-line' : ''} ${index % 2 === 0 ? 'sm:border-r sm:border-line' : ''}`}><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-btn bg-brand-50 text-brand-700"><row.icon className="h-4 w-4" aria-hidden="true" /></span><div className="min-w-0"><dt className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{row.label}</dt><dd className="mt-1 truncate text-sm font-bold text-navy-900">{row.value}</dd></div></div>)}
+          </dl>
+        </section>
+
+        <div className="mt-5 rounded-card border border-line bg-white p-5 text-sm leading-relaxed text-muted shadow-soft">
+          Need to change your name, email or phone number? Contact <a href="mailto:support@ticketflow.co.ke" className="font-bold text-brand-700 underline">support@ticketflow.co.ke</a>. Account updates remain support-assisted until a verified profile-update endpoint is available.
+        </div>
+      </Container>
+    </main>
   );
 }
 
 export default function AccountSettingsPage() {
-  const { user, loading } = useAuth();
-
-  if (loading || !user) {
-    return (
-      <Container className="py-16 text-center text-muted">
-        <p>Loading account...</p>
-      </Container>
-    );
-  }
-
-  return (
-    <Container className="max-w-2xl py-10">
-      <h1 className="text-2xl font-bold text-navy-900">Account Settings</h1>
-      <p className="mt-1 text-sm text-muted">Your account details as registered with TicketFlow Kenya.</p>
-
-      <div className="mt-6 rounded-2xl border border-line bg-white p-6 shadow-soft">
-        <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-navy-900 text-lg font-bold text-white">
-            {`${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()}
-          </span>
-          <div>
-            <p className="text-lg font-bold text-navy-900">
-              {user.firstName} {user.lastName}
-            </p>
-            <Badge tone="brand">{user.role}</Badge>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Row icon={<Mail className="h-4 w-4" aria-hidden="true" />} label="Email" value={user.email} />
-          <Row icon={<Phone className="h-4 w-4" aria-hidden="true" />} label="Phone" value={user.phone || 'Not set'} />
-          <Row icon={<UserIcon className="h-4 w-4" aria-hidden="true" />} label="Account type" value={user.role} />
-          <Row
-            icon={<ShieldCheck className="h-4 w-4" aria-hidden="true" />}
-            label="Status"
-            value={user.isActive ? 'Active' : 'Suspended'}
-          />
-        </div>
-      </div>
-
-      <p className="mt-4 text-xs text-muted">
-        Need to change your name, email, or phone number? Contact{' '}
-        <a href="mailto:support@ticketflow.co.ke" className="font-medium text-brand-700 underline">
-          support@ticketflow.co.ke
-        </a>
-        .
-      </p>
-    </Container>
-  );
+  return <RequireRole roles={['CUSTOMER', 'ORGANIZER', 'ADMIN']}><AccountSettingsContent /></RequireRole>;
 }

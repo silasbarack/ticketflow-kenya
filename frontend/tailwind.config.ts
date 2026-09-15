@@ -49,17 +49,17 @@ const config: Config = {
         },
         // Primary dark colour — deep navy (#0E1B2A). Also used for headings/body text.
         navy: {
-          50: '#f1f5f9',
-          100: '#e2e9f0',
-          200: '#c7d3e0',
-          300: '#9db0c6',
-          400: '#6c84a3',
-          500: '#48607f',
-          600: '#354a66',
-          700: '#263650',
-          800: '#18253a',
-          900: '#0e1b2a',
-          950: '#080f18',
+          50: '#f7f7f6',
+          100: '#ececea',
+          200: '#d9d8d4',
+          300: '#b8b6b0',
+          400: '#8d8a83',
+          500: '#68655f',
+          600: '#4e4b46',
+          700: '#393733',
+          800: '#282724',
+          900: '#191918',
+          950: '#0d0d0c',
         },
         /*
          * Ink — the near-black ground for the immersive marketing/booking
@@ -67,15 +67,15 @@ const config: Config = {
          * navy so a navy card still separates when it sits on top of it.
          */
         ink: {
-          700: '#131a24',
-          800: '#0d131b',
-          900: '#080d13',
-          950: '#04070b',
+          700: '#242321',
+          800: '#1a1918',
+          900: '#111110',
+          950: '#090908',
         },
-        cream: '#f6f5f1',
-        surface: '#eef1ee',
-        muted: '#667085',
-        line: '#e6e4df',
+        cream: '#f8f7f4',
+        surface: '#f1f0ec',
+        muted: '#6f6b64',
+        line: '#e3e1dc',
       },
       fontFamily: {
         // Single family across the product — headings, body copy and figures.
@@ -85,15 +85,15 @@ const config: Config = {
       borderRadius: {
         // Inputs/selects. Buttons opt into a full pill via `rounded-full`.
         btn: '12px',
-        card: '20px',
-        panel: '28px',
+        card: '18px',
+        panel: '24px',
       },
       boxShadow: {
         soft: '0 1px 2px 0 rgba(8,13,19,0.04), 0 1px 3px 0 rgba(8,13,19,0.05)',
-        card: '0 1px 2px rgba(8,13,19,0.04), 0 8px 24px -12px rgba(8,13,19,0.12)',
-        elevated: '0 24px 60px -24px rgba(8,13,19,0.35)',
+        card: '0 1px 2px rgba(17,17,16,0.04), 0 12px 32px -24px rgba(17,17,16,0.32)',
+        elevated: '0 28px 70px -32px rgba(17,17,16,0.42)',
         // Primary CTA halo — brand red at low alpha, never used to carry meaning.
-        glow: '0 8px 24px -8px rgba(227,24,69,0.55)',
+        glow: '0 10px 28px -14px rgba(227,24,69,0.65)',
       },
       maxWidth: {
         container: '1280px',

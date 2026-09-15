@@ -29,7 +29,7 @@ api.interceptors.response.use(
 
 export function getApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as any;
+    const data = error.response?.data as { message?: string | string[] } | undefined;
     if (data?.message) {
       return Array.isArray(data.message) ? data.message.join(', ') : data.message;
     }

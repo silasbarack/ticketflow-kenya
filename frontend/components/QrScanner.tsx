@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { Html5Qrcode } from 'html5-qrcode';
 
 interface QrScannerProps {
   onScan: (decodedText: string) => void;
@@ -9,16 +10,15 @@ interface QrScannerProps {
 
 export default function QrScanner({ onScan, active }: QrScannerProps) {
   const containerId = 'qr-scanner-region';
-  const scannerRef = useRef<any>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
     if (!active) return;
-    let html5QrCode: any;
     let stopped = false;
 
     import('html5-qrcode').then(({ Html5Qrcode }) => {
       if (stopped) return;
-      html5QrCode = new Html5Qrcode(containerId);
+      const html5QrCode = new Html5Qrcode(containerId);
       scannerRef.current = html5QrCode;
       html5QrCode
         .start(

@@ -1,35 +1,50 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { LayoutDashboard, LogOut, Palette, Ticket, User as UserIcon, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
 import Button from '@/components/ui/Button';
 
 const NAV_LINKS = [
-  { label: 'Browse Events', href: '/events' },
-  { label: 'Categories', href: '/events' },
+  { label: 'Discover events', href: '/events' },
+  { label: 'Events in Nairobi', href: '/events?city=Nairobi' },
   { label: 'For Organizers', href: '/#for-organizers' },
   { label: 'How It Works', href: '/#how-it-works' },
 ];
 
 export default function MobileNavigationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, logout } = useAuth();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current();
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'));
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
     }
     document.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -44,6 +59,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
         className="absolute inset-0 bg-navy-900/50 backdrop-blur-[2px]"
       />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
@@ -52,6 +68,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <Logo className="h-9" />
           <button
+            ref={closeRef}
             onClick={onClose}
             aria-label="Close menu"
             className="flex h-11 w-11 items-center justify-center rounded-full text-navy-600 hover:bg-navy-900/5"

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
@@ -41,6 +41,16 @@ function EventsContent() {
   const [sort, setSort] = useState<SortOption>('recommended');
   const [sheetOpen, setSheetOpen] = useState(false);
 
+  useEffect(() => {
+    setFilters((current) => ({
+      ...current,
+      search: searchParams.get('search') || '',
+      categoryId: searchParams.get('category') || '',
+      city: searchParams.get('city') || '',
+      fromDate: searchParams.get('fromDate') || '',
+    }));
+  }, [searchParams]);
+
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -80,13 +90,11 @@ function EventsContent() {
 
   return (
     <main>
-      <div className="border-b border-line bg-white py-8 sm:py-10">
+      <div className="border-b border-line bg-white py-8 sm:py-11">
         <Container>
-          <p className="eyebrow text-brand-700">{activeCategory ? activeCategory.name : 'All events'}</p>
-          <h1 className="mt-2 text-[28px] font-extrabold tracking-[-0.02em] text-navy-900 sm:text-[34px]">
-            Browse events
-          </h1>
-          <p className="mt-1.5 text-muted">Find concerts, conferences, sports, and festivals happening near you.</p>
+          <p className="page-kicker">{activeCategory ? activeCategory.name : 'Discover'}</p>
+          <h1 className="page-title">Events across Kenya</h1>
+          <p className="page-description">Search current listings by event name, description, venue or city, then narrow by date, category and price.</p>
 
           <div className="mt-6">
             <label className="flex h-12 items-center gap-2.5 rounded-full border border-line bg-cream/60 px-4 transition focus-within:border-brand-500 focus-within:bg-white">
