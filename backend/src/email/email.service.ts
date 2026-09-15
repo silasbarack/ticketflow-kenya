@@ -15,10 +15,21 @@ export interface TicketEmailPayload {
   pdfBuffer: Buffer;
 }
 
-export interface PasswordResetEmailPayload {
+export interface PasswordResetCodeEmailPayload {
   to: string;
   firstName: string;
-  token: string;
+  code: string;
+  expiresInMinutes: number;
+}
+
+/** User-supplied text (a first name) must never be able to inject markup. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // Load the full Kenya-map + card logo PNG from disk (assets/logo.png)
@@ -235,9 +246,13 @@ export class EmailService {
     }
   }
 
-  async sendPasswordResetEmail(payload: PasswordResetEmailPayload): Promise<boolean> {
+  /**
+   * Emails a password-reset verification code. The code itself is never logged:
+   * it is a live credential for the next ten minutes.
+   */
+  async sendPasswordResetCodeEmail(payload: PasswordResetCodeEmailPayload): Promise<boolean> {
     if (!this.transporter) {
-      this.logger.warn('SMTP not configured — skipping password reset email for ' + payload.to);
+      this.logger.warn('SMTP not configured — password reset code email not sent');
       return false;
     }
 
@@ -247,18 +262,36 @@ export class EmailService {
     const logoUrl = this.configService.get<string>('EMAIL_LOGO_URL')
       || 'https://ticketflow-frontend-w47s.onrender.com/logo.png';
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL')
-      || 'https://ticketflow-frontend-w47s.onrender.com';
-    const resetUrl = `${frontendUrl}/reset-password?token=${payload.token}`;
+    const firstName = escapeHtml(payload.firstName || 'there');
+    const code = payload.code;
+    const minutes = payload.expiresInMinutes;
+    const font = "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+    const text = [
+      `Dear ${payload.firstName || 'there'},`,
+      '',
+      'We received a request to reset the password for your TicketFlow Kenya account.',
+      '',
+      `Your password reset verification code is ${code}.`,
+      '',
+      `This code expires in ${minutes} minutes and can only be used once.`,
+      '',
+      'Never share this code with anyone. TicketFlow Kenya staff will never ask you for it.',
+      '',
+      'If you did not request a password reset, you can safely ignore this email — your password will not be changed.',
+      '',
+      'Regards,',
+      'TicketFlow Kenya · support@ticketflow.co.ke',
+    ].join('\n');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Reset your TicketFlow Kenya password</title>
+<title>Password Reset Verification Code</title>
 </head>
-<body style="margin:0;padding:0;background-color:#121212;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background-color:#121212;font-family:${font};">
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
        style="background-color:#121212;padding:32px 24px;">
@@ -274,8 +307,8 @@ export class EmailService {
           <img src="${logoUrl}" width="56" height="58" alt="TFK" style="display:block;"/>
         </td>
         <td style="vertical-align:middle;">
-          <div style="color:#ffffff;font-size:24px;font-weight:900;font-style:italic;line-height:1;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">TICKETFLOW</div>
-          <div style="color:#fda4af;font-size:10px;font-weight:700;letter-spacing:5px;margin-top:3px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">KENYA</div>
+          <div style="color:#ffffff;font-size:24px;font-weight:900;font-style:italic;line-height:1;font-family:${font};">TICKETFLOW</div>
+          <div style="color:#fda4af;font-size:10px;font-weight:700;letter-spacing:5px;margin-top:3px;font-family:${font};">KENYA</div>
         </td>
       </tr></table>
     </td>
@@ -284,32 +317,33 @@ export class EmailService {
   <tr>
     <td style="padding:28px 24px 24px;">
 
-      <p style="margin:0 0 18px;font-size:20px;font-weight:600;color:#eaeeef;line-height:1.4;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        Dear <strong>${payload.firstName}</strong>,
+      <p style="margin:0 0 18px;font-size:20px;font-weight:600;color:#eaeeef;line-height:1.4;font-family:${font};">
+        Dear <strong>${firstName}</strong>,
       </p>
 
-      <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        We received a request to reset the password for your <strong>TicketFlow Kenya</strong> account.
-        Click the button below to choose a new password. This link expires in 30 minutes.
+      <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#c4c7ca;font-family:${font};">
+        We received a request to reset the password for your <strong style="color:#eaeeef;">TicketFlow Kenya</strong> account.
+        Enter this verification code to continue:
       </p>
 
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
         <tr>
-          <td style="border-radius:8px;background-color:#be123c;">
-            <a href="${resetUrl}"
-               style="display:inline-block;padding:12px 28px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-              Reset Password
-            </a>
+          <td align="center" style="background-color:#121212;border:1px solid #2a2b2d;border-radius:8px;padding:20px 12px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#9aa0a6;text-transform:uppercase;font-family:${font};">Verification code</div>
+            <div style="margin-top:10px;font-size:36px;font-weight:800;letter-spacing:10px;color:#ffffff;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;">${code}</div>
           </td>
         </tr>
       </table>
 
-      <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#9aa0a6;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        If the button doesn't work, copy and paste this link into your browser:<br/>
-        <a href="${resetUrl}" style="color:#6ea8fe;word-break:break-all;">${resetUrl}</a>
+      <p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#c4c7ca;font-family:${font};">
+        This code expires in <strong style="color:#eaeeef;">${minutes} minutes</strong> and can only be used once.
       </p>
 
-      <p style="margin:0 0 20px;font-size:12px;line-height:1.6;color:#9aa0a6;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#9aa0a6;font-family:${font};">
+        <strong style="color:#eaeeef;">Never share this code.</strong> TicketFlow Kenya staff will never ask you for it.
+      </p>
+
+      <p style="margin:0 0 20px;font-size:13px;line-height:1.6;color:#9aa0a6;font-family:${font};">
         <strong style="color:#eaeeef;">Didn't request this?</strong> You can safely ignore this email —
         your password will not be changed.
       </p>
@@ -318,7 +352,7 @@ export class EmailService {
         <tr><td style="border-top:1px solid #2a2b2d;font-size:0;line-height:0;">&nbsp;</td></tr>
       </table>
 
-      <p style="margin:0;font-size:14px;color:#9aa0a6;text-align:center;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      <p style="margin:0;font-size:14px;color:#9aa0a6;text-align:center;font-family:${font};">
         Regards, <strong style="color:#eaeeef;">TicketFlow Kenya</strong> &nbsp;&middot;&nbsp;
         <a href="mailto:support@ticketflow.co.ke"
            style="color:#6ea8fe;text-decoration:none;">support@ticketflow.co.ke</a>
@@ -337,13 +371,14 @@ export class EmailService {
       await this.transporter.sendMail({
         from,
         to: payload.to,
-        subject: 'Reset your TicketFlow Kenya password',
+        subject: 'Password Reset Verification Code',
+        text,
         html,
       });
-      this.logger.log(`Password reset email sent to ${payload.to}`);
+      this.logger.log('Password reset code email sent');
       return true;
     } catch (err: any) {
-      this.logger.error(`Failed to send password reset email to ${payload.to}: ${err?.message}`);
+      this.logger.error(`Failed to send password reset code email: ${err?.message}`);
       return false;
     }
   }

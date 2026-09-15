@@ -79,23 +79,26 @@ enum TicketStatus {
 // ---------- MODELS ----------
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  phone        String?  @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         UserRole @default(CUSTOMER)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String    @id @default(uuid())
+  email             String    @unique
+  phone             String?   @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  role              UserRole  @default(CUSTOMER)
+  isActive          Boolean   @default(true)
+  // Any JWT issued before this instant is rejected (see JwtStrategy), so a
+  // password reset signs the account out everywhere.
+  passwordChangedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  organizerProfile    OrganizerProfile?
-  orders              Order[]
-  tickets             Ticket[]
-  passwordResetTokens PasswordResetToken[]
-  auditLogs           AuditLog[]
-  checkInsPerformed   CheckIn[]            @relation("CheckInScannedBy")
+  organizerProfile      OrganizerProfile?
+  orders                Order[]
+  tickets               Ticket[]
+  passwordResetRequests PasswordResetRequest[]
+  auditLogs             AuditLog[]
+  checkInsPerformed     CheckIn[]              @relation("CheckInScannedBy")
 
   @@map("users")
 }
@@ -331,16 +334,33 @@ model PlatformCommission {
   @@map("platform_commissions")
 }
 
-model PasswordResetToken {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @unique
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+/// One forgot-password attempt: an emailed 6-digit code, then — once that code
+/// is verified — a short-lived reset authorisation. Neither secret is stored in
+/// the clear. Only the newest request per user is ever live; requesting a new
+/// code invalidates the rest.
+model PasswordResetRequest {
+  id                  String    @id @default(uuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// HMAC-SHA256 of the code, keyed with a server secret. A bare hash of a
+  /// 6-digit code could be reversed in a million guesses if the table leaked.
+  codeHash            String
+  expiresAt           DateTime
+  /// Verification attempts used, including the successful one. Capped at 5.
+  attempts            Int       @default(0)
+  verifiedAt          DateTime?
+  /// SHA-256 of the reset authorisation handed out after verification.
+  resetTokenHash      String?   @unique
+  resetTokenExpiresAt DateTime?
+  /// Set when the new password is saved — the authorisation cannot be replayed.
+  consumedAt          DateTime?
+  /// Set when superseded by a newer code, locked by too many wrong guesses, or
+  /// closed by a completed reset.
+  invalidatedAt       DateTime?
+  createdAt           DateTime  @default(now())
 
-  @@map("password_reset_tokens")
+  @@index([userId, createdAt])
+  @@map("password_reset_requests")
 }
 
 model AuditLog {

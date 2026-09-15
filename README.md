@@ -161,6 +161,12 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
 - **One prompt per order**: initiation is serialised per order and reuses any live prompt, so a
   double-click, a refresh or two tabs cannot ring the buyer's phone twice. A fresh prompt is only
   sent once the previous one can no longer be paid.
+- **Password reset**: a 6-digit emailed code (10-minute expiry, 5 attempts, single use) unlocks a
+  15-minute reset token that permits exactly one password change, after which every existing
+  session for the account is revoked. Codes and tokens are only ever stored hashed, and the
+  request endpoint answers identically for registered and unknown emails. Delivery uses the
+  existing `SMTP_*` settings; for local work without SMTP, set `PASSWORD_RESET_DEV_LOG_CODES=true`
+  to print codes to the server console (ignored when `NODE_ENV=production`).
 - **Adding another payment provider**: see `backend/README.md` → "Adding another payment
   provider".
 

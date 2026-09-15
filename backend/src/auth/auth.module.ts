@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { PasswordResetService } from './password-reset.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
@@ -22,7 +23,7 @@ import { EmailModule } from '../email/email.module';
     AuditLogsModule,
     EmailModule,
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, PasswordResetService, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
