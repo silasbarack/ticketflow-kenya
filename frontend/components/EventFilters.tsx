@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import { EventCategory } from '@/types';
 import { Input, Label, Select } from '@/components/ui/Input';
@@ -37,20 +37,23 @@ export function EventFilterFields({
   filters,
   onChange,
   categories,
+  layout = 'row',
 }: {
   filters: EventFiltersValue;
   onChange: (next: EventFiltersValue) => void;
   categories: EventCategory[] | undefined;
+  layout?: 'row' | 'sidebar';
 }) {
+  const prefix = useId();
   function set<K extends keyof EventFiltersValue>(key: K, value: EventFiltersValue[K]) {
     onChange({ ...filters, [key]: value });
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+    <div className={layout === 'sidebar' ? 'grid grid-cols-1 gap-5 [&>div]:col-span-1' : 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6'}>
       <div className="lg:col-span-1">
-        <Label htmlFor="filter-category">Category</Label>
-        <Select id="filter-category" value={filters.categoryId} onChange={(e) => set('categoryId', e.target.value)}>
+        <Label htmlFor={`${prefix}-category`}>Category</Label>
+        <Select id={`${prefix}-category`} value={filters.categoryId} onChange={(e) => set('categoryId', e.target.value)}>
           <option value="">All categories</option>
           {categories?.map((c) => (
             <option key={c.id} value={c.id}>
@@ -61,20 +64,20 @@ export function EventFilterFields({
       </div>
 
       <div className="lg:col-span-1">
-        <Label htmlFor="filter-city">Location</Label>
-        <Input id="filter-city" value={filters.city} onChange={(e) => set('city', e.target.value)} placeholder="Any city" />
+        <Label htmlFor={`${prefix}-city`}>Location</Label>
+        <Input id={`${prefix}-city`} value={filters.city} onChange={(e) => set('city', e.target.value)} placeholder="Any city" />
       </div>
 
       <div className="lg:col-span-1">
-        <Label htmlFor="filter-date">From date</Label>
-        <Input id="filter-date" type="date" value={filters.fromDate} onChange={(e) => set('fromDate', e.target.value)} />
+        <Label htmlFor={`${prefix}-date`}>From date</Label>
+        <Input id={`${prefix}-date`} type="date" value={filters.fromDate} onChange={(e) => set('fromDate', e.target.value)} />
       </div>
 
       <div className="lg:col-span-2">
-        <Label htmlFor="filter-min-price">Price range (KES)</Label>
+        <Label htmlFor={`${prefix}-min-price`}>Price range (KES)</Label>
         <div className="flex items-center gap-2">
           <Input
-            id="filter-min-price"
+            id={`${prefix}-min-price`}
             type="number"
             min={0}
             inputMode="numeric"

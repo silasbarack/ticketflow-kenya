@@ -98,19 +98,19 @@ function CheckoutContent() {
 
     return (
       <main className="pb-16">
-        <section className="ember-ground text-white">
+        <section className="booking-heading">
           <Container className="py-12 text-center sm:py-16">
             <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 ring-1 ring-inset ring-white/20">
               <PartyPopper className="h-7 w-7 text-brand-300" aria-hidden="true" />
             </span>
             <h1 className="mt-5 text-[28px] font-extrabold sm:text-4xl">
-              Payment <span className="ember-text">confirmed</span>
+              Payment <span className="text-brand-600">confirmed</span>
             </h1>
-            <p className="mx-auto mt-3 max-w-md text-[15px] text-white/70">
+            <p className="mx-auto mt-3 max-w-md text-[15px] text-muted">
               Thank you for buying with TicketFlow Kenya. Your ticket
               {paidTickets.length === 1 ? ' has' : 's have'} been issued and sent to your email.
             </p>
-            <p className="tnum mt-4 text-xs text-white/45">Order {order.orderNumber}</p>
+            <p className="tnum mt-4 text-xs text-muted">Order {order.orderNumber}</p>
           </Container>
         </section>
 
@@ -134,11 +134,11 @@ function CheckoutContent() {
               </h2>
               {paidTickets.map((ticket) => (
                 <div key={ticket.id} className="overflow-hidden rounded-card border border-line bg-white shadow-card">
-                  <div className="flex items-center justify-between gap-3 bg-ink-900 px-5 py-3">
-                    <span className="eyebrow text-brand-300">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-brand-100 bg-brand-50 px-5 py-3">
+                    <span className="eyebrow text-brand-700">
                       {ticket.ticketType?.name} · {tierLabel(ticket.ticketType?.category ?? '')}
                     </span>
-                    <span className="tnum font-mono text-xs text-white/80">{ticket.ticketCode}</span>
+                    <span className="tnum font-mono text-xs text-navy-600">{ticket.ticketCode}</span>
                   </div>
 
                   <div className="flex flex-col gap-5 p-5 sm:flex-row">
@@ -219,13 +219,13 @@ function CheckoutContent() {
 
   return (
     <main className="pb-16">
-      <section className="ember-ground text-white">
+      <section className="booking-heading">
         <Container className="py-7 sm:py-9">
-          <p className="eyebrow text-brand-300">Final step</p>
+          <p className="eyebrow text-brand-700">Final step</p>
           <h1 className="mt-2 text-[26px] font-extrabold leading-tight sm:text-[32px]">
-            Re-enter your number to <span className="ember-text">send the STK push</span>
+            Re-enter your number to <span className="text-brand-600">send the STK push</span>
           </h1>
-          <p className="mt-2 max-w-xl text-[13px] text-white/65">
+          <p className="mt-2 max-w-xl text-[13px] text-muted">
             {confirmedPhone
               ? `You reserved these tickets against ${maskKenyanPhone(confirmedPhone)}. Type it once more to release the payment prompt.`
               : 'Type the M-Pesa number that will approve this payment.'}

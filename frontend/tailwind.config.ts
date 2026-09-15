@@ -84,9 +84,9 @@ const config: Config = {
       },
       borderRadius: {
         // Inputs/selects. Buttons opt into a full pill via `rounded-full`.
-        btn: '12px',
-        card: '18px',
-        panel: '24px',
+        btn: '8px',
+        card: '12px',
+        panel: '16px',
       },
       boxShadow: {
         soft: '0 1px 2px 0 rgba(8,13,19,0.04), 0 1px 3px 0 rgba(8,13,19,0.05)',

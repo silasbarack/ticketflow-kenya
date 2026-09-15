@@ -52,7 +52,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
     user?.role === 'ADMIN' ? '/admin/dashboard' : user?.role === 'ORGANIZER' ? '/organizer/dashboard' : '/dashboard';
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div className="fixed inset-0 z-50 xl:hidden">
       <button
         aria-label="Close menu"
         onClick={onClose}
@@ -66,7 +66,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
         className="absolute inset-y-0 right-0 flex w-[85vw] max-w-sm flex-col bg-white shadow-elevated"
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
-          <Logo className="h-9" />
+          <Logo className="h-9" wordmarkClassName="text-sm" />
           <button
             ref={closeRef}
             onClick={onClose}

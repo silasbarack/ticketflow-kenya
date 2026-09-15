@@ -36,7 +36,7 @@ function AccountSettingsContent() {
         </section>
 
         <div className="mt-5 rounded-card border border-line bg-white p-5 text-sm leading-relaxed text-muted shadow-soft">
-          Need to change your name, email or phone number? Contact <a href="mailto:support@ticketflow.co.ke" className="font-bold text-brand-700 underline">support@ticketflow.co.ke</a>. Account updates remain support-assisted until a verified profile-update endpoint is available.
+          Need to change your name, email or phone number? Contact <a href="mailto:support@ticketflow.co.ke" className="font-bold text-brand-700 underline">support@ticketflow.co.ke</a> for help updating your account.
         </div>
       </Container>
     </main>

@@ -49,7 +49,7 @@ export default function TicketTierSelector({
               qty > 0 ? 'border-brand-300 bg-brand-50/50 shadow-soft' : 'border-line bg-white'
             } ${unavailable ? 'opacity-60' : ''}`}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
                 <span
                   className={`eyebrow inline-flex rounded-full px-2 py-1 ring-1 ring-inset ${tint}`}
@@ -86,7 +86,7 @@ export default function TicketTierSelector({
                 <button
                   type="button"
                   aria-label={`Decrease quantity for ${tt.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-navy-700 transition hover:border-navy-300 disabled:opacity-30"
+                  className="flex h-11 w-11 items-center justify-center rounded-btn border border-line bg-white text-navy-700 transition hover:border-brand-600 disabled:opacity-30"
                   disabled={qty === 0}
                   onClick={() => onChange(tt.id, Math.max(0, qty - 1))}
                 >
@@ -98,7 +98,7 @@ export default function TicketTierSelector({
                 <button
                   type="button"
                   aria-label={`Increase quantity for ${tt.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-white text-navy-700 transition hover:border-navy-300 disabled:opacity-30"
+                  className="flex h-11 w-11 items-center justify-center rounded-btn border border-line bg-white text-navy-700 transition hover:border-brand-600 disabled:opacity-30"
                   disabled={unavailable || available <= qty}
                   onClick={() => onChange(tt.id, qty + 1)}
                 >

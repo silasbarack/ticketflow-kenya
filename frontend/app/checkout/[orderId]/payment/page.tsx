@@ -209,10 +209,10 @@ function PaymentProcessing() {
   return (
     // Fills the fold below the navbar without adding a viewport of dead ground
     // underneath the card.
-    <main className="ember-ground min-h-[calc(100vh-7rem)] py-10 sm:py-14">
+    <main className="bg-cream min-h-[calc(100vh-var(--header-height))] py-10 sm:py-14">
       <Container className="max-w-lg">
         <div className="mb-6 flex justify-center">
-          <Logo variant="full" theme="dark" className="h-10" wordmarkClassName="text-base" />
+          <Logo variant="full" theme="light" className="h-10" wordmarkClassName="text-base" />
         </div>
 
         <div className="rounded-card border border-line bg-white p-6 shadow-card sm:p-8">

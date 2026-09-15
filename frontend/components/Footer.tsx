@@ -1,87 +1,23 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { QrCode, ShieldCheck, Smartphone } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import Logo from '@/components/Logo';
 import Container from '@/components/ui/Container';
 
-const EXPLORE_LINKS = [
-  { label: 'Browse Events', href: '/events' },
-  { label: 'Become an Organizer', href: '/register' },
-  { label: 'How It Works', href: '/#how-it-works' },
-  { label: 'Log In', href: '/login' },
+const GROUPS = [
+  {title: 'Discover', links: [['All events', '/events'], ['My tickets', '/dashboard/tickets'], ['My account', '/dashboard'], ['How it works', '/#how-it-works']]},
+  {title: 'Organize', links: [['List your event', '/register'], ['Organizer dashboard', '/organizer/dashboard'], ['Organizer policy', '/legal/event-organizer-policy']]},
+  {title: 'Help & information', links: [['Ticket purchase policy', '/legal/ticket-purchase-policy'], ['Payments & refunds', '/legal/payment-policy'], ['Terms & conditions', '/legal/terms-and-conditions'], ['Privacy policy', '/legal/privacy-policy'], ['Cookie policy', '/legal/cookie-policy']]},
 ];
-
-const LEGAL_LINKS = [
-  { label: 'Privacy Policy', href: '/legal/privacy-policy' },
-  { label: 'Terms and Conditions', href: '/legal/terms-and-conditions' },
-  { label: 'Payment Policy', href: '/legal/payment-policy' },
-];
-
-const MORE_LEGAL_LINKS = [
-  { label: 'Event Organizer Policy', href: '/legal/event-organizer-policy' },
-  { label: 'Ticket Purchase Policy', href: '/legal/ticket-purchase-policy' },
-  { label: 'Cookie Policy', href: '/legal/cookie-policy' },
-];
-
-const ASSURANCES = [
-  { icon: Smartphone, text: 'M-Pesa STK Push' },
-  { icon: QrCode, text: 'Signed QR tickets' },
-  { icon: ShieldCheck, text: 'Verified organizers' },
-];
-
-function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
-  return (
-    <div>
-      <p className="eyebrow text-white/40">{title}</p>
-      <nav className="mt-4 flex flex-col gap-2.5">
-        {links.map((link) => (
-          <Link key={link.label} href={link.href} className="text-[14px] text-white/65 transition hover:text-white">
-            {link.label}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  );
-}
-
 export default function Footer() {
   return (
-    <footer className="ember-ground text-white/80">
-      <Container className="py-14 sm:py-16">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:grid-cols-4">
-          <div className="col-span-2 lg:col-span-1">
-            <Link href="/">
-              <Logo theme="dark" className="h-9" />
-            </Link>
-            <p className="mt-4 max-w-xs text-[14px] leading-relaxed text-white/55">
-              The all-in-one platform for event organizers to sell tickets, accept M-Pesa payments, and check in
-              attendees with QR codes — built for Kenya.
-            </p>
-
-            <ul className="mt-5 flex flex-col gap-2 text-[12px] text-white/50">
-              {ASSURANCES.map((a) => (
-                <li key={a.text} className="flex items-center gap-2">
-                  <a.icon className="h-3.5 w-3.5 text-brand-400" aria-hidden="true" />
-                  {a.text}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <FooterColumn title="Explore" links={EXPLORE_LINKS} />
-          <FooterColumn title="Legal" links={LEGAL_LINKS} />
-          <FooterColumn title="More Legal" links={MORE_LEGAL_LINKS} />
+    <footer className="site-footer border-t border-line bg-white text-navy-900">
+      <Container className="py-10">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.2fr]">
+          <div><Link href="/" aria-label="TicketFlow Kenya home"><Logo className="h-12" wordmarkClassName="text-lg" /></Link><p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">Good experiences bring people together. Find yours with TicketFlow Kenya.</p><Link href="/events" className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand-700">See what&apos;s happening <ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link></div>
+          {GROUPS.map((group) => <nav key={group.title} aria-label={group.title}><h2 className="text-sm font-bold">{group.title}</h2><ul className="mt-3 space-y-1">{group.links.map(([label, href]) => <li key={href}><Link href={href} className="inline-flex min-h-9 items-center text-sm text-muted hover:text-brand-700">{label}</Link></li>)}</ul></nav>)}
         </div>
-
-        <div className="hairline mt-12" aria-hidden="true" />
-
-        <div className="mt-7 flex flex-col items-center justify-between gap-4 text-[13px] text-white/45 sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} TicketFlow Kenya. All rights reserved.</p>
-          <div className="flex items-center gap-2">
-            <span>Payments powered by</span>
-            <Image src="/mpesa-logo.svg" alt="M-PESA" width={512} height={273} unoptimized className="h-6 w-auto" />
-          </div>
-        </div>
+        <div className="mt-8 flex flex-col gap-4 border-t border-line pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between"><p>&copy; {new Date().getFullYear()} TicketFlow Kenya. All rights reserved.</p><div className="flex items-center gap-3"><span>Book with</span><Image src="/mpesa-logo.svg" alt="M-Pesa" width={512} height={273} unoptimized className="h-6 w-auto" /><span className="border-l border-line pl-3">Made for Kenya</span></div></div>
       </Container>
     </footer>
   );

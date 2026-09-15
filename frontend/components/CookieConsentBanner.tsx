@@ -21,26 +21,25 @@ export default function CookieConsentBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-white/95 p-3 shadow-elevated backdrop-blur sm:p-4">
-      <div className="mx-auto flex max-w-7xl flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="fixed bottom-0 left-0 z-50 w-[100vw] max-w-full border-t border-line bg-white/95 p-3 shadow-elevated backdrop-blur sm:p-4">
+      <div className="mx-auto flex min-w-0 max-w-7xl flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-4xl text-[13px] leading-relaxed text-muted">
-          We use strictly necessary cookies to keep you logged in and process payments, plus
-          optional functional and analytics cookies to improve TicketFlow Kenya. Read our{' '}
+          We use essential cookies for bookings, and optional cookies to improve your experience.{' '}
           <Link href="/legal/cookie-policy" className="font-semibold text-brand-600 hover:text-brand-700">
             Cookie Policy
           </Link>
           .
         </p>
-        <div className="flex w-full shrink-0 gap-2 sm:w-auto">
+        <div className="grid w-full min-w-0 grid-cols-2 gap-2 sm:flex sm:w-auto sm:shrink-0">
           <button
             onClick={() => choose('necessary')}
-            className="min-h-11 flex-1 rounded-btn border border-line px-4 py-2 text-sm font-semibold text-navy-700 hover:bg-cream sm:flex-none"
+            className="min-h-11 min-w-0 rounded-btn border border-line px-3 py-2 text-xs font-semibold text-navy-700 hover:bg-cream sm:px-4 sm:text-sm"
           >
             Necessary only
           </button>
           <button
             onClick={() => choose('all')}
-            className="min-h-11 flex-1 rounded-btn bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 sm:flex-none"
+            className="min-h-11 min-w-0 rounded-btn bg-brand-600 px-3 py-2 text-xs font-semibold text-white hover:bg-brand-700 sm:px-4 sm:text-sm"
           >
             Accept all
           </button>

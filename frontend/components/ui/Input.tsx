@@ -2,7 +2,7 @@ import { InputHTMLAttributes, SelectHTMLAttributes, forwardRef } from 'react';
 import clsx from 'clsx';
 
 export const inputClasses =
-  'h-12 w-full rounded-btn border border-line bg-white px-4 text-[15px] text-navy-900 placeholder:text-muted/75 shadow-[0_1px_0_rgba(17,17,16,0.02)] transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-navy-900/5';
+  'h-12 w-full min-w-0 rounded-btn border border-line bg-white px-4 text-[15px] text-navy-900 placeholder:text-muted/75 shadow-[0_1px_0_rgba(17,17,16,0.02)] transition focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-navy-900/5';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (

@@ -6,14 +6,12 @@ import { ArrowUpRight, CalendarDays, Heart, MapPin, Share2, Ticket } from 'lucid
 import { EventItem } from '@/types';
 import { formatCurrency, formatDateTime } from '@/lib/format';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useCountdown } from '@/hooks/useCountdown';
 import EventPoster from '@/components/EventPoster';
 import Badge from '@/components/ui/Badge';
 import { getTierStatus, sortTiers } from '@/lib/tiers';
 
 export default function EventCard({ event, priority = false }: { event: EventItem; priority?: boolean }) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const countdown = useCountdown(event.startDateTime, event.endDateTime);
   const favorite = isFavorite(event.id);
   const eventUrl = `/events/${event.slug}`;
   const tiers = sortTiers(event.ticketTypes);
@@ -43,47 +41,43 @@ export default function EventCard({ event, priority = false }: { event: EventIte
   }
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-card border border-line bg-white shadow-soft transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-navy-200 hover:shadow-card focus-within:border-brand-300 focus-within:shadow-card">
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-line bg-white transition-[border-color,box-shadow] duration-200 hover:border-brand-200 hover:shadow-card focus-within:border-brand-300">
       <div className="relative">
         <Link href={eventUrl} className="block focus-visible:outline-none" aria-label={`View ${event.title}`}>
-          <div className="relative aspect-[16/10] overflow-hidden bg-surface">
+          <div className="relative aspect-[4/3] overflow-hidden bg-surface">
             <EventPoster src={event.posterUrl} alt={event.posterAlt || `${event.title} event poster`} priority={priority} objectPosition="center 40%" className="transition duration-500 group-hover:scale-[1.035]" />
             <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" aria-hidden="true" />
           </div>
         </Link>
 
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          {event.isFeatured && <Badge tone="brand" className="bg-white/95 shadow-soft">Featured</Badge>}
+        <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5">
           <Badge tone={soldOut ? 'neutral' : sellingFast ? 'warning' : internalBookable ? 'success' : 'neutral'} className="bg-white/95 shadow-soft">
-            {externalBooking ? 'Official listing' : soldOut ? 'Sold out' : sellingFast ? `${totalAvailable} left` : internalBookable ? 'Tickets available' : 'Sales closed'}
+            {externalBooking ? 'Official listing' : soldOut ? 'Sold out' : sellingFast ? `${totalAvailable} left` : internalBookable && availableTiers.length ? 'Tickets available' : 'Sales closed'}
           </Badge>
         </div>
 
         <div className="absolute right-3 top-3 flex gap-1.5">
-          <button type="button" onClick={handleToggleFavorite} aria-label={favorite ? `Remove ${event.title} from favourites` : `Add ${event.title} to favourites`} aria-pressed={favorite} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-navy-700 shadow-soft transition hover:text-brand-700"><Heart className="h-4 w-4" fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" /></button>
-          <button type="button" onClick={handleShare} aria-label={`Share ${event.title}`} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-navy-700 shadow-soft transition hover:text-brand-700"><Share2 className="h-4 w-4" aria-hidden="true" /></button>
+          <button type="button" onClick={handleToggleFavorite} aria-label={favorite ? `Remove ${event.title} from favourites` : `Add ${event.title} to favourites`} aria-pressed={favorite} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy-700 shadow-soft transition hover:text-brand-700"><Heart className="h-4 w-4" fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" /></button>
+          <button type="button" onClick={handleShare} aria-label={`Share ${event.title}`} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy-700 shadow-soft transition hover:text-brand-700"><Share2 className="h-4 w-4" aria-hidden="true" /></button>
         </div>
 
-        <span className="absolute bottom-3 left-3 rounded-full bg-ink-950/90 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
-          {countdown.phase === 'upcoming' ? `${countdown.label} to go` : countdown.label}
-        </span>
       </div>
 
       <div className="flex flex-1 flex-col p-4 sm:p-[18px]">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-brand-700">{event.category?.name}</p>
         <Link href={eventUrl} className="mt-2 block"><h3 className="line-clamp-2 text-[17px] font-extrabold leading-snug tracking-[-0.018em] text-navy-900 group-hover:text-brand-700">{event.title}</h3></Link>
 
-        <div className="mt-3 space-y-2 text-[13px] text-muted">
+        <div className="mb-4 mt-3 space-y-2 text-[13px] text-muted">
           <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" aria-hidden="true" /><span>{formatDateTime(event.startDateTime)}</span></p>
           <p className="flex items-start gap-2"><MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" aria-hidden="true" /><span className="line-clamp-1">{event.venue}, {event.city}</span></p>
         </div>
 
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-4">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-line pt-4">
           <div>
             <p className="text-[11px] text-muted">{startingPrice !== null ? 'Tickets from' : tiers.length ? 'Ticket status' : 'Tickets'}</p>
             <p className="tnum mt-0.5 text-base font-extrabold text-navy-900">{startingPrice !== null ? formatCurrency(startingPrice) : tiers.length ? 'Unavailable' : 'To be announced'}</p>
           </div>
-          <Link href={eventUrl} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-brand-50 px-3.5 text-xs font-extrabold text-brand-700 transition group-hover:bg-brand-600 group-hover:text-white">
+          <Link href={eventUrl} className="inline-flex min-h-11 items-center gap-1.5 rounded-btn bg-brand-50 px-3.5 text-xs font-extrabold text-brand-700 transition group-hover:bg-brand-600 group-hover:text-white">
             {internalBookable ? <><Ticket className="h-3.5 w-3.5" aria-hidden="true" />View tickets</> : <>View details<ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /></>}
           </Link>
         </div>

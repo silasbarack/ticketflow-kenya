@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
 export default function Skeleton({ className }: { className?: string }) {
-  return <div className={clsx('animate-pulse rounded-xl bg-navy-900/8', className)} aria-hidden="true" />;
+  return <div className={clsx('animate-pulse rounded-xl bg-navy-900/[0.08]', className)} aria-hidden="true" />;
 }
 
 /** Grid of card-shaped skeletons, sized to match EventCard. */

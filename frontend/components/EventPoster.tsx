@@ -21,6 +21,7 @@ export default function EventPoster({
   sizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
   className = '',
   objectPosition = 'center 40%',
+  fit = 'cover',
 }: {
   src?: string | null;
   alt: string;
@@ -29,6 +30,7 @@ export default function EventPoster({
   sizes?: string;
   className?: string;
   objectPosition?: string;
+  fit?: 'cover' | 'contain';
 }) {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(src ? 'loading' : 'error');
 
@@ -57,7 +59,7 @@ export default function EventPoster({
         fill
         sizes={sizes}
         {...(priority ? { priority: true } : { loading: 'lazy' as const })}
-        className={`object-cover ${className}`}
+        className={`${fit === 'contain' ? 'object-contain' : 'object-cover'} ${className}`}
         style={{ objectPosition }}
         onLoad={() => setStatus('ready')}
         onError={() => {
