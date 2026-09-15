@@ -24,6 +24,14 @@ services:
         generateValue: true
       - key: JWT_EXPIRES_IN
         value: 7d
+      # Keys the HMAC that protects stored password-reset codes.
+      - key: PASSWORD_RESET_SECRET
+        generateValue: true
+      # Render puts one proxy in front of the service; without this every
+      # request looks like it comes from the same IP and per-IP rate limits
+      # throttle all users together.
+      - key: TRUST_PROXY
+        value: "1"
       - key: PLATFORM_COMMISSION_PERCENT
         value: "9"
       - key: ENABLE_MOCK_PAYMENTS
