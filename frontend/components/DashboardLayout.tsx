@@ -22,7 +22,7 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
   return (
     <div className="min-h-[calc(100vh-var(--header-height))] bg-cream">
       <div className="mx-auto flex max-w-[1600px]">
-        <aside className="sticky top-[var(--header-height)] hidden h-[calc(100vh-var(--header-height))] w-[240px] shrink-0 flex-col border-r border-line bg-white px-4 py-5 text-navy-900 lg:flex">
+        <aside className="sticky top-[var(--header-height)] hidden h-[calc(100vh-var(--header-height))] w-[260px] shrink-0 flex-col border-r border-line bg-white px-4 py-6 text-navy-900 lg:flex">
           <div className="border-b border-line px-2 pb-5">
             <div className="flex items-center justify-between gap-3">
               <Logo variant="icon" className="h-9" />
@@ -43,8 +43,8 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={clsx(
-                    'group flex min-h-11 items-center gap-3 rounded-btn px-3.5 text-sm font-semibold transition',
-                    active ? 'bg-brand-50 text-brand-700' : 'text-navy-600 hover:bg-surface hover:text-navy-900',
+                    'group flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-bold transition',
+                    active ? 'bg-brand-50 text-brand-700 shadow-soft' : 'text-navy-600 hover:bg-surface hover:text-navy-900',
                   )}
                 >
                   <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -67,7 +67,7 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
         </aside>
 
         <div className="min-w-0 flex-1">
-          <div className="sticky top-[var(--header-height)] z-20 border-b border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+          <div className="sticky top-[var(--header-height)] z-20 border-b border-line bg-white/95 px-4 py-3 shadow-soft backdrop-blur lg:hidden">
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted">
               <ShieldCheck className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />
               {workspaceLabel}
@@ -90,7 +90,7 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
             </nav>
           </div>
 
-          <main className="mx-auto w-full max-w-[1220px] px-4 py-7 sm:px-6 sm:py-9 xl:px-10 xl:py-11">
+          <main className="mx-auto w-full max-w-[1240px] px-4 py-6 sm:px-6 sm:py-8 xl:px-10 xl:py-10">
             {children}
           </main>
         </div>
