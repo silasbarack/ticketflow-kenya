@@ -14,7 +14,7 @@ export default function EventGrid({
   onRetry,
   emptyTitle = 'No events found',
   emptyDescription = 'Try adjusting your search or check back soon for new listings.',
-  skeletonCount = 6,
+  skeletonCount = 8,
 }: {
   events: EventItem[] | undefined;
   isLoading?: boolean;
@@ -25,9 +25,7 @@ export default function EventGrid({
   skeletonCount?: number;
 }) {
   if (isLoading) return <EventCardSkeletonGrid count={skeletonCount} />;
-
   if (isError) return <ErrorState title="Couldn't load events" onRetry={onRetry} />;
-
   if (!events || events.length === 0) {
     return (
       <EmptyState
@@ -39,11 +37,8 @@ export default function EventGrid({
   }
 
   return (
-    <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 ${events.length === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} xl:gap-6`}>
-      {/* The first row (three cards at lg) is above the fold at every width. */}
-      {events.map((event, index) => (
-        <EventCard key={event.id} event={event} priority={index < 3} />
-      ))}
+    <div className="ref-catalog-grid">
+      {events.map((event, index) => <EventCard key={event.id} event={event} priority={index < 4} />)}
     </div>
   );
 }

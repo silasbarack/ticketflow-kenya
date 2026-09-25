@@ -7,17 +7,17 @@ const config: Config = {
       colors: {
         // Primary action colour — TicketFlow red (#E31845), matching the real logo
         brand: {
-          50: '#fff0f4',
-          100: '#ffe0e8',
-          200: '#ffbecd',
-          300: '#ff90ab',
-          400: '#fa5c85',
-          500: '#ef2f5f',
-          600: '#e31845',
-          700: '#b90f33',
-          800: '#8f0c29',
-          900: '#6b0a1f',
-          950: '#3d0611',
+          50: '#fff1f4',
+          100: '#ffe2e8',
+          200: '#ffc6d2',
+          300: '#ff97aa',
+          400: '#ff5874',
+          500: '#f92348',
+          600: '#e6002d',
+          700: '#bd0025',
+          800: '#9f0625',
+          900: '#870925',
+          950: '#4b0010',
         },
         // Warning / urgency accent — amber-orange (reversible states only: sold out, low stock, pending)
         accent: {
@@ -93,7 +93,7 @@ const config: Config = {
         card: '0 16px 40px -26px rgba(15,23,42,0.28), 0 2px 6px rgba(15,23,42,0.05)',
         elevated: '0 30px 80px -30px rgba(15,23,42,0.38)',
         // Primary CTA halo — brand red at low alpha, never used to carry meaning.
-        glow: '0 16px 34px -18px rgba(227,24,69,0.72)',
+        glow: '0 16px 34px -18px rgba(230,0,45,0.72)',
       },
       maxWidth: {
         container: '1280px',
