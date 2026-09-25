@@ -1,38 +1,63 @@
-import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUpRight, Mail, MapPin, ShieldCheck } from 'lucide-react';
+import Link from 'next/link';
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Youtube } from 'lucide-react';
 import Logo from '@/components/Logo';
 
 export default function Footer() {
   return (
-    <footer className="fresh-footer">
+    <footer className="ref-footer" id="contact">
       <div className="container-page">
-        <div className="fresh-footer-main">
-          <div className="fresh-footer-brand">
-            <Link href="/" className="fresh-footer-logo"><Logo theme="dark" className="h-10" wordmarkClassName="text-[17px]" /></Link>
-            <p>Discover what is happening across Kenya, book supported events securely, and keep your ticket on your phone.</p>
-            <div className="fresh-footer-contact">
-              <span><MapPin size={15} /> Kenya</span>
-              <span><Mail size={15} /> Support through TicketFlow</span>
+        <div className="ref-footer-grid">
+          <div className="ref-footer-brand">
+            <Link href="/" aria-label="TicketFlow Kenya home"><Logo className="h-16" /></Link>
+            <p>Good events. Brighter people.</p>
+            <small>Discover and manage memorable experiences across Kenya.</small>
+          </div>
+
+          <div className="ref-footer-col">
+            <h3>Quick Links</h3>
+            <Link href="/">Home</Link>
+            <Link href="/events">Discover</Link>
+            <Link href="/#categories">Categories</Link>
+            <Link href="/register">Organizers</Link>
+            <Link href="/#about">About</Link>
+          </div>
+
+          <div className="ref-footer-col">
+            <h3>Help</h3>
+            <Link href="/legal/ticket-purchase-policy">Ticket Support</Link>
+            <Link href="/legal/payment-policy">Payment Policy</Link>
+            <Link href="/legal/terms-and-conditions">Terms & Conditions</Link>
+            <Link href="/legal/privacy-policy">Privacy Policy</Link>
+          </div>
+
+          <div className="ref-footer-col ref-footer-contact">
+            <h3>Connect With Us</h3>
+            <div className="ref-socials">
+              <a href="#" aria-label="Facebook"><Facebook /></a>
+              <a href="#" aria-label="Instagram"><Instagram /></a>
+              <a href="#" aria-label="YouTube"><Youtube /></a>
+              <a href="#" aria-label="LinkedIn"><Linkedin /></a>
             </div>
+            <span><Mail /> support@ticketflow.co.ke</span>
+            <span><MapPin /> Nairobi, Kenya</span>
+            <span><Phone /> TicketFlow customer support</span>
           </div>
 
-          <div className="fresh-footer-links">
-            <div><h3>Discover</h3><Link href="/events">All events</Link><Link href="/events?city=Nairobi">Nairobi events</Link><Link href="/dashboard/tickets">My tickets</Link></div>
-            <div><h3>Organizers</h3><Link href="/register">List an event</Link><Link href="/organizer/dashboard">Dashboard</Link><Link href="/legal/event-organizer-policy">Organizer policy</Link></div>
-            <div><h3>Help & legal</h3><Link href="/legal/ticket-purchase-policy">Ticket policy</Link><Link href="/legal/payment-policy">Payments</Link><Link href="/legal/privacy-policy">Privacy</Link></div>
+          <div className="ref-footer-col ref-newsletter">
+            <h3>Join Our Newsletter</h3>
+            <p>Get the latest events and platform updates.</p>
+            <form action="/events">
+              <input type="email" name="email" placeholder="Your email address" aria-label="Your email address" />
+              <button type="submit" aria-label="Subscribe"><Send /></button>
+            </form>
+            <div className="ref-mpesa-foot"><span>Payments supported with</span><Image src="/mpesa-logo.svg" alt="M-Pesa" width={96} height={48} unoptimized /></div>
           </div>
         </div>
 
-        <div className="fresh-payment-strip">
-          <div><ShieldCheck size={18} /><span><b>Secure event checkout</b><small>TicketFlow-hosted events support mobile-first booking and M-Pesa workflows.</small></span></div>
-          <span className="fresh-mpesa"><Image src="/mpesa-logo.svg" alt="M-Pesa" width={128} height={68} unoptimized /></span>
-          <Link href="/events">Browse events <ArrowUpRight size={16} /></Link>
-        </div>
-
-        <div className="fresh-footer-bottom">
-          <span>© {new Date().getFullYear()} TicketFlow Kenya.</span>
-          <span>Built for mobile and desktop.</span>
+        <div className="ref-footer-bottom">
+          <span>© {new Date().getFullYear()} TicketFlow Kenya. All rights reserved.</span>
+          <span>Events make a brighter Kenya.</span>
         </div>
       </div>
     </footer>

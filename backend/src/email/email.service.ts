@@ -32,7 +32,7 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-// Load the full Kenya-map + card logo PNG from disk (assets/logo.png)
+// Load the official TicketFlow Kenya logo PNG from disk (assets/logo.png)
 function loadLogoPng(): string {
   try {
     const logoPath = path.join(__dirname, '..', '..', 'assets', 'logo.png');
@@ -78,8 +78,10 @@ export class EmailService {
 
     // Logo must use the publicly deployed URL — localhost is unreachable from Gmail's servers.
     // EMAIL_LOGO_URL env var overrides; falls back to the known Render deployment.
-    const logoUrl = this.configService.get<string>('EMAIL_LOGO_URL')
-      || 'https://ticketflow-frontend-w47s.onrender.com/logo.png';
+    const logoUrl = this.logoPngBase64
+      ? 'cid:ticketflow-logo'
+      : (this.configService.get<string>('EMAIL_LOGO_URL')
+        || 'https://ticketflow-frontend-w47s.onrender.com/logo.png');
 
     /*
      * Plain-text fallback:
@@ -110,16 +112,9 @@ export class EmailService {
 
   <!-- ── Logo header ── -->
   <tr>
-    <td style="background-color:#be123c;padding:16px 24px;">
-      <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-        <td style="vertical-align:middle;padding-right:14px;">
-          <img src="${logoUrl}" width="56" height="58" alt="TFK" style="display:block;"/>
-        </td>
-        <td style="vertical-align:middle;">
-          <div style="color:#ffffff;font-size:24px;font-weight:900;font-style:italic;line-height:1;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">TICKETFLOW</div>
-          <div style="color:#fda4af;font-size:10px;font-weight:700;letter-spacing:5px;margin-top:3px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">KENYA</div>
-        </td>
-      </tr></table>
+    <td style="background-color:#ffffff;padding:18px 24px;border-bottom:4px solid #e6002d;">
+      <img src="${logoUrl}" width="156" alt="TicketFlow Kenya"
+           style="display:block;width:156px;max-width:100%;height:auto;border:0;"/>
     </td>
   </tr>
 
@@ -231,6 +226,12 @@ export class EmailService {
         subject: 'Your TicketFlow Kenya Ticket is Ready',
         html,
         attachments: [
+          ...(this.logoPngBase64 ? [{
+            filename: 'ticketflow-logo.png',
+            content: Buffer.from(this.logoPngBase64, 'base64'),
+            contentType: 'image/png',
+            cid: 'ticketflow-logo',
+          }] : []),
           {
             filename: `ticket-${payload.ticketCode}.pdf`,
             content: payload.pdfBuffer,
@@ -259,8 +260,10 @@ export class EmailService {
     const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
 
     // Same rationale as the ticket email logo: must be a publicly reachable URL.
-    const logoUrl = this.configService.get<string>('EMAIL_LOGO_URL')
-      || 'https://ticketflow-frontend-w47s.onrender.com/logo.png';
+    const logoUrl = this.logoPngBase64
+      ? 'cid:ticketflow-logo'
+      : (this.configService.get<string>('EMAIL_LOGO_URL')
+        || 'https://ticketflow-frontend-w47s.onrender.com/logo.png');
 
     const firstName = escapeHtml(payload.firstName || 'there');
     const code = payload.code;
@@ -301,16 +304,9 @@ export class EmailService {
        style="width:100%;max-width:600px;background-color:#1e1f21;border-radius:8px;overflow:hidden;">
 
   <tr>
-    <td style="background-color:#be123c;padding:16px 24px;">
-      <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-        <td style="vertical-align:middle;padding-right:14px;">
-          <img src="${logoUrl}" width="56" height="58" alt="TFK" style="display:block;"/>
-        </td>
-        <td style="vertical-align:middle;">
-          <div style="color:#ffffff;font-size:24px;font-weight:900;font-style:italic;line-height:1;font-family:${font};">TICKETFLOW</div>
-          <div style="color:#fda4af;font-size:10px;font-weight:700;letter-spacing:5px;margin-top:3px;font-family:${font};">KENYA</div>
-        </td>
-      </tr></table>
+    <td style="background-color:#ffffff;padding:18px 24px;border-bottom:4px solid #e6002d;">
+      <img src="${logoUrl}" width="156" alt="TicketFlow Kenya"
+           style="display:block;width:156px;max-width:100%;height:auto;border:0;"/>
     </td>
   </tr>
 
@@ -374,6 +370,12 @@ export class EmailService {
         subject: 'Password Reset Verification Code',
         text,
         html,
+        attachments: this.logoPngBase64 ? [{
+          filename: 'ticketflow-logo.png',
+          content: Buffer.from(this.logoPngBase64, 'base64'),
+          contentType: 'image/png',
+          cid: 'ticketflow-logo',
+        }] : undefined,
       });
       this.logger.log('Password reset code email sent');
       return true;

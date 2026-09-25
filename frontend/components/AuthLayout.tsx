@@ -1,23 +1,24 @@
 import { ReactNode } from 'react';
 import Image from 'next/image';
 import { Check, ShieldCheck } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function AuthLayout({ title, subtitle, panelTitle, panelPoints, footer, children }: {
   title: string; subtitle: string; panelTitle: string; panelPoints: string[]; footer?: ReactNode; children: ReactNode;
 }) {
   return (
-    <main className="min-h-[calc(100vh-var(--header-height))] bg-cream px-4 py-6 sm:py-10 lg:py-14">
-      <div className="mx-auto grid max-w-[1080px] overflow-hidden rounded-panel border border-line bg-white shadow-card lg:grid-cols-[0.95fr_1.05fr]">
-        <aside className="relative hidden min-h-[640px] flex-col justify-end overflow-hidden bg-ink-900 p-10 text-white lg:flex">
-          <Image src="/hero-party.jpg" alt="" fill sizes="520px" className="object-cover opacity-60" />
+    <main className="min-h-[calc(100vh-var(--header-height))] bg-[#f7f7f9] px-4 py-6 sm:py-10 lg:py-14">
+      <div className="mx-auto grid max-w-[1080px] overflow-hidden rounded-[24px] border border-line bg-white shadow-card lg:grid-cols-[0.95fr_1.05fr]">
+        <aside className="relative hidden min-h-[640px] flex-col justify-end overflow-hidden bg-[#151516] p-10 text-white lg:flex">
+          <Image src="/hero-party.jpg" alt="" fill sizes="520px" className="object-cover opacity-55" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-black/10" aria-hidden="true" />
           <div className="relative max-w-md">
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-200">TicketFlow Kenya</p>
-            <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.04em]">{panelTitle}</h2>
+            <span className="inline-flex rounded-xl bg-white p-2"><Logo className="h-16" /></span>
+            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.04em]">{panelTitle}</h2>
             <ul className="mt-7 space-y-4">
               {panelPoints.map((point) => (
                 <li key={point} className="flex gap-3 text-sm leading-relaxed text-white/85">
-                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white/10"><Check className="h-3.5 w-3.5 text-brand-200" aria-hidden="true" /></span>
+                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-600"><Check className="h-3.5 w-3.5" aria-hidden="true" /></span>
                   {point}
                 </li>
               ))}
@@ -26,6 +27,7 @@ export default function AuthLayout({ title, subtitle, panelTitle, panelPoints, f
         </aside>
 
         <section className="flex min-h-[560px] flex-col justify-center px-5 py-8 sm:px-10 sm:py-12 lg:px-14">
+          <div className="mb-7 lg:hidden"><Logo className="h-16" /></div>
           <div className="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
             <ShieldCheck className="h-5 w-5" aria-hidden="true" />
           </div>

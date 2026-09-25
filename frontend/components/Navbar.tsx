@@ -14,40 +14,49 @@ export default function Navbar() {
   const { user } = useAuth();
   const { totalItems } = useCart();
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const nav = [
+    ['Home', '/'],
+    ['Discover', '/events'],
+    ['Categories', '/#categories'],
+    ['Organizers', '/#for-organizers'],
+    ['About', '/#about'],
+    ['Contact', '/#contact'],
+  ];
 
   return (
-    <header className="fresh-header">
-      <div className="container-page fresh-header-inner">
-        <Link href="/" className="fresh-logo" aria-label="TicketFlow Kenya home">
-          <span className="fresh-logo-desktop"><Logo className="h-10" wordmarkClassName="text-[17px]" /></span>
-          <span className="fresh-logo-mobile"><Logo variant="icon" className="h-9" /></span>
-        </Link>
+    <header className="ref-header">
+      <div className="container-page ref-header-inner">
+        <Link href="/" className="ref-header-logo" aria-label="TicketFlow Kenya home"><Logo className="h-12" /></Link>
 
-        <nav className="fresh-desktop-nav" aria-label="Primary">
-          <Link href="/events" className={pathname.startsWith('/events') ? 'active' : ''}>Events</Link>
-          <Link href="/events?city=Nairobi">Nairobi</Link>
-          <Link href="/#for-organizers">For organizers</Link>
+        <nav className="ref-main-nav" aria-label="Primary navigation">
+          {nav.map(([label, href]) => {
+            const active = href === '/' ? pathname === '/' : href === '/events' ? pathname.startsWith('/events') : false;
+            return <Link key={href} href={href} className={active ? 'active' : ''}>{label}</Link>;
+          })}
         </nav>
 
-        <form action="/events" className="fresh-header-search">
-          <Search size={17} />
-          <input name="q" placeholder="Search events" aria-label="Search events" />
-        </form>
-
-        <div className="fresh-header-actions">
-          <Link href="/cart" className="fresh-icon-button" aria-label={'Cart with ' + totalItems + ' tickets'}>
-            <ShoppingCart size={20} />
+        <div className="ref-header-right">
+          <Link href="/events" className="ref-header-icon" aria-label="Search events"><Search size={18} /></Link>
+          <Link href="/cart" className="ref-header-icon ref-cart" aria-label={'Cart with ' + totalItems + ' tickets'}>
+            <ShoppingCart size={18} />
             {totalItems > 0 && <span>{totalItems > 99 ? '99+' : totalItems}</span>}
           </Link>
-          <div className="fresh-account-area">
-            {user ? <UserMenu /> : <Link href="/login" className="fresh-login">Log in</Link>}
-            {user?.role !== 'ADMIN' && <Link href={user?.role === 'ORGANIZER' ? '/organizer/events/create' : '/register'} className="fresh-list-event">List event</Link>}
+
+          <div className="ref-header-auth">
+            {user ? <UserMenu /> : <>
+              <Link href="/login" className="ref-login-btn">Log In</Link>
+              <Link href="/register" className="ref-signup-btn">Sign Up</Link>
+            </>}
           </div>
-          <button type="button" className="fresh-menu-button" aria-label="Open navigation" onClick={() => setOpen(true)}><Menu size={23} /></button>
+
+          <button type="button" className="ref-menu-btn" aria-label="Open menu" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}>
+            <Menu size={23} />
+          </button>
         </div>
       </div>
-      <MobileNavigationDrawer open={open} onClose={() => setOpen(false)} />
+      <MobileNavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </header>
   );
 }

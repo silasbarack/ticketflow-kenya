@@ -14,7 +14,7 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import PDFDocument from 'pdfkit';
 
-// Cached logo PNG buffer (Kenya map + card design)
+// Cached official TicketFlow Kenya logo PNG buffer
 let _logoBuf: Buffer | null = null;
 function getLogoBuf(): Buffer | null {
   if (_logoBuf) return _logoBuf;
@@ -92,7 +92,7 @@ export class TicketsService {
       doc.on('error', reject);
 
       const W = 595.28; // A4 width in points
-      const orange = '#be123c'; // Kenya flag red
+      const orange = '#e6002d'; // TicketFlow brand red
       const dark = '#111827';
       const muted = '#6b7280';
       const light = '#f9fafb';
@@ -105,30 +105,25 @@ export class TicketsService {
         dateStyle: 'full', timeStyle: 'short',
       }).format(new Date(event.startDateTime));
 
-      // ── Header band ─────────────────────────────────────────────────────────
-      doc.rect(0, 0, W, 100).fill(orange);
+      // ── Branded header ──────────────────────────────────────────────────────
+      doc.rect(0, 0, W, 100).fill('#ffffff');
+      doc.rect(0, 96, W, 4).fill(orange);
 
-      // Kenya map + card logo PNG
       const logoBuf = getLogoBuf();
-      const logoH = 78; // height in PDF points
-      const logoW = Math.round(logoH * (480 / 500)); // preserve aspect ratio
       if (logoBuf) {
-        doc.image(logoBuf, 30, 11, { height: logoH });
+        doc.image(logoBuf, 30, 8, { fit: [150, 82], align: 'left', valign: 'center' });
+      } else {
+        doc.fillColor(dark).fontSize(22).font('Helvetica-Bold')
+          .text('TicketFlow Kenya', 38, 34, { width: 180 });
       }
 
-      // "TicketFlow Kenya" text beside the logo
-      const textX = logoBuf ? 30 + logoW + 10 : 40;
-      doc.fillColor('#ffffff').fontSize(24).font('Helvetica-Bold')
-        .text('TICKETFLOW', textX, 26, { width: W - textX - 20 });
-      doc.fillColor('#fda4af').fontSize(12).font('Helvetica-Bold')
-        .text('KENYA', textX, 55, { characterSpacing: 4 });
-      doc.fillColor('#fecdd3').fontSize(9).font('Helvetica')
-        .text('Official E-Ticket', textX, 72);
-      doc.fillColor('#ffffff').fontSize(8)
-        .text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, textX, 84);
+      doc.fillColor(dark).fontSize(10).font('Helvetica-Bold')
+        .text('OFFICIAL E-TICKET', 345, 30, { width: 210, align: 'right' });
+      doc.fillColor(muted).fontSize(8).font('Helvetica')
+        .text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, 345, 49, { width: 210, align: 'right' });
 
       // ── Event title strip ────────────────────────────────────────────────────
-      doc.rect(0, 100, W, 52).fill(dark);
+      doc.rect(0, 100, W, 52).fill(orange);
       doc.fillColor('#ffffff').fontSize(18).font('Helvetica-Bold')
         .text(event.title, 40, 115, { width: W - 80, ellipsis: true });
 

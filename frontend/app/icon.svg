@@ -1,14 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <defs>
-    <linearGradient id="tfk-favicon-grad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fa5c85" />
-      <stop offset="1" stop-color="#b90f33" />
-    </linearGradient>
-  </defs>
-  <rect width="48" height="48" rx="12" fill="url(#tfk-favicon-grad)" />
-  <rect x="9" y="15" width="30" height="18" rx="3" fill="white" />
-  <circle cx="9" cy="24" r="3.5" fill="url(#tfk-favicon-grad)" />
-  <circle cx="39" cy="24" r="3.5" fill="url(#tfk-favicon-grad)" />
-  <line x1="30" y1="17.5" x2="30" y2="30.5" stroke="#ff90ab" stroke-width="1.4" stroke-dasharray="2.2 2.2" stroke-linecap="round" />
-  <path d="M32.2 24 L34.4 26.4 L37.6 21" fill="none" stroke="#b90f33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 110" role="img" aria-label="TicketFlow Kenya">
+  <rect width="180" height="110" fill="#fff"/>
+  <g transform="translate(9 5) rotate(-8 82 50)">
+    <path d="M7 72C30 63 50 50 69 35 91 18 112 8 140 3l28 10c-8 13-7 26 3 38l-17 34c-15-7-28-5-41 5L7 72Z" fill="#e6002d"/>
+    <path d="M15 72c28-10 51-23 71-40-10 20-27 36-48 48 38-8 69-21 95-42-23 28-55 47-97 55" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M119 12l5 8m3 5 5 8m3 5 5 8m3 5 5 8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  </g>
 </svg>

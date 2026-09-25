@@ -7,74 +7,36 @@ interface LogoProps {
   variant?: 'full' | 'icon';
   theme?: 'light' | 'dark';
   className?: string;
-  /** Wordmark text size/style override (full variant only). */
   wordmarkClassName?: string;
-  /** Kept for API compatibility — unused now that logo is an image. */
   gradientId?: string;
 }
 
-/**
- * Renders the TicketFlow Kenya logo.
- * Place the downloaded logo file at frontend/public/logo.png to show it.
- * Falls back to a styled text mark if the image is unavailable.
- */
 export default function Logo({
   variant = 'full',
-  theme = 'light',
   className = 'h-14',
-  wordmarkClassName = 'text-xl',
 }: LogoProps) {
-  const [imgFailed, setImgFailed] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const src = variant === 'icon' ? '/logo-icon.svg' : '/logo.png';
+  const aspect = variant === 'icon' ? '1.7 / 1' : '1.25 / 1';
 
-  const wordmarkColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
-
-  if (variant === 'icon') {
-    return imgFailed ? (
-      <span
-        className={`inline-flex items-center justify-center rounded-xl bg-brand-700 font-black
-                    text-white ${className}`}
-        style={{ aspectRatio: '1' }}
-      >
-        TK
-      </span>
-    ) : (
-      <span className={`relative inline-block ${className}`} style={{ aspectRatio: '1' }}>
-        <Image
-          src="/logo.png"
-          alt="TicketFlow Kenya"
-          fill
-          unoptimized
-          className="object-contain"
-          onError={() => setImgFailed(true)}
-        />
+  if (failed) {
+    return (
+      <span className={`inline-flex items-center rounded-xl bg-white px-2 font-black text-brand-700 ${className}`}>
+        TicketFlow
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-3">
-      {imgFailed ? (
-        <span
-          className="inline-flex h-14 w-14 items-center justify-center rounded-xl
-                     bg-brand-700 text-sm font-black text-white"
-        >
-          TK
-        </span>
-      ) : (
-        <span className={`relative inline-block ${className}`} style={{ aspectRatio: '1' }}>
-          <Image
-            src="/logo.png"
-            alt="TicketFlow Kenya"
-            fill
-            unoptimized
-            className="object-contain"
-            onError={() => setImgFailed(true)}
-          />
-        </span>
-      )}
-      <span className={`${wordmarkClassName} font-bold leading-none ${wordmarkColor}`}>
-        TicketFlow <span className="text-brand-700">Kenya</span>
-      </span>
+    <span className={`relative inline-block shrink-0 ${className}`} style={{ aspectRatio: aspect }}>
+      <Image
+        src={src}
+        alt="TicketFlow Kenya"
+        fill
+        unoptimized
+        className="object-contain"
+        onError={() => setFailed(true)}
+      />
     </span>
   );
 }
