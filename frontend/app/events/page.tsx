@@ -90,14 +90,14 @@ function EventsContent() {
 
   return (
     <main>
-      <div className="border-b border-line bg-brand-50/40 py-7 sm:py-9">
+      <div className="border-b border-line bg-[radial-gradient(circle_at_top_left,rgba(227,24,69,.10),transparent_34rem)] py-8 sm:py-11">
         <Container>
           <p className="page-kicker">{activeCategory ? activeCategory.name : 'Discover'}</p>
           <h1 className="page-title">Find your kind of experience.</h1>
           <p className="page-description">A night out, a new idea, a day to remember. See what&apos;s happening across Kenya.</p>
 
-          <div className="mt-6">
-            <label className="flex h-14 max-w-3xl items-center gap-3 rounded-btn border border-line bg-white px-4 transition focus-within:border-brand-500">
+          <div className="mt-7">
+            <label className="flex h-14 max-w-4xl items-center gap-3 rounded-2xl border border-line bg-white px-4 shadow-soft transition focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-500/10">
               <Search className="h-5 w-5 shrink-0 text-navy-400" aria-hidden="true" />
               <span className="sr-only">Search events</span>
               <input
@@ -111,7 +111,7 @@ function EventsContent() {
           </div>
 
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
               Filters
@@ -130,9 +130,9 @@ function EventsContent() {
         </Container>
       </div>
 
-      <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <Container className="grid gap-7 py-7 sm:py-10 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-9">
         <aside className="hidden lg:block">
-          <div className="sticky top-24 rounded-card border border-line bg-white p-4">
+          <div className="sticky top-24 rounded-card border border-line bg-white p-5 shadow-soft">
             <h2 className="mb-5 flex items-center gap-2 text-sm font-bold text-navy-900"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />Make it your own</h2>
             <EventFilterFields filters={filters} onChange={setFilters} categories={categories} layout="sidebar" />
           </div>
