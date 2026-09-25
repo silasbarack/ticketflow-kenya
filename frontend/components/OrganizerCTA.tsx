@@ -4,7 +4,36 @@ import { ArrowUpRight, CalendarPlus, QrCode, Wallet } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import { buttonVariants } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
+
 export default function OrganizerCTA() {
   const { user } = useAuth();
-  return <section id="for-organizers" className="scroll-mt-24 bg-brand-600 py-10 text-white sm:py-12"><Container className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-white/80">For the people who bring us together</p><h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Your event. A full house.</h2><p className="mt-3 max-w-lg text-sm leading-relaxed text-white/85">Create your event, sell tickets with M-Pesa, and welcome your guests with a quick QR scan.</p><Link href={user?.role === 'ORGANIZER' ? '/organizer/events/create' : '/register'} className={buttonVariants({ variant:'outline', className:'mt-6 border-white text-brand-700' })}>Start organizing <ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link></div><div className="grid gap-4">{[{icon:CalendarPlus,title:'Publish your event',text:'Set up your page and ticket options.'},{icon:Wallet,title:'Keep track of sales',text:'View your orders and revenue in one place.'},{icon:QrCode,title:'Make entry simple',text:'Check in guests with their QR tickets.'}].map(({icon:Icon,title,text}) => <div key={title} className="flex items-center gap-4 border-b border-white/25 pb-4 last:border-0"><Icon className="h-6 w-6 shrink-0" aria-hidden="true" /><div><h3 className="text-sm font-bold">{title}</h3><p className="mt-1 text-xs text-white/80">{text}</p></div></div>)}</div></Container></section>;
+  const items = [
+    {icon:CalendarPlus,title:'Publish your event',text:'Create a polished event page and configure ticket tiers.'},
+    {icon:Wallet,title:'Track your sales',text:'See orders, ticket performance and revenue in one workspace.'},
+    {icon:QrCode,title:'Scan tickets fast',text:'Validate signed QR tickets at the entrance from your phone.'},
+  ];
+
+  return (
+    <section id="for-organizers" className="scroll-mt-24 bg-navy-950 py-12 text-white sm:py-16">
+      <Container className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-300">For event organizers</p>
+          <h2 className="mt-4 max-w-xl text-3xl font-black tracking-[-0.04em] sm:text-5xl">Your event deserves a smoother ticketing experience.</h2>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-white/65 sm:text-base">Create, sell and scan from one platform built for Kenyan events and mobile-first customers.</p>
+          <Link href={user?.role === 'ORGANIZER' ? '/organizer/events/create' : '/register'} className={buttonVariants({ size:'lg', className:'mt-7 rounded-full' })}>
+            Start organizing <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+
+        <div className="grid gap-3">
+          {items.map(({icon:Icon,title,text}, index) => (
+            <div key={title} className="group flex gap-4 rounded-card border border-white/10 bg-white/[0.055] p-5 transition hover:border-brand-400/40 hover:bg-white/[0.08]">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+              <div><p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/40">0{index + 1}</p><h3 className="mt-1 text-base font-extrabold">{title}</h3><p className="mt-1.5 text-sm leading-6 text-white/60">{text}</p></div>
+            </div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
 }
