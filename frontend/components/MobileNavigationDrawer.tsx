@@ -56,14 +56,14 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
       <button
         aria-label="Close menu"
         onClick={onClose}
-        className="absolute inset-0 bg-navy-900/50 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-navy-950/60 backdrop-blur-[3px]"
       />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
-        className="absolute inset-y-0 right-0 flex w-[85vw] max-w-sm flex-col bg-white shadow-elevated"
+        className="absolute inset-y-0 right-0 flex w-[88vw] max-w-[390px] flex-col bg-white shadow-elevated"
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <Logo className="h-9" wordmarkClassName="text-sm" />
@@ -83,7 +83,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
               key={link.label}
               href={link.href}
               onClick={onClose}
-              className="rounded-xl px-3 py-3 text-base font-medium text-navy-800 hover:bg-navy-900/5"
+              className="rounded-2xl px-4 py-3 text-base font-bold text-navy-800 transition hover:bg-brand-50 hover:text-brand-700"
               style={{ minHeight: 44 }}
             >
               {link.label}
@@ -91,7 +91,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
           ))}
         </nav>
 
-        <div className="mt-auto border-t border-line px-3 py-4">
+        <div className="mobile-safe-area mt-auto border-t border-line bg-cream/60 px-3 py-4">
           {user ? (
             <div className="flex flex-col gap-1">
               <div className="px-3 pb-2">
@@ -117,7 +117,7 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
                   onClose();
                   logout();
                 }}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-left text-base font-medium text-navy-700 hover:bg-navy-900/5"
+                className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-base font-semibold text-navy-700 hover:bg-navy-900/5"
                 style={{ minHeight: 44 }}
               >
                 <LogOut className="h-5 w-5" aria-hidden="true" />
@@ -159,7 +159,7 @@ function DrawerLink({
     <Link
       href={href}
       onClick={onNavigate}
-      className="flex items-center gap-3 rounded-xl px-3 py-3 text-base font-medium text-navy-800 hover:bg-navy-900/5"
+      className="flex items-center gap-3 rounded-2xl px-3 py-3 text-base font-semibold text-navy-800 hover:bg-brand-50 hover:text-brand-700"
       style={{ minHeight: 44 }}
     >
       {icon}
