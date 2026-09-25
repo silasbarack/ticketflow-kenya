@@ -72,10 +72,10 @@ const config: Config = {
           900: '#111110',
           950: '#090908',
         },
-        cream: '#f8f7f4',
-        surface: '#f1f0ec',
-        muted: '#6f6b64',
-        line: '#e3e1dc',
+        cream: '#f7f7f9',
+        surface: '#f2f3f6',
+        muted: '#6c6f78',
+        line: '#e5e7eb',
       },
       fontFamily: {
         // Single family across the product — headings, body copy and figures.
@@ -84,16 +84,16 @@ const config: Config = {
       },
       borderRadius: {
         // Inputs/selects. Buttons opt into a full pill via `rounded-full`.
-        btn: '8px',
-        card: '12px',
-        panel: '16px',
+        btn: '12px',
+        card: '18px',
+        panel: '24px',
       },
       boxShadow: {
-        soft: '0 1px 2px 0 rgba(8,13,19,0.04), 0 1px 3px 0 rgba(8,13,19,0.05)',
-        card: '0 1px 2px rgba(17,17,16,0.04), 0 12px 32px -24px rgba(17,17,16,0.32)',
-        elevated: '0 28px 70px -32px rgba(17,17,16,0.42)',
+        soft: '0 4px 16px -10px rgba(15,23,42,0.18), 0 1px 3px rgba(15,23,42,0.06)',
+        card: '0 16px 40px -26px rgba(15,23,42,0.28), 0 2px 6px rgba(15,23,42,0.05)',
+        elevated: '0 30px 80px -30px rgba(15,23,42,0.38)',
         // Primary CTA halo — brand red at low alpha, never used to carry meaning.
-        glow: '0 10px 28px -14px rgba(227,24,69,0.65)',
+        glow: '0 16px 34px -18px rgba(227,24,69,0.72)',
       },
       maxWidth: {
         container: '1280px',
