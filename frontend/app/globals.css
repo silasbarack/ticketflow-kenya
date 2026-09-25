@@ -394,3 +394,81 @@ html[data-theme='dark']
   .discovery-search { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) auto; align-items: center; }
   .discovery-search-field { border-bottom: 0; border-right: 1px solid #e3e1dc; }
 }
+
+
+/* ------------------------------------------------------------------ */
+/* TicketFlow responsive redesign                                      */
+/* ------------------------------------------------------------------ */
+:root {
+  --header-height: 76px;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(227,24,69,0.035), transparent 24rem),
+    var(--bg-color);
+}
+
+.site-header {
+  backdrop-filter: saturate(1.2) blur(14px);
+  background: rgba(255,255,255,.94);
+}
+
+.container-page {
+  max-width: 1320px;
+  padding-inline: clamp(1rem, 3.2vw, 2.25rem);
+}
+
+.marketplace-home {
+  overflow-x: clip;
+}
+
+.marketplace-intro {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(50rem 25rem at 0% 0%, rgba(227,24,69,.12), transparent 60%),
+    linear-gradient(180deg, #fffafb 0%, #fff 88%);
+}
+
+.marketplace-intro::after {
+  content: '';
+  position: absolute;
+  inset: auto -10rem -14rem auto;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 9999px;
+  background: rgba(227,24,69,.055);
+  pointer-events: none;
+}
+
+.discovery-search {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 44px -28px rgba(15,23,42,.32), 0 2px 8px rgba(15,23,42,.05);
+}
+
+.event-card-premium {
+  transform: translateZ(0);
+}
+
+.event-card-premium:hover {
+  transform: translateY(-3px);
+}
+
+.mobile-safe-area {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 639px) {
+  :root { --header-height: 66px; }
+  .container-page { padding-inline: 1rem; }
+  .marketplace-heading { font-size: 1.5rem; }
+  .page-title { font-size: 1.8rem; }
+  .page-description { font-size: .875rem; }
+  .discovery-search { border-radius: 16px; }
+}
+
+@media (min-width: 1280px) {
+  .container-page { max-width: 1360px; }
+}
