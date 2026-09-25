@@ -3,78 +3,130 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, ArrowUpRight, MapPin, QrCode, ShieldCheck, Smartphone, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, CalendarDays, CheckCircle2, MapPin, QrCode, Search, ShieldCheck, Smartphone, Sparkles, TicketCheck } from 'lucide-react';
 import { api } from '@/lib/api';
-import Container from '@/components/ui/Container';
-import { buttonVariants } from '@/components/ui/Button';
+import { EventItem } from '@/types';
+import { getCuratedUpcoming } from '@/lib/curated-events';
 import EventGrid from '@/components/EventGrid';
-import HeroSearch from '@/components/HeroSearch';
 import OrganizerCTA from '@/components/OrganizerCTA';
-import { EventCategory, EventItem } from '@/types';
 
-export default function LandingPage() {
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['home-events'],
-    queryFn: async () => (await api.get('/events', { params: { take: 50 } })).data as { events: EventItem[]; total: number },
+const categories = ['Music', 'Sports', 'Nightlife', 'Culture', 'Festival', 'Technology'];
+
+export default function HomePage() {
+  const curated = getCuratedUpcoming();
+  const { data } = useQuery({
+    queryKey: ['home-events-new-ui'],
+    queryFn: async () => (await api.get('/events', { params: { take: 24 } })).data as { events: EventItem[]; total: number },
   });
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => (await api.get('/categories')).data as EventCategory[],
-  });
-  const events = data?.events ?? [];
-  const featured = events.filter((event) => event.isFeatured);
-  const upcoming = [...events].sort((a, b) => Date.parse(a.startDateTime) - Date.parse(b.startDateTime));
-  const cities = Array.from(new Set(events.map((event) => event.city))).filter(Boolean).sort();
+
+  const apiEvents = (data?.events || []).filter((event) => Date.parse(event.endDateTime) >= Date.now());
+  const seen = new Set(curated.map((event) => event.slug));
+  const allEvents = [...curated, ...apiEvents.filter((event) => !seen.has(event.slug))]
+    .sort((a, b) => Date.parse(a.startDateTime) - Date.parse(b.startDateTime));
+  const heroEvent = allEvents[0] || curated[0];
+
   return (
-    <main className="marketplace-home bg-white">
-      <section className="marketplace-intro">
-        <Container className="relative z-10 grid items-center gap-8 py-9 sm:py-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:py-16">
-          <div className="min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white/80 px-3 py-2 text-xs font-extrabold text-brand-700 shadow-soft"><Sparkles className="h-3.5 w-3.5" aria-hidden="true" />Kenya&apos;s event discovery & ticketing platform</div>
-            <h1 className="mt-5 max-w-3xl text-[40px] font-black leading-[1.02] tracking-[-0.052em] text-navy-900 sm:text-[56px] lg:text-[68px]">Find the event.<br /><span className="text-brand-600">Feel the moment.</span></h1>
-            <p className="mt-5 max-w-xl text-[15px] leading-7 text-muted sm:text-base">From live music and festivals to theatre, networking and culture — discover what&apos;s happening and book in a few taps.</p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <Link href="#discover-events" className={buttonVariants({size:'lg', className:'rounded-full'})}>Explore events <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
-              <span className="flex min-h-11 items-center gap-2 rounded-full border border-line bg-white px-4 text-xs font-bold text-muted shadow-soft"><Smartphone className="h-4 w-4" aria-hidden="true" />Book with M-Pesa</span>
+    <main className="fresh-home">
+      <section className="home-hero">
+        <div className="container-page home-hero-grid">
+          <div className="home-hero-copy">
+            <span className="hero-pill"><Sparkles size={15} /> Kenya is happening now</span>
+            <h1>Plans worth<br /><span>leaving the house for.</span></h1>
+            <p>Discover verified upcoming experiences across Kenya, compare dates and prices, and move from “what are we doing?” to booked.</p>
+            <div className="hero-actions">
+              <Link href="/events" className="primary-cta">Explore events <ArrowRight size={18} /></Link>
+              <Link href="/register" className="secondary-cta">List your event</Link>
+            </div>
+            <div className="hero-trust-row">
+              <span><ShieldCheck size={16} /> Verified listings</span>
+              <span><Smartphone size={16} /> M-Pesa ready</span>
+              <span><QrCode size={16} /> QR tickets</span>
             </div>
           </div>
-          <div className="relative">
-            <div className="relative h-[260px] overflow-hidden rounded-panel border border-white/70 shadow-elevated sm:h-[360px] lg:h-[470px]">
-              <Image src="/hero-party.jpg" alt="An audience enjoying a live music performance" fill priority sizes="(min-width: 1024px) 45vw, 90vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" aria-hidden="true" />
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7"><p className="text-xs font-extrabold uppercase tracking-[0.16em] text-white/70">This weekend</p><p className="mt-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">Less scrolling.<br />More being there.</p></div>
-            </div>
-            <span className="absolute -right-2 -top-3 flex h-20 w-20 rotate-6 items-center justify-center rounded-full border-[5px] border-white bg-brand-600 text-center text-[10px] font-extrabold uppercase leading-snug tracking-wide text-white shadow-card sm:h-24 sm:w-24 sm:text-xs">Made for<br />going out</span>
-          </div>
-        </Container>
-      </section>
-      <Container className="relative z-20 -mt-3 pb-8 sm:-mt-5">
-        <HeroSearch />
-        {categories && categories.length > 0 && <nav aria-label="Event categories" className="snap-row mt-6 gap-2 pb-1">
-          <Link href="/events" data-active="true" className="filter-chip shrink-0">All experiences</Link>
-          {categories.map((category) => <Link key={category.id} href={`/events?category=${encodeURIComponent(category.id)}`} className="filter-chip shrink-0">{category.name}</Link>)}
-        </nav>}
-      </Container>
-      <section id="discover-events" className="scroll-mt-24 border-t border-line bg-white py-10 sm:py-14"><Container>
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div><p className="page-kicker">Your next plan</p><h2 className="marketplace-heading mt-2">{featured.length ? 'In the spotlight' : 'Coming up in Kenya'}</h2></div>
-          <Link href="/events" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-brand-700">View all <ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link>
+
+          {heroEvent && (
+            <Link href={'/events/' + heroEvent.slug} className="hero-event-card">
+              <Image src={heroEvent.posterUrl || '/hero-party.jpg'} alt={heroEvent.posterAlt || heroEvent.title} fill priority sizes="(max-width: 900px) 100vw, 46vw" className="hero-event-image" />
+              <div className="hero-event-shade" />
+              <div className="hero-event-date">
+                <b>{new Intl.DateTimeFormat('en-KE', { day: '2-digit', timeZone: 'Africa/Nairobi' }).format(new Date(heroEvent.startDateTime))}</b>
+                <span>{new Intl.DateTimeFormat('en-KE', { month: 'short', timeZone: 'Africa/Nairobi' }).format(new Date(heroEvent.startDateTime)).toUpperCase()}</span>
+              </div>
+              <div className="hero-event-content">
+                <span>{heroEvent.category.name}</span>
+                <h2>{heroEvent.title}</h2>
+                <p><MapPin size={15} /> {heroEvent.venue}, {heroEvent.city}</p>
+              </div>
+            </Link>
+          )}
         </div>
-        <EventGrid events={(featured.length ? featured : upcoming).slice(0, 6)} isLoading={isLoading} isError={isError} onRetry={() => refetch()} emptyTitle="New experiences are on their way" emptyDescription="Check back soon for upcoming events across Kenya." />
-      </Container></section>
-      {featured.length > 0 && upcoming.some((event) => !event.isFeatured) && <section className="border-t border-line py-9 sm:py-12"><Container><div className="mb-6"><p className="page-kicker">Save the date</p><h2 className="marketplace-heading mt-2">More to look forward to</h2></div><EventGrid events={upcoming.filter((event) => !event.isFeatured).slice(0, 3)} /></Container></section>}
-      {cities.length > 0 && <section className="border-y border-line bg-white py-8"><Container className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div><p className="page-kicker">Around the country</p><h2 className="mt-2 text-xl font-bold tracking-tight text-navy-900">Find your city. Find your scene.</h2></div>
-        <div className="flex flex-wrap gap-2">{cities.map((city) => <Link key={city} href={`/events?city=${encodeURIComponent(city)}`} className="inline-flex min-h-11 items-center gap-2 rounded-btn border border-line px-4 text-sm font-semibold text-navy-700 hover:border-brand-600 hover:text-brand-700"><MapPin className="h-4 w-4" aria-hidden="true" />{city}</Link>)}</div>
-      </Container></section>}
-      <section id="how-it-works" className="scroll-mt-24 py-10 sm:py-14"><Container>
-        <div className="mb-8"><p className="page-kicker">From discovery to the door</p><h2 className="marketplace-heading mt-2">Your next experience, made easy.</h2></div>
-        <div className="grid gap-4 sm:grid-cols-3">{[
-          { icon: ShieldCheck, title: 'Find something you love', text: 'Explore events, compare ticket options and choose your experience.' },
-          { icon: Smartphone, title: 'Pay with M-Pesa', text: 'Confirm the prompt on your phone. Your PIN stays with M-Pesa.' },
-          { icon: QrCode, title: 'Show up. Scan in.', text: 'After payment, open your QR ticket from your account at the entrance.' },
-        ].map((step, index) => <div key={step.title} className="rounded-card border border-line bg-white p-5 shadow-soft transition hover:-translate-y-1 hover:shadow-card sm:p-6"><div className="flex items-center justify-between"><step.icon className="h-6 w-6 text-brand-600" aria-hidden="true" /><span className="text-sm font-bold text-muted">0{index + 1}</span></div><h3 className="mt-4 text-lg font-bold text-navy-900">{step.title}</h3><p className="mt-2 text-sm leading-relaxed text-muted">{step.text}</p></div>)}</div>
-      </Container></section>
+      </section>
+
+      <section className="quick-find-wrap">
+        <div className="container-page">
+          <form action="/events" className="quick-find">
+            <div className="quick-find-field"><Search size={18} /><input name="q" placeholder="Search events, artists or venues" aria-label="Search events" /></div>
+            <div className="quick-find-field"><MapPin size={18} /><select name="city" aria-label="Choose city"><option value="">Anywhere in Kenya</option><option>Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Eldoret</option><option>Thika</option></select></div>
+            <button type="submit">Find events</button>
+          </form>
+          <div className="category-strip" aria-label="Browse categories">
+            {categories.map((name) => <Link key={name} href={'/events?category=' + encodeURIComponent(name.toLowerCase())}>{name}</Link>)}
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section">
+        <div className="container-page">
+          <div className="section-heading-row">
+            <div>
+              <span className="section-eyebrow">Calendar picks</span>
+              <h2>What’s next in Kenya</h2>
+              <p>Current listings ordered by date, with source links for externally ticketed events.</p>
+            </div>
+            <Link href="/events" className="text-link">View full calendar <ArrowUpRight size={17} /></Link>
+          </div>
+          <EventGrid events={allEvents.slice(0, 8)} />
+        </div>
+      </section>
+
+      <section className="calendar-band">
+        <div className="container-page">
+          <div className="calendar-band-copy">
+            <span className="section-eyebrow light">This month</span>
+            <h2>Your weekend should not start with 17 open tabs.</h2>
+            <p>TicketFlow puts dates, venues, cities, ticket prices and booking paths in one clean mobile-first view.</p>
+            <Link href="/events" className="white-cta">Open the event calendar <CalendarDays size={18} /></Link>
+          </div>
+          <div className="calendar-list">
+            {allEvents.slice(0, 4).map((event) => (
+              <Link key={event.id} href={'/events/' + event.slug}>
+                <span className="calendar-date-box">
+                  <b>{new Intl.DateTimeFormat('en-KE', { day: '2-digit', timeZone: 'Africa/Nairobi' }).format(new Date(event.startDateTime))}</b>
+                  <small>{new Intl.DateTimeFormat('en-KE', { month: 'short', timeZone: 'Africa/Nairobi' }).format(new Date(event.startDateTime)).toUpperCase()}</small>
+                </span>
+                <span className="calendar-list-copy"><b>{event.title}</b><small>{event.venue} · {event.city}</small></span>
+                <ArrowUpRight size={18} />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section trust-section">
+        <div className="container-page">
+          <div className="section-heading-row compact">
+            <div><span className="section-eyebrow">Built for real plans</span><h2>From discovery to the gate.</h2></div>
+          </div>
+          <div className="trust-grid">
+            <article><span><Search /></span><h3>Discover clearly</h3><p>Browse by date, city and category without fighting through clutter.</p></article>
+            <article><span><TicketCheck /></span><h3>Book confidently</h3><p>TicketFlow-hosted events can support secure checkout and clear ticket tiers.</p></article>
+            <article><span><Smartphone /></span><h3>Pay the Kenyan way</h3><p>M-Pesa-first checkout keeps the experience familiar on mobile.</p></article>
+            <article><span><QrCode /></span><h3>Scan and enter</h3><p>Digital QR tickets are ready for fast validation at the entrance.</p></article>
+          </div>
+          <div className="listing-note"><CheckCircle2 size={18} /><span>Externally ticketed calendar events are clearly labelled and link to their listed ticket source.</span></div>
+        </div>
+      </section>
+
       <OrganizerCTA />
     </main>
   );

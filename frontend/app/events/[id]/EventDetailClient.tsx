@@ -1,132 +1,129 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import { BadgeCheck, Calendar, CalendarX, Clock, ExternalLink, Heart, MapPin, Share2, ShieldCheck, Ticket as TicketIcon, Users } from 'lucide-react';
-import { api } from '@/lib/api';
-import { useFavorites } from '@/hooks/useFavorites';
-import { EventItem } from '@/types';
-import { formatCurrency, formatDateTime } from '@/lib/format';
-import Container from '@/components/ui/Container';
-import Badge from '@/components/ui/Badge';
-import Button, { buttonVariants } from '@/components/ui/Button';
-import EventGrid from '@/components/EventGrid';
-import EventPoster from '@/components/EventPoster';
-import EventBookingPanel from '@/components/EventBookingPanel';
-import EmptyState from '@/components/ui/EmptyState';
-import Skeleton from '@/components/ui/Skeleton';
-import { getTierStatus } from '@/lib/tiers';
+import Image from 'next/image';
 import Link from 'next/link';
+import { ArrowLeft, ArrowUpRight, CalendarDays, CheckCircle2, Clock3, ExternalLink, MapPin, Minus, Plus, ShieldCheck, Ticket, Users } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { EventItem, TicketType } from '@/types';
+import { useCart } from '@/hooks/useCart';
+import { formatCurrency } from '@/lib/format';
+import { useState } from 'react';
 
-export default function EventDetailClient() {
-  const params = useParams<{ id: string }>();
-  const { isFavorite, toggleFavorite } = useFavorites();
+function eventDateLabel(value: string) {
+  return new Intl.DateTimeFormat('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Nairobi' }).format(new Date(value));
+}
 
-  const { data: event, isLoading, isError, refetch } = useQuery({
-    queryKey: ['event', params.id],
-    queryFn: async () => {
-      const { data } = await api.get(`/events/${params.id}`);
-      return data as EventItem;
-    },
-  });
+function eventTimeLabel(value: string) {
+  return new Intl.DateTimeFormat('en-KE', { hour: 'numeric', minute: '2-digit', timeZone: 'Africa/Nairobi' }).format(new Date(value));
+}
 
-  const { data: relatedData } = useQuery({
-    queryKey: ['related-events', event?.category?.id],
-    queryFn: async () => {
-      const { data } = await api.get('/events', { params: { categoryId: event!.category.id, take: 6 } });
-      return data as { events: EventItem[] };
-    },
-    enabled: Boolean(event?.category?.id),
-  });
-  const related = (relatedData?.events ?? []).filter((e) => e.id !== event?.id).slice(0, 3);
+export default function EventDetailClient({ initialEvent }: { initialEvent: EventItem | null }) {
+  const event = initialEvent;
+  const { addToCart } = useCart();
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  const favorite = event ? isFavorite(event.id) : false;
-
-  async function handleShare() {
-    if (!event) return;
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const shareData = { title: event.title, text: `${event.title} — ${event.venue}, ${event.city}`, url: shareUrl };
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        /* user cancelled */
-      }
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copied to clipboard');
-    } catch {
-      toast.error('Could not copy link');
-    }
-  }
-
-  if (isLoading) {
+  if (!event) {
     return (
-      <Container className="grid gap-8 py-8 sm:py-10 lg:grid-cols-[1.6fr_1fr]">
-        <Skeleton className="aspect-[16/10] rounded-card" />
-        <div className="space-y-4"><Skeleton className="h-5 w-28" /><Skeleton className="h-10 w-full" /><Skeleton className="h-5 w-3/4" /><Skeleton className="mt-8 h-72 rounded-card" /></div>
-      </Container>
-    );
-  }
-  if (isError || !event) {
-    return (
-      <Container className="max-w-2xl py-16">
-        <EmptyState
-          icon={<CalendarX className="h-6 w-6" aria-hidden="true" />}
-          title={isError ? "We couldn't load this event" : 'Event not found'}
-          description={isError ? 'Check your connection and try again.' : 'The event may have ended or the link may be incorrect.'}
-          action={isError ? <Button onClick={() => refetch()}>Try again</Button> : <Link href="/events" className={buttonVariants()}>Browse events</Link>}
-        />
-      </Container>
+      <main className="event-not-found">
+        <div className="container-page">
+          <span className="section-eyebrow">Event unavailable</span>
+          <h1>We could not find that event.</h1>
+          <p>It may have ended, moved, or no longer be publicly listed.</p>
+          <Link href="/events" className="primary-cta"><ArrowLeft size={18} /> Back to events</Link>
+        </div>
+      </main>
     );
   }
 
-  const externalBooking = event.bookingMode === 'EXTERNAL' && Boolean(event.bookingUrl);
-  // Absent on older payloads — treat that as bookable so nothing regresses.
-  const bookable = event.isBookable !== false && !externalBooking;
-  const availableTiers = event.ticketTypes.filter((ticket) => getTierStatus(ticket) === 'AVAILABLE');
-  const startingPrice = availableTiers.length
-    ? Math.min(...availableTiers.map((ticket) => Number(ticket.price)))
-    : null;
+  const external = event.bookingMode === 'EXTERNAL' && event.bookingUrl;
+  const lowest = Math.min(...event.ticketTypes.map((item) => Number(item.price)), 0);
 
-  const bookingPanel = <EventBookingPanel event={event} />;
+  const addTier = (tier: TicketType) => {
+    const quantity = quantities[tier.id] || 1;
+    addToCart({
+      eventId: event.id,
+      eventTitle: event.title,
+      eventSlug: event.slug,
+      eventDateTime: event.startDateTime,
+      eventVenue: event.venue,
+      eventCity: event.city,
+      ticketTypeId: tier.id,
+      ticketTypeName: tier.name,
+      ticketTypeCategory: tier.category,
+      price: Number(tier.price),
+      quantity,
+    });
+    toast.success(quantity + ' ticket' + (quantity > 1 ? 's' : '') + ' added to cart');
+  };
 
   return (
-    <main className="bg-white pb-24 lg:pb-12">
-      <Container className="py-5">
-        <Link href="/events" className="inline-flex min-h-11 items-center text-sm text-muted hover:text-brand-700">&larr; All experiences</Link>
-        <div className="mt-2 flex flex-wrap items-center gap-3"><Badge tone="brand">{event.category?.name}</Badge><span className="text-sm text-muted">{event.city}</span></div>
-        <h1 className="mt-4 max-w-4xl text-[28px] font-extrabold leading-tight tracking-[-0.035em] text-navy-900 sm:text-[40px]">{event.title}</h1>
-        {event.subtitle && <p className="mt-3 text-base text-muted">{event.subtitle}</p>}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-          <p className="flex items-center gap-2 text-sm text-muted"><Calendar className="h-4 w-4 text-brand-600" aria-hidden="true" />{formatDateTime(event.startDateTime)}</p>
-          <div className="flex gap-2"><Button variant="outline" size="sm" onClick={handleShare}><Share2 className="h-4 w-4" aria-hidden="true" />Share</Button><Button variant="outline" size="sm" aria-pressed={favorite} onClick={() => {toggleFavorite(event.id); toast.success(favorite ? 'Removed from favourites' : 'Added to favourites');}}><Heart className="h-4 w-4" fill={favorite ? 'currentColor' : 'none'} aria-hidden="true" />{favorite ? 'Saved' : 'Save'}</Button></div>
-        </div>
-      </Container>
-      <Container className="grid grid-cols-1 items-start gap-8 pb-8 lg:grid-cols-[minmax(0,1.8fr)_minmax(300px,1fr)]">
-        <div className="min-w-0">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-panel bg-surface">
-            <EventPoster src={event.posterUrl} alt={event.posterAlt || event.title} priority sizes="(min-width: 1024px) 60vw, 100vw" fit="contain" />
+    <main className="event-detail-page">
+      <div className="container-page">
+        <Link href="/events" className="event-back-link"><ArrowLeft size={17} /> Back to events</Link>
+        <section className="event-detail-hero">
+          <div className="event-detail-media">
+            <Image src={event.posterUrl || '/hero-party.jpg'} alt={event.posterAlt || event.title} fill priority sizes="(max-width: 900px) 100vw, 55vw" />
+            <span className="event-detail-category">{event.category.name}</span>
           </div>
-          <div className="mt-7 grid gap-5 border-y border-line py-6 sm:grid-cols-2">
-            <div className="flex gap-3"><Clock className="h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" /><div><h2 className="text-sm font-bold text-navy-900">Date & time</h2><p className="mt-2 text-sm text-muted">{formatDateTime(event.startDateTime)}</p><p className="mt-1 text-xs text-muted">Until {formatDateTime(event.endDateTime)}</p></div></div>
-            <div className="flex gap-3"><MapPin className="h-5 w-5 shrink-0 text-brand-600" aria-hidden="true" /><div><h2 className="text-sm font-bold text-navy-900">Location</h2><p className="mt-2 text-sm text-muted">{event.venue}</p><p className="mt-1 text-xs text-muted">{event.address ? event.address + ', ' : ''}{event.city}</p></div></div>
+          <div className="event-detail-copy">
+            {event.isFeatured && <span className="detail-featured"><CheckCircle2 size={15} /> Calendar pick</span>}
+            <h1>{event.title}</h1>
+            {event.subtitle && <p className="event-subtitle">{event.subtitle}</p>}
+            <div className="event-facts">
+              <div><span><CalendarDays /></span><p><b>{eventDateLabel(event.startDateTime)}</b><small>{eventTimeLabel(event.startDateTime)} EAT</small></p></div>
+              <div><span><MapPin /></span><p><b>{event.venue}</b><small>{event.address || event.city}</small></p></div>
+              <div><span><Ticket /></span><p><b>{lowest > 0 ? 'From ' + formatCurrency(lowest) : 'Ticket information available'}</b><small>{external ? 'External ticket source' : 'TicketFlow checkout'}</small></p></div>
+            </div>
+            {external ? (
+              <div className="external-booking-card">
+                <div><ShieldCheck size={20} /><span><b>Externally ticketed event</b><small>TicketFlow is displaying the calendar listing. Payment happens on the listed ticket provider.</small></span></div>
+                <a href={event.bookingUrl || '#'} target="_blank" rel="noreferrer">View official tickets <ExternalLink size={17} /></a>
+                {event.verificationSource && <p>Listing source: {event.verificationSource}{event.verifiedAt ? ' · checked 25 Sep 2026' : ''}</p>}
+              </div>
+            ) : (
+              <Link href="#tickets" className="primary-cta">Choose tickets <ArrowUpRight size={18} /></Link>
+            )}
           </div>
-          <section className="py-7"><h2 className="text-xl font-bold tracking-tight text-navy-900">The experience</h2><p className="mt-4 whitespace-pre-line text-[15px] leading-7 text-navy-700">{event.description}</p></section>
-          {(event.organizerName || event.organizer) && <section className="flex gap-4 rounded-card border border-line bg-cream p-5"><Users className="h-6 w-6 shrink-0 text-brand-600" aria-hidden="true" /><div><p className="text-xs text-muted">Brought to you by</p><h2 className="mt-1 font-bold text-navy-900">{event.organizerName || event.organizer?.companyName}</h2>{!externalBooking && event.organizer?.description && <p className="mt-2 text-sm text-muted">{event.organizer.description}</p>}{event.verificationSource && <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700"><BadgeCheck className="h-4 w-4" aria-hidden="true" />Details verified with {event.verificationSource}</p>}</div></section>}
-          <section className="mt-6 border-t border-line py-6"><h2 className="flex items-center gap-2 text-sm font-bold text-navy-900"><ShieldCheck className="h-4 w-4 text-brand-600" aria-hidden="true" />Before you book</h2><p className="mt-3 text-sm leading-relaxed text-muted">{externalBooking ? 'Booking, payment, ticket delivery and refunds are handled by the official seller. Review their terms before purchasing.' : <>Your QR ticket is available after payment confirmation. See our <Link href="/legal/ticket-purchase-policy" className="text-brand-700 underline">ticket purchase policy</Link> and <Link href="/legal/payment-policy" className="text-brand-700 underline">payment policy</Link> for entry and refund information.</>}</p></section>
-        </div>
-        <aside id="tickets" className="min-w-0 scroll-mt-24 lg:sticky lg:top-24">{bookingPanel}</aside>
-      </Container>
-      {related.length > 0 && <section className="border-t border-line bg-cream py-9"><Container><h2 className="marketplace-heading mb-6">Keep exploring</h2><EventGrid events={related} /></Container></section>}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white p-3 lg:hidden">
-        <Container className="flex items-center justify-between gap-3 px-0">
-          <div className="min-w-0"><p className="text-xs text-muted">{bookable ? 'Tickets from' : 'Ticket information'}</p><p className="tnum text-base font-bold text-navy-900">{startingPrice !== null ? formatCurrency(startingPrice) : 'Sales closed'}</p></div>
-          {bookable ? <Link href={`/cart?event=${encodeURIComponent(event.slug)}`} className={buttonVariants({className:'shrink-0'})}><TicketIcon className="h-4 w-4" aria-hidden="true" />Choose tickets</Link> : externalBooking ? <a href={event.bookingUrl as string} target="_blank" rel="noopener noreferrer" className={buttonVariants({variant:'outline'})}>Official seller <ExternalLink className="h-4 w-4" aria-hidden="true" /></a> : null}
-        </Container>
+        </section>
+
+        <section className="event-detail-body">
+          <article className="event-about">
+            <span className="section-eyebrow">About this event</span>
+            <h2>Know before you go</h2>
+            <p>{event.description}</p>
+            <div className="event-meta-grid">
+              <div><Users /><span><b>Organizer</b><small>{event.organizerName || event.organizer?.companyName || 'Event organizer'}</small></span></div>
+              <div><Clock3 /><span><b>Starts</b><small>{eventTimeLabel(event.startDateTime)} EAT</small></span></div>
+              <div><MapPin /><span><b>City</b><small>{event.city}, Kenya</small></span></div>
+            </div>
+          </article>
+
+          {!external && (
+            <aside id="tickets" className="ticket-panel">
+              <span className="section-eyebrow">Tickets</span>
+              <h2>Choose your experience</h2>
+              <div className="ticket-tier-list">
+                {event.ticketTypes.map((tier) => {
+                  const qty = quantities[tier.id] || 1;
+                  return (
+                    <div key={tier.id} className="ticket-tier">
+                      <div><b>{tier.name}</b><span>{formatCurrency(tier.price)}</span></div>
+                      <div className="tier-actions">
+                        <div className="qty-control">
+                          <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.max(1, qty - 1) }))} aria-label="Decrease quantity"><Minus size={15} /></button>
+                          <span>{qty}</span>
+                          <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.min(10, qty + 1) }))} aria-label="Increase quantity"><Plus size={15} /></button>
+                        </div>
+                        <button className="add-ticket-button" onClick={() => addTier(tier)}>Add</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <Link href="/cart" className="primary-cta full">Go to cart <ArrowUpRight size={18} /></Link>
+            </aside>
+          )}
+        </section>
       </div>
     </main>
   );

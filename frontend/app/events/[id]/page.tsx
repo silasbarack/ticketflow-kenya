@@ -1,14 +1,16 @@
 import type { Metadata } from 'next';
 import { API_URL } from '@/lib/api';
-import { absolutePosterUrl, SITE_URL } from '@/lib/posters';
+import { getCuratedEvent } from '@/lib/curated-events';
 import { EventItem } from '@/types';
 import EventDetailClient from './EventDetailClient';
 
 async function getEvent(idOrSlug: string): Promise<EventItem | null> {
+  const curated = getCuratedEvent(idOrSlug);
+  if (curated) return curated;
   try {
-    const res = await fetch(`${API_URL}/events/${idOrSlug}`, { next: { revalidate: 60 } });
-    if (!res.ok) return null;
-    return (await res.json()) as EventItem;
+    const response = await fetch(API_URL + '/events/' + encodeURIComponent(idOrSlug), { next: { revalidate: 60 } });
+    if (!response.ok) return null;
+    return await response.json() as EventItem;
   } catch {
     return null;
   }
@@ -16,88 +18,19 @@ async function getEvent(idOrSlug: string): Promise<EventItem | null> {
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const event = await getEvent(params.id);
-
-  if (!event) {
-    return { title: 'Event not found | TicketFlow Kenya' };
-  }
-
-  const title = `${event.title} | TicketFlow Kenya`;
-  const description =
-    event.description?.slice(0, 160) || `Get tickets for ${event.title} at ${event.venue}, ${event.city}.`;
-  const images = event.posterUrl
-    ? [{ url: absolutePosterUrl(event.posterUrl), width: 1080, height: 1080, alt: event.title }]
-    : [];
-
+  if (!event) return { title: 'Event not found | TicketFlow Kenya' };
   return {
-    title,
-    description,
+    title: event.title + ' | TicketFlow Kenya',
+    description: event.description.slice(0, 160),
     openGraph: {
-      title,
-      description,
-      type: 'website',
-      images,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: event.posterUrl ? [absolutePosterUrl(event.posterUrl)] : undefined,
+      title: event.title,
+      description: event.description.slice(0, 160),
+      images: event.posterUrl ? [event.posterUrl] : undefined,
     },
   };
 }
 
-export default async function EventDetailsPage({ params }: { params: { id: string } }) {
+export default async function EventPage({ params }: { params: { id: string } }) {
   const event = await getEvent(params.id);
-
-  const jsonLd = event
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'Event',
-        name: event.title,
-        description: event.description,
-        startDate: event.startDateTime,
-        endDate: event.endDateTime,
-        eventStatus: 'https://schema.org/EventScheduled',
-        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-        image: event.posterUrl ? [absolutePosterUrl(event.posterUrl)] : undefined,
-        location: {
-          '@type': 'Place',
-          name: event.venue,
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: event.address || event.venue,
-            addressLocality: event.city,
-            addressCountry: 'KE',
-          },
-        },
-        organizer: event.organizerName || event.organizer
-          ? { '@type': 'Organization', name: event.organizerName || event.organizer?.companyName }
-          : { '@type': 'Organization', name: 'TicketFlow Kenya' },
-        offers: event.ticketTypes.map((tt) => ({
-          '@type': 'Offer',
-          name: tt.name,
-          price: tt.price,
-          priceCurrency: 'KES',
-          availability:
-            tt.availabilityStatus === 'AVAILABLE' || (!tt.availabilityStatus && tt.quantity - tt.quantitySold > 0)
-              ? 'https://schema.org/InStock'
-              : tt.availabilityStatus === 'SOLD_OUT'
-                ? 'https://schema.org/SoldOut'
-                : 'https://schema.org/Discontinued',
-          url: event.bookingMode === 'EXTERNAL' && event.bookingUrl
-            ? event.bookingUrl
-            : `${SITE_URL}/events/${event.slug}`,
-        })),
-      }
-    : null;
-
-  return (
-    <>
-      {jsonLd && (
-        // eslint-disable-next-line react/no-danger
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      )}
-      <EventDetailClient />
-    </>
-  );
+  return <EventDetailClient initialEvent={event} />;
 }
