@@ -41,10 +41,10 @@ export default function EventCard({ event, priority = false }: { event: EventIte
   }
 
   return (
-    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-line bg-white transition-[border-color,box-shadow] duration-200 hover:border-brand-200 hover:shadow-card focus-within:border-brand-300">
+    <article className="event-card-premium group flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-line bg-white shadow-soft transition-[border-color,box-shadow,transform] duration-200 hover:border-brand-200 hover:shadow-card focus-within:border-brand-300">
       <div className="relative">
         <Link href={eventUrl} className="block focus-visible:outline-none" aria-label={`View ${event.title}`}>
-          <div className="relative aspect-[4/3] overflow-hidden bg-surface">
+          <div className="relative aspect-[4/3] overflow-hidden bg-surface sm:aspect-[16/11]">
             <EventPoster src={event.posterUrl} alt={event.posterAlt || `${event.title} event poster`} priority={priority} objectPosition="center 40%" className="transition duration-500 group-hover:scale-[1.035]" />
             <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" aria-hidden="true" />
           </div>
@@ -63,9 +63,9 @@ export default function EventCard({ event, priority = false }: { event: EventIte
 
       </div>
 
-      <div className="flex flex-1 flex-col p-4 sm:p-[18px]">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-brand-700">{event.category?.name}</p>
-        <Link href={eventUrl} className="mt-2 block"><h3 className="line-clamp-2 text-[17px] font-extrabold leading-snug tracking-[-0.018em] text-navy-900 group-hover:text-brand-700">{event.title}</h3></Link>
+        <Link href={eventUrl} className="mt-2 block"><h3 className="line-clamp-2 text-[17px] font-black leading-snug tracking-[-0.022em] text-navy-900 transition group-hover:text-brand-700 sm:text-[18px]">{event.title}</h3></Link>
 
         <div className="mb-4 mt-3 space-y-2 text-[13px] text-muted">
           <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-600" aria-hidden="true" /><span>{formatDateTime(event.startDateTime)}</span></p>
@@ -77,7 +77,7 @@ export default function EventCard({ event, priority = false }: { event: EventIte
             <p className="text-[11px] text-muted">{startingPrice !== null ? 'Tickets from' : tiers.length ? 'Ticket status' : 'Tickets'}</p>
             <p className="tnum mt-0.5 text-base font-extrabold text-navy-900">{startingPrice !== null ? formatCurrency(startingPrice) : tiers.length ? 'Unavailable' : 'To be announced'}</p>
           </div>
-          <Link href={eventUrl} className="inline-flex min-h-11 items-center gap-1.5 rounded-btn bg-brand-50 px-3.5 text-xs font-extrabold text-brand-700 transition group-hover:bg-brand-600 group-hover:text-white">
+          <Link href={eventUrl} className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-50 px-4 text-xs font-extrabold text-brand-700 transition group-hover:bg-brand-600 group-hover:text-white">
             {internalBookable ? <><Ticket className="h-3.5 w-3.5" aria-hidden="true" />View tickets</> : <>View details<ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" /></>}
           </Link>
         </div>
