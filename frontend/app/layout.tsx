@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
-import { Noto_Sans } from 'next/font/google';
+import type { Metadata, Viewport } from 'next';
+import { Caveat, Noto_Sans, Poppins } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Providers from './providers';
@@ -9,13 +9,15 @@ import CookieConsentBanner from '@/components/CookieConsentBanner';
 import { BG_COLOR_KEY, BLACK } from '@/lib/appearance';
 
 const notoSans = Noto_Sans({ subsets: ['latin'], variable: '--font-noto-sans' });
+const poppins = Poppins({ subsets: ['latin'], weight: ['500', '600', '700', '800'], variable: '--font-display' });
+const caveat = Caveat({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-script' });
 
 export const metadata: Metadata = {
   title: {
     default: 'TicketFlow Kenya | Discover Events & Book with M-Pesa',
     template: '%s | TicketFlow Kenya',
   },
-  description: 'Discover events across Kenya, book securely with M-Pesa, and access signed QR tickets from your phone.',
+  description: 'Discover Kenya’s best events — concerts, festivals, theatre, sports and more. Book securely with M-Pesa and get instant QR e-tickets.',
   openGraph: {
     title: 'TicketFlow Kenya',
     description: 'Discover events across Kenya and book securely with M-Pesa.',
@@ -27,16 +29,13 @@ export const metadata: Metadata = {
     title: 'TicketFlow Kenya',
     description: 'Discover events across Kenya and book securely with M-Pesa.',
   },
-  icons: {
-    icon: '/ticketflow-logo-official.png',
-    shortcut: '/ticketflow-logo-official.png',
-    apple: '/ticketflow-logo-official.png',
-  },
 };
+
+export const viewport: Viewport = { themeColor: '#e6002d' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={notoSans.variable} suppressHydrationWarning>
+    <html lang="en" className={[notoSans.variable, poppins.variable, caveat.variable].join(' ')} suppressHydrationWarning>
       <head>
         <Script
           id="apply-bg-color"

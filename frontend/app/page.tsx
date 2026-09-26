@@ -2,197 +2,292 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  ArrowRight, ArrowUpRight, BadgeCheck, BriefcaseBusiness, CalendarDays,
-  ChevronRight, Drama, Headphones, MapPin, Music2, MoonStar, PartyPopper,
-  QrCode, Search, ShieldCheck, Smartphone, Trophy, UsersRound, Zap
+  ArrowRight, BadgeCheck, BriefcaseBusiness, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight,
+  Drama, Headphones, LayoutDashboard, MapPin, Martini, Megaphone, Music2, PartyPopper, QrCode, Search,
+  Settings2, ShieldCheck, Smartphone, Sparkles, Star, Ticket, Trophy, UsersRound, Zap,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { EventItem } from '@/types';
 import { getCuratedUpcoming } from '@/lib/curated-events';
 import Logo from '@/components/Logo';
-import { formatCurrency } from '@/lib/format';
+import EventCard from '@/components/EventCard';
+import Reveal, { CountUp } from '@/components/Reveal';
+import { EventCardSkeletonGrid } from '@/components/ui/Skeleton';
 
-const categories = [
+const CATEGORIES = [
   { label: 'Concerts', icon: Music2, href: '/events?category=music' },
   { label: 'Festivals', icon: PartyPopper, href: '/events?category=festival' },
   { label: 'Theatre', icon: Drama, href: '/events?category=culture' },
   { label: 'Sports', icon: Trophy, href: '/events?category=sports' },
   { label: 'Conferences', icon: BriefcaseBusiness, href: '/events?category=technology' },
-  { label: 'Nightlife', icon: MoonStar, href: '/events?category=nightlife' },
+  { label: 'Nightlife', icon: Martini, href: '/events?category=nightlife' },
   { label: 'Family Events', icon: UsersRound, href: '/events?category=entertainment' },
 ];
 
-function lowestPrice(event: EventItem) {
-  const prices = event.ticketTypes.map((tier) => Number(tier.price)).filter((price) => Number.isFinite(price) && price > 0);
-  return prices.length ? Math.min(...prices) : null;
+const MARQUEE = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Diani', 'Naivasha', 'Thika', 'Nanyuki', 'Malindi'];
+
+const WHY = [
+  { icon: ShieldCheck, title: 'Secure Payments', text: 'Pay safely with M-Pesa STK Push — confirmed directly by Safaricom.' },
+  { icon: Zap, title: 'Fast QR Ticket Delivery', text: 'Get your signed QR e-ticket instantly after payment, by email and in-app.' },
+  { icon: BadgeCheck, title: 'Trusted Organizers', text: 'Every event is reviewed and approved before it goes on sale.' },
+  { icon: Headphones, title: 'Easy Support', text: 'Need help? Our support team is here for you before and after the show.' },
+];
+
+const STEPS = [
+  { icon: Search, title: 'Step 1 · Discover', text: 'Browse concerts, festivals, sports and more happening near you.' },
+  { icon: Ticket, title: 'Step 2 · Choose', text: 'Pick your ticket tier and quantity — prices include every fee up front.' },
+  { icon: Smartphone, title: 'Step 3 · Pay with M-Pesa', text: 'Confirm the STK prompt on your phone. No cards, no hassle.' },
+  { icon: QrCode, title: 'Step 4 · Show up', text: 'Your QR ticket lands instantly. Scan at the gate and enjoy the moment.' },
+];
+
+function HeroSwoosh() {
+  return (
+    <svg className="tf-hero-swoosh" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="tf-swoosh" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ff2a52" />
+          <stop offset="1" stopColor="#b00022" />
+        </linearGradient>
+      </defs>
+      <path d="M120 40h230a24 24 0 0 1 24 24v70a30 30 0 0 0 0 60v150a24 24 0 0 1-24 24H150C90 368 30 300 60 200 80 130 70 70 120 40Z" fill="url(#tf-swoosh)" />
+      <path d="M300 50v320" stroke="#fff" strokeOpacity=".55" strokeWidth="5" strokeDasharray="12 14" strokeLinecap="round" />
+      <path d="M0 330C90 330 150 300 210 230" stroke="#e6002d" strokeWidth="10" strokeLinecap="round" opacity=".35" />
+      <path d="M10 370C120 372 200 330 250 270" stroke="#e6002d" strokeWidth="6" strokeLinecap="round" opacity=".25" />
+    </svg>
+  );
 }
 
-function shortDate(value: string) {
-  const date = new Date(value);
-  return {
-    day: new Intl.DateTimeFormat('en-KE', { day: '2-digit', timeZone: 'Africa/Nairobi' }).format(date),
-    month: new Intl.DateTimeFormat('en-KE', { month: 'short', timeZone: 'Africa/Nairobi' }).format(date).toUpperCase(),
-    label: new Intl.DateTimeFormat('en-KE', {
-      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Nairobi'
-    }).format(date),
-  };
+function StepsCard() {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % STEPS.length), 4200);
+    return () => window.clearInterval(id);
+  }, [index]);
+  const step = STEPS[index];
+  const Icon = step.icon;
+  return (
+    <div className="tf-steps-card" aria-live="polite">
+      <span className="tf-step-icon"><Icon size={24} /></span>
+      <div className="tf-step-body" key={index}>
+        <div className="tf-step-fade">
+          <small>{step.title}</small>
+          <p>{step.text}</p>
+        </div>
+        <div className="tf-step-dots" aria-hidden="true">{STEPS.map((s, i) => <i key={s.title} className={i === index ? 'on' : ''} />)}</div>
+      </div>
+      <div className="tf-step-nav">
+        <button type="button" aria-label="Previous step" onClick={() => setIndex((i) => (i - 1 + STEPS.length) % STEPS.length)}><ChevronLeft size={16} /></button>
+        <button type="button" aria-label="Next step" onClick={() => setIndex((i) => (i + 1) % STEPS.length)}><ChevronRight size={16} /></button>
+      </div>
+    </div>
+  );
 }
 
 export default function HomePage() {
-  const curated = getCuratedUpcoming();
-  const { data } = useQuery({
-    queryKey: ['reference-home-events'],
+  const { data, isLoading } = useQuery({
+    queryKey: ['home-events'],
     queryFn: async () => (await api.get('/events', { params: { take: 30 } })).data as { events: EventItem[]; total: number },
   });
 
-  const apiEvents = (data?.events || []).filter((event) => Date.parse(event.endDateTime) >= Date.now());
-  const known = new Set(curated.map((event) => event.slug));
-  const events = [...curated, ...apiEvents.filter((event) => !known.has(event.slug))]
-    .sort((a, b) => Date.parse(a.startDateTime) - Date.parse(b.startDateTime));
+  const events = useMemo(() => {
+    const curated = getCuratedUpcoming();
+    const live = (data?.events || []).filter((event) => Date.parse(event.endDateTime) >= Date.now());
+    const known = new Set(curated.map((event) => event.slug));
+    return [...curated, ...live.filter((event) => !known.has(event.slug))]
+      .sort((a, b) => Date.parse(a.startDateTime) - Date.parse(b.startDateTime));
+  }, [data]);
+
   const trending = events.slice(0, 5);
+  const cities = new Set(events.map((event) => event.city.trim().toLowerCase())).size;
+  const categories = new Set(events.map((event) => event.category?.slug)).size;
 
   return (
-    <main className="ref-home">
-      <section className="ref-hero">
-        <div className="container-page ref-hero-grid">
-          <div className="ref-hero-copy">
-            <span className="ref-kicker">EVENTS BRING US TOGETHER</span>
-            <h1>Discover Kenya&apos;s<br /><strong>Best Events</strong></h1>
-            <p>Book concerts, festivals, theatre, conferences, sports and memorable experiences across Kenya. Your next great moment is just a ticket away.</p>
+    <main className="tf-home">
+      {/* ---------------- Hero ---------------- */}
+      <section className="tf-hero">
+        <div className="container-page tf-hero-grid">
+          <div>
+            <span className="tf-kicker tf-rise"><span className="tf-live-dot" /> Events bring us together</span>
+            <h1 className="tf-rise" style={{ '--d': '80ms' } as React.CSSProperties}>
+              Discover Kenya&apos;s<br />
+              <span className="red">Best Events</span>
+            </h1>
+            <p className="tf-hero-lead tf-rise" style={{ '--d': '160ms' } as React.CSSProperties}>
+              Book concerts, festivals, theatre, sports,
+              conferences and amazing experiences across Kenya. Your next great moment is just a ticket away.
+            </p>
 
-            <form action="/events" className="ref-hero-search" aria-label="Search events">
+            <form action="/events" className="tf-search tf-rise" style={{ '--d': '240ms' } as React.CSSProperties} aria-label="Search events">
               <label>
-                <Music2 size={18} />
-                <span><small>Event Type</small><select name="category" defaultValue=""><option value="">All Events</option><option value="music">Music</option><option value="festival">Festivals</option><option value="sports">Sports</option><option value="culture">Theatre & Culture</option><option value="technology">Conferences</option></select></span>
+                <Music2 size={20} />
+                <span><small>Event Type</small>
+                  <select name="category" defaultValue="" aria-label="Event type">
+                    <option value="">All Events</option>
+                    <option value="music">Concerts</option>
+                    <option value="festival">Festivals</option>
+                    <option value="culture">Theatre &amp; Culture</option>
+                    <option value="sports">Sports</option>
+                    <option value="technology">Conferences</option>
+                    <option value="nightlife">Nightlife</option>
+                  </select>
+                </span>
               </label>
               <label>
-                <MapPin size={18} />
-                <span><small>City</small><select name="city" defaultValue=""><option value="">Select City</option><option>Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Eldoret</option></select></span>
+                <MapPin size={20} />
+                <span><small>City</small>
+                  <select name="city" defaultValue="" aria-label="City">
+                    <option value="">Select City</option>
+                    <option>Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Nakuru</option><option>Eldoret</option>
+                  </select>
+                </span>
               </label>
               <label>
-                <CalendarDays size={18} />
-                <span><small>Date</small><select name="date" defaultValue=""><option value="">Any Date</option><option value="weekend">This Weekend</option><option value="month">This Month</option></select></span>
+                <CalendarDays size={20} />
+                <span><small>Date</small>
+                  <select name="date" defaultValue="" aria-label="Date">
+                    <option value="">Any Date</option>
+                    <option value="today">Today</option>
+                    <option value="weekend">This Weekend</option>
+                    <option value="month">Next 30 Days</option>
+                  </select>
+                </span>
               </label>
-              <button type="submit"><Search size={17} /> Search Events</button>
+              <button type="submit" className="tf-shine"><Search size={17} /> Search Events</button>
             </form>
 
-            <div className="ref-hero-benefits">
-              <span><ShieldCheck /> <b>Secure Payments</b><small>Your data stays protected.</small></span>
-              <span><Zap /> <b>Instant E-Tickets</b><small>Get your ticket immediately.</small></span>
-              <span><Smartphone /> <b>M-Pesa Support</b><small>Pay easily from your phone.</small></span>
+            <div className="tf-benefits tf-rise" style={{ '--d': '320ms' } as React.CSSProperties}>
+              <div><ShieldCheck size={26} /><span><b>Secure Payments</b><small>Your data is safe with us</small></span></div>
+              <div><Zap size={26} /><span><b>Instant E-Tickets</b><small>Get your tickets instantly</small></span></div>
+              <div><Smartphone size={26} /><span><b>M-Pesa Support</b><small>Pay easily with M-Pesa</small></span></div>
             </div>
           </div>
 
-          <div className="ref-hero-visual">
-            <Image src="/hero-party.jpg" alt="People enjoying an event in Kenya" fill priority sizes="(max-width: 900px) 100vw, 48vw" className="ref-hero-photo" />
-            <div className="ref-hero-overlay" />
-            <div className="ref-handwritten ref-handwritten-one">Good Events<br /><b>Brighter People</b></div>
-            <div className="ref-handwritten ref-handwritten-two">Events Make<br /><b>A Brighter Kenya</b></div>
-            <div className="ref-phone">
-              <div className="ref-phone-speaker" />
-              <Logo className="h-12" />
-              <QrCode size={84} strokeWidth={1.4} />
-              <span>YOUR E-TICKET</span>
-              <small>Scan at the entrance</small>
+          <div className="tf-hero-visual tf-rise" style={{ '--d': '200ms' } as React.CSSProperties}>
+            <HeroSwoosh />
+            <div className="tf-hero-photo">
+              <Image src="/hero-party.jpg" alt="Crowd celebrating at a live concert in Kenya" fill priority sizes="(max-width: 1080px) 80vw, 40vw" />
             </div>
+            <div className="tf-script tf-hero-script-a">Good Events<br /><b>Brighter People</b></div>
+            <div className="tf-phone" aria-hidden="true">
+              <div className="tf-phone-screen">
+                <span className="tf-phone-notch" />
+                <Logo variant="stacked" theme="light" />
+                <div className="tf-phone-qr"><QrCode size={92} strokeWidth={1.3} /></div>
+                <span className="tf-script">Good Events<br /><b>Brighter People</b></span>
+                <span className="tf-phone-chip">ADMIT ONE · VIP</span>
+              </div>
+            </div>
+            <div className="tf-hero-toast" aria-hidden="true">
+              <span><CheckCircle2 size={20} /></span>
+              <span><b>Payment confirmed</b><small>Your QR ticket is ready 🎉</small></span>
+            </div>
+            <div className="tf-script tf-hero-script-b">Events Make A<br /><b>Brighter Kenya</b></div>
           </div>
         </div>
       </section>
 
-      <section className="ref-category-zone" id="categories">
-        <div className="container-page ref-category-shell">
-          <div className="ref-category-intro"><b>Browse by<br />Category</b><small>Find events that match your vibe.</small></div>
-          <div className="ref-category-row">
-            {categories.map(({ label, icon: Icon, href }) => (
-              <Link key={label} href={href}><Icon /><span>{label}</span></Link>
+      <div className="tf-marquee" aria-hidden="true">
+        <div className="tf-marquee-track">
+          {[0, 1].map((copy) => (
+            <span key={copy}>
+              {MARQUEE.map((city) => <span key={city + copy}><Sparkles size={14} /> {city}</span>)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ---------------- Categories ---------------- */}
+      <section className="tf-section tf-categories" id="categories">
+        <div className="container-page">
+          <Reveal className="tf-cat-shell">
+            <div className="tf-cat-intro"><b>Browse by Category</b><small>Find events that match your vibe.</small></div>
+            <div className="tf-cat-row">
+              {CATEGORIES.map(({ label, icon: Icon, href }) => (
+                <Link key={label} href={href} className="tf-cat"><Icon strokeWidth={1.8} /><span>{label}</span></Link>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ---------------- Trending ---------------- */}
+      <section className="tf-section" style={{ paddingTop: 8 }}>
+        <div className="container-page">
+          <Reveal className="tf-section-head">
+            <div><h2>Trending Events</h2><p>Hot events happening across Kenya</p></div>
+            <Link href="/events" className="tf-link">View All Events <ArrowRight size={16} /></Link>
+          </Reveal>
+          {isLoading && trending.length === 0 ? (
+            <EventCardSkeletonGrid count={5} />
+          ) : (
+            <div className="tf-event-grid tf-trending">
+              {trending.map((event, index) => (
+                <Reveal key={event.id} delay={index * 90} className="flex">
+                  <EventCard event={event} priority={index < 3} />
+                </Reveal>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ---------------- Why ---------------- */}
+      <section className="tf-section" id="about" style={{ paddingTop: 8 }}>
+        <div className="container-page">
+          <Reveal className="tf-section-head">
+            <div><h2>Why Book With TicketFlow Kenya?</h2><p>A safer, simpler and better way to experience live events.</p></div>
+          </Reveal>
+          <div className="tf-why-grid">
+            {WHY.map(({ icon: Icon, title, text }, index) => (
+              <Reveal key={title} delay={index * 90} className="tf-why-card">
+                <span className="tf-why-icon"><Icon size={24} /></span>
+                <div><h3>{title}</h3><p>{text}</p></div>
+              </Reveal>
             ))}
           </div>
-          <Link href="/events" className="ref-category-next" aria-label="View all categories"><ChevronRight /></Link>
         </div>
       </section>
 
-      <section className="ref-section">
+      {/* ---------------- Organizers ---------------- */}
+      <section className="tf-organizer" id="for-organizers">
         <div className="container-page">
-          <div className="ref-section-head">
-            <div><h2>Trending Events</h2><p>Hot events happening across Kenya</p></div>
-            <Link href="/events">View All Events <ArrowRight /></Link>
-          </div>
-
-          <div className="ref-trending-grid">
-            {trending.map((event) => {
-              const date = shortDate(event.startDateTime);
-              const price = lowestPrice(event);
-              return (
-                <article key={event.id} className="ref-event-card">
-                  <Link href={'/events/' + event.slug} className="ref-event-poster">
-                    <Image src={event.posterUrl || '/hero-party.jpg'} alt={event.posterAlt || event.title} fill sizes="(max-width: 700px) 50vw, 20vw" />
-                    <span className="ref-event-date"><b>{date.day}</b><small>{date.month}</small></span>
-                  </Link>
-                  <div className="ref-event-info">
-                    <Link href={'/events/' + event.slug}><h3>{event.title}</h3></Link>
-                    <p><MapPin /> {event.venue}</p>
-                    <p><CalendarDays /> {date.label}</p>
-                    <p><MapPin /> {event.city}</p>
-                    <div className="ref-event-price"><span>From <b>{price ? formatCurrency(price) : 'View tickets'}</b></span></div>
-                    <Link href={'/events/' + event.slug} className="ref-get-ticket">Get Tickets</Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <Reveal className="tf-org-shell">
+            <div className="tf-org-photo">
+              <Image src="/hero-party.jpg" alt="A packed audience at a TicketFlow event" fill sizes="(max-width: 760px) 100vw, 32vw" style={{ objectPosition: '70% 70%' }} />
+              <span className="tf-script">More People<br />More <b>Possibilities</b></span>
+            </div>
+            <div className="tf-org-copy">
+              <span className="eyebrow">For event organizers</span>
+              <h2>Sell Tickets With Ease</h2>
+              <p>Reach more people, boost your sales and create amazing events with TicketFlow Kenya. Our platform gives you the tools to manage your events from start to finish.</p>
+              <Link href="/register" className="primary-cta tf-shine">List Your Event <ArrowRight size={17} /></Link>
+            </div>
+            <div className="tf-org-features">
+              <span><LayoutDashboard size={20} /> Simple event management</span>
+              <span><Megaphone size={20} /> Access a wider audience</span>
+              <span><Ticket size={20} /> Secure ticketing &amp; payments</span>
+              <span><Settings2 size={20} /> Dedicated support</span>
+            </div>
+          </Reveal>
         </div>
       </section>
 
-      <section className="ref-section ref-why" id="about">
-        <div className="container-page">
-          <div className="ref-section-head ref-section-head-left"><div><h2>Why Book With TicketFlow Kenya?</h2><p>A safer, simpler and better way to experience live events.</p></div></div>
-          <div className="ref-why-grid">
-            <article><span><ShieldCheck /></span><div><h3>Secure Payments</h3><p>Use trusted payment flows designed for safe ticket checkout.</p></div></article>
-            <article><span><Zap /></span><div><h3>Fast QR Ticket Delivery</h3><p>Your TicketFlow QR ticket is available after successful payment.</p></div></article>
-            <article><span><BadgeCheck /></span><div><h3>Trusted Organizers</h3><p>Organizer workflows include verification and event management tools.</p></div></article>
-            <article><span><Headphones /></span><div><h3>Support When Needed</h3><p>Clear account, ticket and payment support paths are built into the platform.</p></div></article>
-          </div>
-        </div>
-      </section>
-
-      <section className="ref-organizer" id="for-organizers">
-        <div className="container-page ref-organizer-shell">
-          <div className="ref-organizer-photo">
-            <Image src="/hero-party.jpg" alt="Event organizer using TicketFlow Kenya" fill sizes="(max-width: 800px) 100vw, 34vw" />
-            <div className="ref-organizer-photo-overlay" />
-            <span>More People.<br />More Tickets.<br /><b>More Possibilities.</b></span>
-          </div>
-          <div className="ref-organizer-copy">
-            <span>FOR EVENT ORGANIZERS</span>
-            <h2>Sell Tickets With Ease</h2>
-            <p>Reach more people, manage ticket tiers and track your event from one TicketFlow workspace. Keep the setup simple and the guest experience smooth.</p>
-            <Link href="/register">List Your Event <ArrowRight /></Link>
-          </div>
-          <div className="ref-organizer-features">
-            <span><BriefcaseBusiness /> Simple event management</span>
-            <span><UsersRound /> Reach a wider audience</span>
-            <span><ShieldCheck /> Secure ticketing & payments</span>
-            <span><Headphones /> Dedicated support tools</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="ref-confidence">
-        <div className="container-page">
-          <div className="ref-confidence-title">Made for event lovers across Kenya</div>
-          <div className="ref-confidence-grid">
-            <span><UsersRound /><b>Mobile-first</b><small>Easy browsing on any screen</small></span>
-            <span><QrCode /><b>QR Entry</b><small>Fast digital ticket validation</small></span>
-            <span><MapPin /><b>Kenya-wide</b><small>Discover events by city</small></span>
-            <span><ShieldCheck /><b>Secure by design</b><small>Protected payment workflows</small></span>
-          </div>
-          <div className="ref-confidence-quote">
-            <div className="ref-avatar">TF</div>
-            <div><b>Simple discovery. Clear booking. One place for your tickets.</b><small>TicketFlow Kenya platform experience</small></div>
-            <ArrowUpRight />
-          </div>
+      {/* ---------------- Trust ---------------- */}
+      <section className="tf-trust">
+        <div className="container-page tf-trust-shell">
+          <Reveal className="tf-stats">
+            <div className="tf-stats-title">Loved by event lovers across Kenya</div>
+            <div className="tf-stats-grid">
+              <div className="tf-stat"><CalendarDays size={26} /><span><b><CountUp value={events.length} /></b><small>Upcoming Events</small></span></div>
+              <div className="tf-stat"><MapPin size={26} /><span><b><CountUp value={cities} /></b><small>Cities Across Kenya</small></span></div>
+              <div className="tf-stat"><Star size={26} /><span><b><CountUp value={categories} /></b><small>Event Categories</small></span></div>
+              <div className="tf-stat"><QrCode size={26} /><span><b>24/7</b><small>Ticket Access</small></span></div>
+            </div>
+          </Reveal>
+          <Reveal delay={120}><StepsCard /></Reveal>
         </div>
       </section>
     </main>

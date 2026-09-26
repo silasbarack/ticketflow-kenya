@@ -6,13 +6,8 @@ import { LayoutDashboard, LogOut, Palette, Ticket, User as UserIcon, X } from 'l
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
 import Button from '@/components/ui/Button';
+import { PRIMARY_NAV } from '@/lib/nav';
 
-const NAV_LINKS = [
-  { label: 'Discover events', href: '/events' },
-  { label: 'Events in Nairobi', href: '/events?city=Nairobi' },
-  { label: 'For Organizers', href: '/#for-organizers' },
-  { label: 'How It Works', href: '/#how-it-works' },
-];
 
 export default function MobileNavigationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, logout } = useAuth();
@@ -52,21 +47,21 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
     user?.role === 'ADMIN' ? '/admin/dashboard' : user?.role === 'ORGANIZER' ? '/organizer/dashboard' : '/dashboard';
 
   return (
-    <div className="fixed inset-0 z-50 xl:hidden">
+    <div className="fixed inset-0 z-[80]">
       <button
         aria-label="Close menu"
         onClick={onClose}
-        className="absolute inset-0 bg-navy-950/60 backdrop-blur-[3px]"
+        className="absolute inset-0 bg-navy-950/60 backdrop-blur-[3px] animate-[tf-fade_.25s_ease_both]"
       />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
-        className="absolute inset-y-0 right-0 flex w-[88vw] max-w-[390px] flex-col bg-white shadow-elevated"
+        className="absolute inset-y-0 right-0 flex w-[88vw] max-w-[390px] flex-col bg-white shadow-elevated animate-[tf-drawer_.3s_cubic-bezier(.2,.8,.2,1)_both]"
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
-          <Logo className="h-9" wordmarkClassName="text-sm" />
+          <Logo className="h-10" theme="light" />
           <button
             ref={closeRef}
             onClick={onClose}
@@ -78,13 +73,13 @@ export default function MobileNavigationDrawer({ open, onClose }: { open: boolea
         </div>
 
         <nav className="flex flex-col gap-1 px-3 py-4">
-          {NAV_LINKS.map((link) => (
+          {PRIMARY_NAV.map((link, index) => (
             <Link
               key={link.label}
               href={link.href}
               onClick={onClose}
-              className="rounded-2xl px-4 py-3 text-base font-bold text-navy-800 transition hover:bg-brand-50 hover:text-brand-700"
-              style={{ minHeight: 44 }}
+              className="tf-rise flex items-center rounded-2xl px-4 py-3 text-base font-bold text-navy-800 transition hover:bg-brand-50 hover:text-brand-700"
+              style={{ minHeight: 44, '--d': 60 + index * 45 + 'ms' } as React.CSSProperties}
             >
               {link.label}
             </Link>

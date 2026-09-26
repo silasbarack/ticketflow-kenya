@@ -43,31 +43,36 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:#f4f5f7;font-family:'Noto Sans',Arial,sans-serif;color:#20242a">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f7">
+<body style="margin:0;background:#f4f5f8;font-family:'Poppins','Noto Sans',Arial,sans-serif;color:#1b1d22">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f8">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #e6e8ec;border-radius:16px;overflow:hidden">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #eceef2;border-radius:18px;overflow:hidden">
         <tr>
-          <td style="padding:18px 22px;border-bottom:4px solid #e6002d;background:#ffffff">
-            <img src="${logoSrc}" width="138" alt="TicketFlow Kenya" style="display:block;width:138px;height:auto;max-width:100%;border:0">
+          <td style="padding:20px 24px;background:#ffffff">
+            <img src="${logoSrc}" width="190" alt="TicketFlow Kenya" style="display:block;width:190px;height:auto;max-width:100%;border:0">
           </td>
         </tr>
         <tr>
-          <td style="padding:30px 24px">
-            <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#e6002d;text-transform:uppercase">TicketFlow Kenya</div>
-            <h1 style="margin:8px 0 10px;font-size:28px;line-height:1.15;color:#17191d">${title}</h1>
-            <p style="margin:0 0 22px;font-size:14px;line-height:1.7;color:#666b73">${intro}</p>
+          <td style="padding:26px 24px 24px;background:#e6002d;background-image:linear-gradient(135deg,#ff2a52 0%,#e6002d 55%,#b00022 100%)">
+            <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#ffd3dc;text-transform:uppercase">Good Events &middot; Brighter People</div>
+            <h1 style="margin:8px 0 8px;font-size:28px;line-height:1.15;color:#ffffff">${title}</h1>
+            <p style="margin:0;font-size:14px;line-height:1.7;color:#ffe9ee">${intro}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:26px 24px 30px">
             ${body}
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid #eceef1">
-              <tr><td style="padding-top:18px;font-size:12px;line-height:1.6;color:#8a8e95">
-                Good events. Brighter people.<br>
-                <strong style="color:#30343a">TicketFlow Kenya</strong> ·
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid #eceef2">
+              <tr><td style="padding-top:18px;font-size:12px;line-height:1.7;color:#6b6f78">
+                Events make a <strong style="color:#e6002d">brighter Kenya</strong>.<br>
+                <strong style="color:#1b1d22">TicketFlow Kenya</strong> &middot;
                 <a href="mailto:support@ticketflow.co.ke" style="color:#e6002d;text-decoration:none">support@ticketflow.co.ke</a>
               </td></tr>
             </table>
           </td>
         </tr>
       </table>
+      <p style="margin:14px 0 0;font-size:11px;color:#9a9ea6">&copy; TicketFlow Kenya &middot; Nairobi, Kenya</p>
     </td></tr>
   </table>
 </body>
@@ -98,7 +103,7 @@ export class EmailService {
   private getLogoSrc() {
     if (this.logoPng) return 'cid:ticketflow-logo';
     return this.configService.get<string>('EMAIL_LOGO_URL')
-      || 'https://ticketflow-frontend-w47s.onrender.com/ticketflow-logo-official.png';
+      || 'https://ticketflow-frontend-w47s.onrender.com/brand/ticketflow-logo-horizontal.png';
   }
 
   private logoAttachment() {

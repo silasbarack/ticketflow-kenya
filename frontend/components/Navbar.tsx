@@ -2,56 +2,67 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu, Search, ShoppingCart } from 'lucide-react';
+import clsx from 'clsx';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
 import MobileNavigationDrawer from '@/components/MobileNavigationDrawer';
+import { PRIMARY_NAV } from '@/lib/nav';
 
 export default function Navbar() {
   const { user } = useAuth();
   const { totalItems } = useCart();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const nav = [
-    ['Home', '/'],
-    ['Discover', '/events'],
-    ['Categories', '/#categories'],
-    ['Organizers', '/#for-organizers'],
-    ['About', '/#about'],
-    ['Contact', '/#contact'],
-  ];
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <header className="ref-header">
-      <div className="container-page ref-header-inner">
-        <Link href="/" className="ref-header-logo" aria-label="TicketFlow Kenya home"><Logo className="h-12" /></Link>
+    <header className={clsx('tf-header', scrolled && 'scrolled')}>
+      <div className="container-page tf-header-inner">
+        <Link href="/" className="tf-header-logo" aria-label="TicketFlow Kenya home">
+          <Logo className="h-full" />
+        </Link>
 
-        <nav className="ref-main-nav" aria-label="Primary navigation">
-          {nav.map(([label, href]) => {
+        <nav className="tf-nav" aria-label="Primary navigation">
+          {PRIMARY_NAV.map(({ label, href }) => {
             const active = href === '/' ? pathname === '/' : href === '/events' ? pathname.startsWith('/events') : false;
-            return <Link key={href} href={href} className={active ? 'active' : ''}>{label}</Link>;
+            return <Link key={label} href={href} className={active ? 'active' : ''} aria-current={active ? 'page' : undefined}>{label}</Link>;
           })}
         </nav>
 
-        <div className="ref-header-right">
-          <Link href="/events" className="ref-header-icon" aria-label="Search events"><Search size={18} /></Link>
-          <Link href="/cart" className="ref-header-icon ref-cart" aria-label={'Cart with ' + totalItems + ' tickets'}>
-            <ShoppingCart size={18} />
-            {totalItems > 0 && <span>{totalItems > 99 ? '99+' : totalItems}</span>}
+        <div className="tf-header-right">
+          <Link href="/events" className="tf-icon-btn" aria-label="Search events"><Search size={19} /></Link>
+          <Link href="/cart" className="tf-icon-btn" aria-label={'Cart with ' + totalItems + ' tickets'}>
+            <ShoppingCart size={19} />
+            {totalItems > 0 && <span key={totalItems} className="tf-badge">{totalItems > 99 ? '99+' : totalItems}</span>}
           </Link>
 
-          <div className="ref-header-auth">
-            {user ? <UserMenu /> : <>
-              <Link href="/login" className="ref-login-btn">Log In</Link>
-              <Link href="/register" className="ref-signup-btn">Sign Up</Link>
-            </>}
+          <div className="tf-auth">
+            {user ? <UserMenu /> : (
+              <>
+                <Link href="/login" className="tf-login-btn">Log In</Link>
+                <Link href="/register" className="tf-signup-btn tf-shine">Sign Up</Link>
+              </>
+            )}
           </div>
 
-          <button type="button" className="ref-menu-btn" aria-label="Open menu" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}>
+          <button
+            type="button"
+            className="tf-icon-btn tf-menu-btn"
+            aria-label="Open menu"
+            aria-expanded={drawerOpen}
+            onClick={() => setDrawerOpen(true)}
+          >
             <Menu size={23} />
           </button>
         </div>
