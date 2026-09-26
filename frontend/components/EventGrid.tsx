@@ -14,7 +14,7 @@ export default function EventGrid({
   onRetry,
   emptyTitle = 'No events found',
   emptyDescription = 'Try adjusting your search or check back soon for new listings.',
-  skeletonCount = 8,
+  skeletonCount = 6,
 }: {
   events: EventItem[] | undefined;
   isLoading?: boolean;
@@ -37,8 +37,8 @@ export default function EventGrid({
   }
 
   return (
-    <div className="ref-catalog-grid">
-      {events.map((event, index) => <EventCard key={event.id} event={event} priority={index < 4} />)}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      {events.map((event, index) => <EventCard key={event.id} event={event} priority={index < 5} />)}
     </div>
   );
 }

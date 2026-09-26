@@ -22,7 +22,6 @@ export interface PasswordResetCodeEmailPayload {
   expiresInMinutes: number;
 }
 
-/** User-supplied text (a first name) must never be able to inject markup. */
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -32,21 +31,54 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-// Load the official TicketFlow Kenya logo PNG from disk (assets/logo.png)
-function loadLogoPng(): string {
+function loadLogoSvg(): Buffer | null {
   try {
-    const logoPath = path.join(__dirname, '..', '..', 'assets', 'logo.png');
-    return fs.readFileSync(logoPath).toString('base64');
+    return fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'logo.svg'));
   } catch {
-    return '';
+    return null;
   }
+}
+
+function emailFrame(logoSrc: string, title: string, intro: string, body: string) {
+  return `<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#20242a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f7">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #e6e8ec;border-radius:16px;overflow:hidden">
+        <tr>
+          <td style="padding:18px 22px;border-bottom:4px solid #e6002d;background:#ffffff">
+            <img src="${logoSrc}" width="180" alt="TicketFlow Kenya" style="display:block;width:180px;height:auto;max-width:100%;border:0">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:30px 24px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#e6002d;text-transform:uppercase">TicketFlow Kenya</div>
+            <h1 style="margin:8px 0 10px;font-size:28px;line-height:1.15;color:#17191d">${title}</h1>
+            <p style="margin:0 0 22px;font-size:14px;line-height:1.7;color:#666b73">${intro}</p>
+            ${body}
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid #eceef1">
+              <tr><td style="padding-top:18px;font-size:12px;line-height:1.6;color:#8a8e95">
+                Good events. Brighter people.<br>
+                <strong style="color:#30343a">TicketFlow Kenya</strong> ·
+                <a href="mailto:support@ticketflow.co.ke" style="color:#e6002d;text-decoration:none">support@ticketflow.co.ke</a>
+              </td></tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 }
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
-  private readonly logoPngBase64 = loadLogoPng();
+  private readonly logoSvg = loadLogoSvg();
 
   constructor(private configService: ConfigService) {
     const host = this.configService.get<string>('SMTP_HOST');
@@ -61,11 +93,22 @@ export class EmailService {
         },
       });
     }
-    if (this.logoPngBase64) {
-      this.logger.log('Logo PNG loaded for email');
-    } else {
-      this.logger.warn('assets/logo.png not found — email will show text logo');
-    }
+  }
+
+  private getLogoSrc() {
+    if (this.logoSvg) return 'cid:ticketflow-logo';
+    return this.configService.get<string>('EMAIL_LOGO_URL')
+      || 'https://ticketflow-frontend-w47s.onrender.com/logo-full.svg';
+  }
+
+  private logoAttachment() {
+    if (!this.logoSvg) return [];
+    return [{
+      filename: 'ticketflow-logo.svg',
+      content: this.logoSvg,
+      contentType: 'image/svg+xml',
+      cid: 'ticketflow-logo',
+    }];
   }
 
   async sendTicketEmail(payload: TicketEmailPayload): Promise<boolean> {
@@ -74,164 +117,40 @@ export class EmailService {
       return false;
     }
 
-    const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
+    const buyer = escapeHtml(payload.buyerName);
+    const event = escapeHtml(payload.eventName);
+    const ticketType = escapeHtml(payload.ticketType);
+    const ticketCode = escapeHtml(payload.ticketCode);
+    const venue = escapeHtml(payload.venue);
+    const eventDateTime = escapeHtml(payload.eventDateTime);
 
-    // Logo must use the publicly deployed URL — localhost is unreachable from Gmail's servers.
-    // EMAIL_LOGO_URL env var overrides; falls back to the known Render deployment.
-    const logoUrl = this.logoPngBase64
-      ? 'cid:ticketflow-logo'
-      : (this.configService.get<string>('EMAIL_LOGO_URL')
-        || 'https://ticketflow-frontend-w47s.onrender.com/logo.png');
-
-    /*
-     * Plain-text fallback:
-     * Dear ${payload.buyerName},
-     * Thank you for purchasing your ticket through TicketFlow Kenya.
-     * Your payment has been successfully confirmed, and your ticket for ${payload.eventName} is attached as a PDF.
-     * Ticket Code: ${payload.ticketCode} | Venue: ${payload.venue} | Date: ${payload.eventDateTime}
-     * Please present the QR code at the entrance. Important: valid for one entry only.
-     * We appreciate your purchase. Regards, TicketFlow Kenya — support@ticketflow.co.ke
-     */
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Your TicketFlow Kenya Ticket</title>
-</head>
-<body style="margin:0;padding:0;background-color:#121212;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-
-<!-- Outer wrapper: #121212 background, 32px 24px padding -->
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-       style="background-color:#121212;padding:32px 24px;">
-<tr><td align="center">
-
-<!-- Main card: max 600px, #1e1f21 background -->
-<table role="presentation" cellpadding="0" cellspacing="0"
-       style="width:100%;max-width:600px;background-color:#1e1f21;border-radius:8px;overflow:hidden;">
-
-  <!-- ── Logo header ── -->
-  <tr>
-    <td style="background-color:#ffffff;padding:18px 24px;border-bottom:4px solid #e6002d;">
-      <img src="${logoUrl}" width="156" alt="TicketFlow Kenya"
-           style="display:block;width:156px;max-width:100%;height:auto;border:0;"/>
-    </td>
-  </tr>
-
-  <!-- ── Body: 24px padding ── -->
-  <tr>
-    <td style="padding:28px 24px 24px;">
-
-      <!-- 1. Greeting: 20px, #eaeeef -->
-      <p style="margin:0 0 18px;font-size:20px;font-weight:600;color:#eaeeef;line-height:1.4;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        Dear <strong>${payload.buyerName}</strong>,
-      </p>
-
-      <!-- 2. Paragraph 1: 14px, dark blue #1a3a6e -->
-      <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        Thank you for purchasing your ticket through <strong>TicketFlow Kenya</strong>.
-      </p>
-
-      <!-- 3. Paragraph 2: separate block, same 14px dark blue, margin-top via margin -->
-      <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        Your payment has been successfully confirmed, and your ticket for
-        <strong>${payload.eventName}</strong> is attached to this email as a PDF.
-      </p>
-
-      <!-- 4. Ticket details rounded card -->
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-             style="border-radius:12px;border:1px solid #2a2b2d;overflow:hidden;margin:0 0 24px;">
-
-        <!-- Section header -->
-        <tr>
-          <td colspan="2" style="background-color:#1e1f21;padding:12px 16px;border-bottom:1px solid #2a2b2d;">
-            <span style="font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9aa0a6;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">TICKET DETAILS</span>
-          </td>
-        </tr>
-
-        <!-- Event (odd row: #121212) -->
-        <tr style="background-color:#121212;">
-          <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;width:130px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Event</td>
-          <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.eventName}</td>
-        </tr>
-
-        <!-- Ticket Type (even row: #1e1f21) -->
-        <tr style="background-color:#1e1f21;">
-          <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Ticket Type</td>
-          <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.ticketType}</td>
-        </tr>
-
-        <!-- Ticket Code (odd row: #121212) — coral #ff6b6b, monospace -->
-        <tr style="background-color:#121212;">
-          <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Ticket Code</td>
-          <td style="font-size:16px;color:#ff6b6b;font-weight:700;padding:11px 16px;font-family:'Courier New',Courier,monospace;">${payload.ticketCode}</td>
-        </tr>
-
-        <!-- Venue (even row: #1e1f21) -->
-        <tr style="background-color:#1e1f21;">
-          <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Venue</td>
-          <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.venue}</td>
-        </tr>
-
-        <!-- Date & Time (odd row: #121212) -->
-        <tr style="background-color:#121212;">
-          <td style="font-size:15px;color:#9aa0a6;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">Date &amp; Time</td>
-          <td style="font-size:16px;color:#ffffff;font-weight:600;padding:11px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">${payload.eventDateTime}</td>
-        </tr>
-
+    const details = `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e7e9ed;border-radius:12px;overflow:hidden">
+        <tr><td colspan="2" style="padding:11px 14px;background:#fff4f6;color:#e6002d;font-size:11px;font-weight:800;letter-spacing:1px">YOUR E-TICKET</td></tr>
+        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;width:120px;border-top:1px solid #eceef1">Event</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${event}</td></tr>
+        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Ticket</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${ticketType}</td></tr>
+        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Code</td><td style="padding:11px 14px;font-size:15px;font-weight:900;color:#e6002d;border-top:1px solid #eceef1;font-family:monospace">${ticketCode}</td></tr>
+        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Venue</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${venue}</td></tr>
+        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Date</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${eventDateTime}</td></tr>
       </table>
+      <p style="margin:18px 0 0;font-size:13px;line-height:1.7;color:#666b73">Your PDF ticket is attached. Keep the QR code private and present it at the entrance for verification.</p>
+    `;
 
-      <!-- 5. Instructional paragraph: 14px dark blue -->
-      <p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        Please download and keep your ticket safely. You will be required to present
-        the QR code at the entrance for verification.
-      </p>
-
-      <!-- 6. Important notice — 12px (smaller than 14px body, per spec) -->
-      <p style="margin:0 0 20px;font-size:12px;line-height:1.6;color:#9aa0a6;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        <strong style="color:#eaeeef;">Important:</strong> This ticket is valid for one entry only.
-        Do not share your QR code publicly.
-      </p>
-
-      <!-- 7. Closing paragraph: 14px dark blue -->
-      <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#1a3a6e;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        We appreciate your purchase and look forward to serving you again.
-      </p>
-
-      <!-- 8. Horizontal divider -->
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
-        <tr><td style="border-top:1px solid #2a2b2d;font-size:0;line-height:0;">&nbsp;</td></tr>
-      </table>
-
-      <!-- 9. Footer: 14px #9aa0a6, centered, email link #6ea8fe -->
-      <p style="margin:0;font-size:14px;color:#9aa0a6;text-align:center;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-        Regards, <strong style="color:#eaeeef;">TicketFlow Kenya</strong> &nbsp;&middot;&nbsp;
-        <a href="mailto:support@ticketflow.co.ke"
-           style="color:#6ea8fe;text-decoration:none;">support@ticketflow.co.ke</a>
-      </p>
-
-    </td>
-  </tr>
-
-</table>
-
-</td></tr>
-</table>
-</body></html>`;
+    const html = emailFrame(
+      this.getLogoSrc(),
+      'Your ticket is ready',
+      `Hi ${buyer}, your payment is confirmed and your TicketFlow ticket is ready.`,
+      details,
+    );
 
     try {
       await this.transporter.sendMail({
-        from,
+        from: this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke',
         to: payload.to,
         subject: 'Your TicketFlow Kenya Ticket is Ready',
         html,
         attachments: [
-          ...(this.logoPngBase64 ? [{
-            filename: 'ticketflow-logo.png',
-            content: Buffer.from(this.logoPngBase64, 'base64'),
-            contentType: 'image/png',
-            cid: 'ticketflow-logo',
-          }] : []),
+          ...this.logoAttachment(),
           {
             filename: `ticket-${payload.ticketCode}.pdf`,
             content: payload.pdfBuffer,
@@ -241,146 +160,59 @@ export class EmailService {
       });
       this.logger.log(`Ticket email sent to ${payload.to} for ticket ${payload.ticketCode}`);
       return true;
-    } catch (err: any) {
-      this.logger.error(`Failed to send ticket email to ${payload.to}: ${err?.message}`);
+    } catch (error: any) {
+      this.logger.error(`Failed to send ticket email: ${error?.message}`);
       return false;
     }
   }
 
-  /**
-   * Emails a password-reset verification code. The code itself is never logged:
-   * it is a live credential for the next ten minutes.
-   */
   async sendPasswordResetCodeEmail(payload: PasswordResetCodeEmailPayload): Promise<boolean> {
     if (!this.transporter) {
       this.logger.warn('SMTP not configured — password reset code email not sent');
       return false;
     }
 
-    const from = this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke';
-
-    // Same rationale as the ticket email logo: must be a publicly reachable URL.
-    const logoUrl = this.logoPngBase64
-      ? 'cid:ticketflow-logo'
-      : (this.configService.get<string>('EMAIL_LOGO_URL')
-        || 'https://ticketflow-frontend-w47s.onrender.com/logo.png');
-
     const firstName = escapeHtml(payload.firstName || 'there');
-    const code = payload.code;
-    const minutes = payload.expiresInMinutes;
-    const font = "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+    const code = escapeHtml(payload.code);
+
+    const body = `
+      <div style="padding:22px;border:1px solid #f0d5dc;border-radius:14px;background:#fff7f9;text-align:center">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:#8b8f96;text-transform:uppercase">Verification code</div>
+        <div style="margin-top:10px;font-size:38px;font-weight:900;letter-spacing:10px;color:#e6002d;font-family:monospace">${code}</div>
+      </div>
+      <p style="margin:18px 0 0;font-size:13px;line-height:1.7;color:#666b73">This code expires in <strong>${payload.expiresInMinutes} minutes</strong> and can only be used once. Never share it with anyone.</p>
+    `;
+
+    const html = emailFrame(
+      this.getLogoSrc(),
+      'Reset your password',
+      `Hi ${firstName}, we received a request to reset your TicketFlow Kenya password.`,
+      body,
+    );
 
     const text = [
-      `Dear ${payload.firstName || 'there'},`,
+      `Hi ${payload.firstName || 'there'},`,
       '',
-      'We received a request to reset the password for your TicketFlow Kenya account.',
+      `Your TicketFlow Kenya verification code is ${payload.code}.`,
+      `It expires in ${payload.expiresInMinutes} minutes.`,
       '',
-      `Your password reset verification code is ${code}.`,
-      '',
-      `This code expires in ${minutes} minutes and can only be used once.`,
-      '',
-      'Never share this code with anyone. TicketFlow Kenya staff will never ask you for it.',
-      '',
-      'If you did not request a password reset, you can safely ignore this email — your password will not be changed.',
-      '',
-      'Regards,',
+      'If you did not request this, ignore this email.',
       'TicketFlow Kenya · support@ticketflow.co.ke',
     ].join('\n');
 
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Password Reset Verification Code</title>
-</head>
-<body style="margin:0;padding:0;background-color:#121212;font-family:${font};">
-
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-       style="background-color:#121212;padding:32px 24px;">
-<tr><td align="center">
-
-<table role="presentation" cellpadding="0" cellspacing="0"
-       style="width:100%;max-width:600px;background-color:#1e1f21;border-radius:8px;overflow:hidden;">
-
-  <tr>
-    <td style="background-color:#ffffff;padding:18px 24px;border-bottom:4px solid #e6002d;">
-      <img src="${logoUrl}" width="156" alt="TicketFlow Kenya"
-           style="display:block;width:156px;max-width:100%;height:auto;border:0;"/>
-    </td>
-  </tr>
-
-  <tr>
-    <td style="padding:28px 24px 24px;">
-
-      <p style="margin:0 0 18px;font-size:20px;font-weight:600;color:#eaeeef;line-height:1.4;font-family:${font};">
-        Dear <strong>${firstName}</strong>,
-      </p>
-
-      <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#c4c7ca;font-family:${font};">
-        We received a request to reset the password for your <strong style="color:#eaeeef;">TicketFlow Kenya</strong> account.
-        Enter this verification code to continue:
-      </p>
-
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
-        <tr>
-          <td align="center" style="background-color:#121212;border:1px solid #2a2b2d;border-radius:8px;padding:20px 12px;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#9aa0a6;text-transform:uppercase;font-family:${font};">Verification code</div>
-            <div style="margin-top:10px;font-size:36px;font-weight:800;letter-spacing:10px;color:#ffffff;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;">${code}</div>
-          </td>
-        </tr>
-      </table>
-
-      <p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:#c4c7ca;font-family:${font};">
-        This code expires in <strong style="color:#eaeeef;">${minutes} minutes</strong> and can only be used once.
-      </p>
-
-      <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#9aa0a6;font-family:${font};">
-        <strong style="color:#eaeeef;">Never share this code.</strong> TicketFlow Kenya staff will never ask you for it.
-      </p>
-
-      <p style="margin:0 0 20px;font-size:13px;line-height:1.6;color:#9aa0a6;font-family:${font};">
-        <strong style="color:#eaeeef;">Didn't request this?</strong> You can safely ignore this email —
-        your password will not be changed.
-      </p>
-
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
-        <tr><td style="border-top:1px solid #2a2b2d;font-size:0;line-height:0;">&nbsp;</td></tr>
-      </table>
-
-      <p style="margin:0;font-size:14px;color:#9aa0a6;text-align:center;font-family:${font};">
-        Regards, <strong style="color:#eaeeef;">TicketFlow Kenya</strong> &nbsp;&middot;&nbsp;
-        <a href="mailto:support@ticketflow.co.ke"
-           style="color:#6ea8fe;text-decoration:none;">support@ticketflow.co.ke</a>
-      </p>
-
-    </td>
-  </tr>
-
-</table>
-
-</td></tr>
-</table>
-</body></html>`;
-
     try {
       await this.transporter.sendMail({
-        from,
+        from: this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke',
         to: payload.to,
-        subject: 'Password Reset Verification Code',
+        subject: 'TicketFlow Kenya Password Reset Code',
         text,
         html,
-        attachments: this.logoPngBase64 ? [{
-          filename: 'ticketflow-logo.png',
-          content: Buffer.from(this.logoPngBase64, 'base64'),
-          contentType: 'image/png',
-          cid: 'ticketflow-logo',
-        }] : undefined,
+        attachments: this.logoAttachment(),
       });
       this.logger.log('Password reset code email sent');
       return true;
-    } catch (err: any) {
-      this.logger.error(`Failed to send password reset code email: ${err?.message}`);
+    } catch (error: any) {
+      this.logger.error(`Failed to send password reset code email: ${error?.message}`);
       return false;
     }
   }

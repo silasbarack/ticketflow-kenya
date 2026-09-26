@@ -5,11 +5,11 @@ export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'dan
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white shadow-glow hover:bg-brand-700 hover:shadow-elevated disabled:shadow-none',
-  secondary: 'bg-navy-900 text-white shadow-soft hover:bg-navy-800 disabled:hover:bg-navy-900',
-  outline: 'border border-line bg-white text-navy-900 shadow-soft hover:border-brand-200 hover:bg-brand-50/60 hover:text-brand-700',
-  ghost: 'text-navy-700 hover:bg-navy-900/[0.055] hover:text-navy-900',
-  danger: 'bg-danger-600 text-white shadow-soft hover:bg-danger-700 disabled:hover:bg-danger-600',
+  primary: 'bg-brand-600 text-white shadow-glow hover:bg-brand-700 hover:shadow-elevated',
+  secondary: 'bg-navy-900 text-white shadow-soft hover:bg-navy-800',
+  outline: 'border border-line bg-white text-navy-900 shadow-soft hover:border-brand-300 hover:text-brand-700',
+  ghost: 'text-navy-700 hover:bg-brand-50 hover:text-brand-700',
+  danger: 'bg-danger-600 text-white hover:bg-danger-700',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -30,9 +30,8 @@ export function buttonVariants({
   className?: string;
 } = {}) {
   return clsx(
-    'inline-flex min-h-[44px] items-center justify-center rounded-btn font-bold tracking-[-0.01em]',
-    'transition-[color,background-color,border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 active:translate-y-0',
-    'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0',
+    'inline-flex min-h-[44px] items-center justify-center rounded-xl font-extrabold tracking-[-0.01em]',
+    'transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50',
     VARIANT_CLASSES[variant],
     SIZE_CLASSES[size],
     fullWidth && 'w-full',
@@ -56,9 +55,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       aria-busy={loading || undefined}
       {...props}
     >
-      {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-70" aria-hidden="true" />
-      )}
+      {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />}
       {children}
     </button>
   ),
