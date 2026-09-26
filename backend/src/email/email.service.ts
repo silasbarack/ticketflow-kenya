@@ -43,7 +43,7 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:#f4f5f8;font-family:'Poppins','Noto Sans',Arial,sans-serif;color:#1b1d22">
+<body style="margin:0;background:#f4f5f8;font-family:'Noto Sans',Arial,sans-serif;color:#1b1d22">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f8">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #eceef2;border-radius:18px;overflow:hidden">

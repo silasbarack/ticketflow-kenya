@@ -78,10 +78,10 @@ const config: Config = {
         line: '#e5e7eb',
       },
       fontFamily: {
-        // Noto Sans for body copy; Poppins for headings (h1–h3 in globals.css); Caveat for the brand's handwritten accents.
-        sans: ['var(--font-noto-sans)', 'Arial', 'sans-serif'],
-        display: ['var(--font-display)', 'var(--font-noto-sans)', 'Arial', 'sans-serif'],
-        script: ['var(--font-script)', 'cursive'],
+        // Noto Sans everywhere (body, headings and accents), falling back to Arial, then sans-serif.
+        sans: ['var(--font-noto-sans)', 'Noto Sans', 'Arial', 'sans-serif'],
+        display: ['var(--font-noto-sans)', 'Noto Sans', 'Arial', 'sans-serif'],
+        script: ['var(--font-noto-sans)', 'Noto Sans', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         // Inputs/selects. Buttons opt into a full pill via `rounded-full`.

@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { CalendarDays, MapPin, Search, SlidersHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
 import { EventItem } from '@/types';
-import { getCuratedUpcoming } from '@/lib/curated-events';
 import EventGrid from '@/components/EventGrid';
 
 const categoryOptions = ['all', 'music', 'sports', 'nightlife', 'culture', 'festival', 'technology', 'entertainment', 'motoring'];
@@ -57,10 +56,8 @@ function EventsCatalog() {
   });
 
   const events = useMemo(() => {
-    const curated = getCuratedUpcoming();
-    const live = (data?.events || []).filter((event) => Date.parse(event.endDateTime) >= Date.now());
-    const known = new Set(curated.map((event) => event.slug));
-    return [...curated, ...live.filter((event) => !known.has(event.slug))]
+    return (data?.events || [])
+      .filter((event) => Date.parse(event.endDateTime) >= Date.now())
       .filter((event) => {
         const haystack = [event.title, event.subtitle, event.venue, event.city, event.category.name].filter(Boolean).join(' ').toLowerCase();
         const matchQ = !q || haystack.includes(q);

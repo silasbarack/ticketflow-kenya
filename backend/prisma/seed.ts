@@ -59,11 +59,10 @@ type SeedEvent = {
   endAt: string;
   posterUrl: string;
   posterAlt: string;
-  posterSourceUrl: string;
-  bookingUrl: string;
+  posterSourceUrl?: string;
   verificationSource: string;
   verificationSourceUrl: string;
-  secondaryVerificationSourceUrl: string;
+  secondaryVerificationSourceUrl?: string;
   ticketTiers: SeedTier[];
 };
 
@@ -86,9 +85,9 @@ const TIER_ALLOCATION: Partial<Record<TicketTypeCategory, number>> = {
   [TicketTypeCategory.VVIP]: 60,
 };
 
-// Verified on 1 September 2026 (Africa/Nairobi). These are editorial listings
-// for real third-party events. TicketFlow is not their seller: every Book Now
-// action goes to the listed authorised platform and server-side sales stay off.
+// Real Nairobi events, verified against their public listings (Africa/Nairobi).
+// Every one is ticketed and sold on TicketFlow Kenya itself: Book Now always
+// leads to TicketFlow checkout, never to another seller.
 const eventSeeds: SeedEvent[] = [
   {
     slug: 'fally-ipupa-live-in-nairobi-2026',
@@ -107,7 +106,6 @@ const eventSeeds: SeedEvent[] = [
     posterUrl: 'https://admin.ticketsasa.com/storage/events/August2026/79OurX3VJB-1785932580.jpg',
     posterAlt: 'Official promotional poster for Fally Ipupa Live in Nairobi on 5 September 2026 at Uhuru Gardens',
     posterSourceUrl: 'https://www.ticketsasa.com/events/fally-ipupa-live-in-nairobi',
-    bookingUrl: 'https://www.ticketsasa.com/events/fally-ipupa-live-in-nairobi',
     verificationSource: 'Ticketsasa — current official seller listing',
     verificationSourceUrl: 'https://www.ticketsasa.com/events/fally-ipupa-live-in-nairobi',
     secondaryVerificationSourceUrl: 'https://www.fallyipupalive.com/',
@@ -167,7 +165,6 @@ const eventSeeds: SeedEvent[] = [
     posterUrl: 'https://mookh-v3-public.lon1.digitaloceanspaces.com/events/event-featured-1784205723980-j57squ.jpeg',
     posterAlt: 'Official illustrated poster for Roots n Riddim in Nairobi on 12 September 2026',
     posterSourceUrl: 'https://mookh.com/roots-n-riddim/',
-    bookingUrl: 'https://mookh.com/roots-n-riddim/',
     verificationSource: 'Mookh — official seller listing by Nairobi R&B',
     verificationSourceUrl: 'https://mookh.com/roots-n-riddim/',
     secondaryVerificationSourceUrl: 'https://nairobieventsguide.com/upcoming-events/',
@@ -209,7 +206,6 @@ const eventSeeds: SeedEvent[] = [
     posterUrl: 'https://mookh-v3-public.lon1.digitaloceanspaces.com/events/featured/91f9fe13-9d3e-4b90-baf4-656bf08e8fff/IMG-20260430-WA0009.jpg',
     posterAlt: 'Official promotional poster for the Too Early For Birds Wangarĩ Maathai rerun, 25 to 27 September 2026',
     posterSourceUrl: 'https://mookh.com/too-early-for-birds-wangari-maathai-rerun/',
-    bookingUrl: 'https://mookh.com/too-early-for-birds-wangari-maathai-rerun/',
     verificationSource: 'Mookh — official TEFB Wangarĩ Maathai seller listing',
     verificationSourceUrl: 'https://mookh.com/too-early-for-birds-wangari-maathai-rerun/',
     secondaryVerificationSourceUrl: 'https://news.sanaapost.com/shawry-for-trees-the-shawry-is-back/',
@@ -256,7 +252,6 @@ const eventSeeds: SeedEvent[] = [
     posterUrl: 'https://mookh-v3-public.lon1.digitaloceanspaces.com/events/featured/2982e52b-592b-4f8d-a60d-c3790708a749/ALL_PEACHES__CREAM_26TH_SEP__1X1_copy.jpg',
     posterAlt: 'Official Peaches & Cream event poster listing the 26 September 2026 Nairobi lineup',
     posterSourceUrl: 'https://mookh.com/peaches-and-cream/',
-    bookingUrl: 'https://mookh.com/peaches-and-cream/',
     verificationSource: 'Mookh — official Peaches & Cream seller listing',
     verificationSourceUrl: 'https://mookh.com/peaches-and-cream/',
     secondaryVerificationSourceUrl:
@@ -318,6 +313,205 @@ const eventSeeds: SeedEvent[] = [
         availabilityStatus: TicketAvailabilityStatus.CLOSED,
         description: 'Total price for a group of four; not a per-person price.',
       },
+    ],
+  },
+  {
+    slug: 'miles-of-melody-where-rhythm-roams-2026',
+    title: 'Miles of Melody: Where Rhythm Roams',
+    subtitle: 'The Catalog 254 — music, conversation and community',
+    description:
+      'An intimate afternoon built around music, conversation and community, with the featured artist in the room to unpack the creative process track by track.',
+    organizerName: 'The Catalog 254',
+    venue: 'Chronos',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Lavington, Nairobi',
+    categoryIndex: 0,
+    startAt: '2026-09-26T15:00:00+03:00',
+    endAt: '2026-09-26T21:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Live singer performing under warm stage lights',
+    verificationSource: 'TikoHUB',
+    verificationSourceUrl: 'https://www.tikohub.com/events/miles-of-melody-where-rhythm-roams',
+    ticketTiers: [
+      { name: 'Entry ticket', category: TicketTypeCategory.REGULAR, price: 1000, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'africa-concours-delegance-2026',
+    title: 'Africa Concours d’Elegance 2026',
+    subtitle: 'Vintage cars, classic motorcycles and Kenya motoring culture',
+    description:
+      'Kenya’s long-running classic motoring showcase returns to Ngong Racecourse with vintage and classic cars, motorcycles and a full day of automotive culture.',
+    organizerName: 'Africa Concours d’Elegance',
+    venue: 'Ngong Racecourse',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Ngong Road, Nairobi',
+    categoryIndex: 4,
+    startAt: '2026-09-27T09:00:00+03:00',
+    endAt: '2026-09-27T18:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Classic sports car displayed outdoors',
+    verificationSource: 'Little Events',
+    verificationSourceUrl: 'https://apps.little.africa/events/55',
+    secondaryVerificationSourceUrl: 'https://nairobieventsguide.com/event/2026-africa-concours-delegance/',
+    ticketTiers: [
+      { name: 'Advance adult', category: TicketTypeCategory.REGULAR, price: 1800, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'first-rhumba-vip-affair-2026',
+    title: 'The First Rhumba VIP Affair',
+    subtitle: 'A premium live Rhumba night at Emara Ole-Sereni',
+    description:
+      'A premium Rhumba experience bringing together live bands, DJs, hospitality and an elegant evening atmosphere at Emara Ole-Sereni.',
+    organizerName: 'Zeget Delongeur & E&F Sounds Entertainment',
+    venue: 'Emara Ole-Sereni',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Mombasa Road, Nairobi',
+    categoryIndex: 0,
+    startAt: '2026-10-03T18:00:00+03:00',
+    endAt: '2026-10-04T02:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Musician performing live on stage',
+    verificationSource: 'TikoHUB',
+    verificationSourceUrl: 'https://tikohub.com/events/the-first-rhumba-vip-affair',
+    ticketTiers: [
+      { name: 'VIP ticket', category: TicketTypeCategory.VIP, price: 3000, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'safari-7s-2026',
+    title: 'Safari 7s 2026',
+    subtitle: 'Three days of rugby, entertainment and festival energy',
+    description:
+      'East Africa’s rugby festival returns to Nyayo Stadium for three days of sevens rugby, entertainment and a high-energy stadium atmosphere.',
+    organizerName: 'Safari 7s',
+    venue: 'Nyayo Stadium',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Nyayo National Stadium, Nairobi',
+    categoryIndex: 2,
+    startAt: '2026-10-09T07:30:00+03:00',
+    endAt: '2026-10-11T20:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1515808266237-4f89cbe46c1c?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Rugby players competing on a green field',
+    verificationSource: 'TikoHUB',
+    verificationSourceUrl: 'https://tikohub.com/events/safari-7s-2026',
+    ticketTiers: [
+      { name: 'Friday regular', category: TicketTypeCategory.REGULAR, price: 300, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'kulture-icons-soundtrack-2026',
+    title: 'KULTURE: Celebrating the Icons & The Soundtrack',
+    subtitle: 'A seated celebration of the music that shaped a generation',
+    description:
+      'An evening celebrating influential music and cultural icons, with red carpet arrivals followed by a gala show at the Tsavo Ballroom, KICC.',
+    organizerName: 'KULTURE',
+    venue: 'Tsavo Ballroom, KICC',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Kenyatta International Convention Centre, Nairobi',
+    categoryIndex: 3,
+    startAt: '2026-10-10T16:00:00+03:00',
+    endAt: '2026-10-11T00:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Audience watching a theatrical stage performance',
+    verificationSource: 'KULTURE',
+    verificationSourceUrl: 'https://kulture.ke/',
+    ticketTiers: [
+      { name: 'Zone H', category: TicketTypeCategory.REGULAR, price: 2000, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'pineapple-party-nairobi-2026',
+    title: 'Pineapple Party',
+    subtitle: 'A Saturday music and nightlife experience in Westlands',
+    description:
+      'A Nairobi weekend party experience at Nairobi Street Kitchen, bringing together music, food and a lively social crowd.',
+    organizerName: 'Pineapple Party',
+    venue: 'Nairobi Street Kitchen',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Mpaka Road, Westlands, Nairobi',
+    categoryIndex: 0,
+    startAt: '2026-10-10T16:00:00+03:00',
+    endAt: '2026-10-11T02:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Crowd enjoying a colourful outdoor music event',
+    verificationSource: 'Tipsi Tickets',
+    verificationSourceUrl: 'https://www.tipsitickets.com/',
+    ticketTiers: [
+      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 1500, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'midnight-royale-2026',
+    title: 'Midnight Royale',
+    subtitle: 'A late-night Nairobi experience at Carnivore Grounds',
+    description:
+      'A Saturday-to-Sunday entertainment experience at The Carnivore Grounds, with tickets from KES 1,500.',
+    organizerName: 'Midnight Royale',
+    venue: 'The Carnivore Grounds',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Langata Road, Nairobi',
+    categoryIndex: 4,
+    startAt: '2026-10-17T15:00:00+03:00',
+    endAt: '2026-10-18T03:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Large concert crowd under red stage lighting',
+    verificationSource: 'Tipsi Tickets',
+    verificationSourceUrl: 'https://www.tipsitickets.com/',
+    ticketTiers: [
+      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 1500, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'teen-pop-up-festival-2026',
+    title: '2nd Edition Teen Pop Up Festival',
+    subtitle: 'A daytime youth festival at Nairobi Arboretum',
+    description:
+      'A daytime festival at Nairobi Arboretum with affordable entry and a youth-focused mix of social, creative and entertainment experiences.',
+    organizerName: 'Teen Pop Up Festival',
+    venue: 'The Nairobi Arboretum',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'State House Road, Nairobi',
+    categoryIndex: 4,
+    startAt: '2026-10-24T06:00:00+03:00',
+    endAt: '2026-10-24T16:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1496024840928-4c417adf211d?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Outdoor festival crowd in daylight',
+    verificationSource: 'Tipsi Tickets',
+    verificationSourceUrl: 'https://www.tipsitickets.com/',
+    ticketTiers: [
+      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 250, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+    ],
+  },
+  {
+    slug: 'ai-build-day-2nd-edition-2026',
+    title: 'AI Build Day — 2nd Edition',
+    subtitle: 'A technology build day at Strathmore University',
+    description:
+      'A hands-on technology event at Strathmore University for builders, developers and people interested in creating with AI.',
+    organizerName: 'AI Build Day',
+    venue: 'Strathmore University',
+    city: 'Nairobi',
+    county: 'Nairobi',
+    address: 'Madaraka Estate, Nairobi',
+    categoryIndex: 1,
+    startAt: '2026-11-06T06:00:00+03:00',
+    endAt: '2026-11-06T14:00:00+03:00',
+    posterUrl: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=88',
+    posterAlt: 'Developer working on code at a laptop',
+    verificationSource: 'Tipsi Tickets',
+    verificationSourceUrl: 'https://www.tipsitickets.com/',
+    ticketTiers: [
+      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 800, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
     ],
   },
 ];
@@ -438,7 +632,7 @@ async function main() {
       description: seedEvent.description,
       posterUrl: seedEvent.posterUrl,
       posterAlt: seedEvent.posterAlt,
-      posterSourceUrl: seedEvent.posterSourceUrl,
+      posterSourceUrl: seedEvent.posterSourceUrl ?? null,
       venue: seedEvent.venue,
       city: seedEvent.city,
       county: seedEvent.county,
@@ -455,7 +649,7 @@ async function main() {
       bookingUrl: null,
       verificationSource: seedEvent.verificationSource,
       verificationSourceUrl: seedEvent.verificationSourceUrl,
-      secondaryVerificationSourceUrl: seedEvent.secondaryVerificationSourceUrl,
+      secondaryVerificationSourceUrl: seedEvent.secondaryVerificationSourceUrl ?? null,
       verifiedAt: VERIFIED_AT,
       salesEnabled: true,
       isDemo: false,
