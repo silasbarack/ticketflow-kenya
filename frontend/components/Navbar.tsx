@@ -9,14 +9,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
-import MobileNavigationDrawer from '@/components/MobileNavigationDrawer';
 import { PRIMARY_NAV } from '@/lib/nav';
 
 export default function Navbar() {
   const { user } = useAuth();
   const { totalItems } = useCart();
   const pathname = usePathname();
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -56,18 +54,16 @@ export default function Navbar() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="tf-icon-btn tf-menu-btn"
-            aria-label="Open menu"
-            aria-expanded={drawerOpen}
-            onClick={() => setDrawerOpen(true)}
+          <Link
+            href="/menu"
+            className={clsx('tf-icon-btn tf-menu-btn', pathname === '/menu' && 'active')}
+            aria-label="Menu"
+            aria-current={pathname === '/menu' ? 'page' : undefined}
           >
             <Menu size={23} />
-          </button>
+          </Link>
         </div>
       </div>
-      <MobileNavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </header>
   );
 }
