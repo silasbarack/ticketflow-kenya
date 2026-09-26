@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 250" role="img" aria-label="TicketFlow Kenya">
-  <rect width="560" height="250" fill="#fff"/>
-  <g transform="translate(22 12)">
-    <path d="M25 164C112 143 187 107 257 48L438 14C437 43 454 65 484 75C456 91 443 115 447 145L265 201C180 224 101 212 25 164Z" fill="#e6002d"/>
-    <path d="M48 165C132 145 199 116 253 74C214 124 161 156 94 173" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
-    <path d="M53 181C156 166 236 132 301 82C247 143 177 181 88 194" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
-    <path d="M369 37L377 56M382 69L390 88M395 101L403 120M408 133L416 152" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
-  </g>
-</svg>

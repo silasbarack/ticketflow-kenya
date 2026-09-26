@@ -31,9 +31,9 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function loadLogoSvg(): Buffer | null {
+function loadLogoPng(): Buffer | null {
   try {
-    return fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'logo.svg'));
+    return fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'logo.png'));
   } catch {
     return null;
   }
@@ -43,13 +43,13 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#20242a">
+<body style="margin:0;background:#f4f5f7;font-family:'Noto Sans',Arial,sans-serif;color:#20242a">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f7">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #e6e8ec;border-radius:16px;overflow:hidden">
         <tr>
           <td style="padding:18px 22px;border-bottom:4px solid #e6002d;background:#ffffff">
-            <img src="${logoSrc}" width="180" alt="TicketFlow Kenya" style="display:block;width:180px;height:auto;max-width:100%;border:0">
+            <img src="${logoSrc}" width="138" alt="TicketFlow Kenya" style="display:block;width:138px;height:auto;max-width:100%;border:0">
           </td>
         </tr>
         <tr>
@@ -78,7 +78,7 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
-  private readonly logoSvg = loadLogoSvg();
+  private readonly logoPng = loadLogoPng();
 
   constructor(private configService: ConfigService) {
     const host = this.configService.get<string>('SMTP_HOST');
@@ -96,17 +96,17 @@ export class EmailService {
   }
 
   private getLogoSrc() {
-    if (this.logoSvg) return 'cid:ticketflow-logo';
+    if (this.logoPng) return 'cid:ticketflow-logo';
     return this.configService.get<string>('EMAIL_LOGO_URL')
-      || 'https://ticketflow-frontend-w47s.onrender.com/logo-full.svg';
+      || 'https://ticketflow-frontend-w47s.onrender.com/ticketflow-logo.png';
   }
 
   private logoAttachment() {
-    if (!this.logoSvg) return [];
+    if (!this.logoPng) return [];
     return [{
-      filename: 'ticketflow-logo.svg',
-      content: this.logoSvg,
-      contentType: 'image/svg+xml',
+      filename: 'ticketflow-logo.png',
+      content: this.logoPng,
+      contentType: 'image/png',
       cid: 'ticketflow-logo',
     }];
   }

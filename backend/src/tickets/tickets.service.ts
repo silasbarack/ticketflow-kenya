@@ -8,34 +8,35 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import PDFDocument from 'pdfkit';
 
+let ticketFlowLogo: Buffer | null | undefined;
+
+function loadTicketFlowLogo(): Buffer | null {
+  if (ticketFlowLogo !== undefined) return ticketFlowLogo;
+  try {
+    ticketFlowLogo = fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'logo.png'));
+  } catch {
+    ticketFlowLogo = null;
+  }
+  return ticketFlowLogo;
+}
+
 function drawTicketFlowLogo(doc: any, x: number, y: number) {
-  const red = '#e6002d';
-  const ink = '#252a2f';
+  const logo = loadTicketFlowLogo();
+  if (logo) {
+    doc.image(logo, x, y, { fit: [145, 80], align: 'left', valign: 'center' });
+    return;
+  }
+
   doc.save();
-  doc.fillColor(red)
-    .moveTo(x + 4, y + 28)
-    .bezierCurveTo(x + 29, y + 22, x + 53, y + 13, x + 74, y + 2)
-    .lineTo(x + 129, y - 5)
-    .bezierCurveTo(x + 128, y + 5, x + 134, y + 13, x + 145, y + 17)
-    .bezierCurveTo(x + 135, y + 22, x + 131, y + 30, x + 133, y + 40)
-    .lineTo(x + 77, y + 54)
-    .bezierCurveTo(x + 50, y + 61, x + 25, y + 52, x + 4, y + 28)
-    .fill();
-  doc.strokeColor('#ffffff').lineWidth(2.5)
-    .moveTo(x + 14, y + 31)
-    .bezierCurveTo(x + 44, y + 26, x + 67, y + 16, x + 88, y + 3)
-    .stroke();
-  doc.strokeColor('#ffffff').lineWidth(2)
-    .moveTo(x + 16, y + 37)
-    .bezierCurveTo(x + 50, y + 34, x + 77, y + 23, x + 99, y + 9)
-    .stroke();
-  doc.fillColor(ink).font('Helvetica-Bold').fontSize(18).text('Ticket', x + 5, y + 62, { continued: true });
-  doc.fillColor(red).text('Flow');
-  doc.fillColor(ink).fontSize(6).text('K E N Y A', x + 48, y + 84);
+  doc.fillColor('#252a2f').font('Helvetica-Bold').fontSize(18).text('Ticket', x, y + 24, { continued: true });
+  doc.fillColor('#e6002d').text('Flow');
+  doc.fillColor('#252a2f').fontSize(6).text('K E N Y A', x + 34, y + 47);
   doc.restore();
 }
 

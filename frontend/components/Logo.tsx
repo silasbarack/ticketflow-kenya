@@ -13,8 +13,8 @@ interface LogoProps {
 
 export default function Logo({ variant = 'full', className = 'h-14' }: LogoProps) {
   const [failed, setFailed] = useState(false);
-  const src = variant === 'icon' ? '/logo-icon.svg' : '/logo-full.svg';
-  const aspect = variant === 'icon' ? '560 / 250' : '620 / 430';
+  const src = variant === 'icon' ? '/ticketflow-logo-mark.png' : '/ticketflow-logo.png';
+  const aspect = variant === 'icon' ? '220 / 126' : '280 / 225';
 
   if (failed) {
     return (
@@ -25,13 +25,14 @@ export default function Logo({ variant = 'full', className = 'h-14' }: LogoProps
   }
 
   return (
-    <span className={'relative inline-block shrink-0 ' + className} style={{ aspectRatio: aspect }}>
+    <span className={'relative inline-block shrink-0 overflow-hidden rounded-sm bg-white ' + className} style={{ aspectRatio: aspect }}>
       <Image
         src={src}
         alt="TicketFlow Kenya"
         fill
+        priority={false}
         unoptimized
-        sizes="260px"
+        sizes={variant === 'icon' ? '160px' : '280px'}
         className="object-contain"
         onError={() => setFailed(true)}
       />
