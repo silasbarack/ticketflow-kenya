@@ -98,7 +98,7 @@ export class EmailService {
   private getLogoSrc() {
     if (this.logoPng) return 'cid:ticketflow-logo';
     return this.configService.get<string>('EMAIL_LOGO_URL')
-      || 'https://ticketflow-frontend-w47s.onrender.com/ticketflow-logo.png';
+      || 'https://ticketflow-frontend-w47s.onrender.com/ticketflow-logo-official.png';
   }
 
   private logoAttachment() {

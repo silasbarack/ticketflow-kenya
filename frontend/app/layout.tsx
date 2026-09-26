@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     title: 'TicketFlow Kenya',
     description: 'Discover events across Kenya and book securely with M-Pesa.',
   },
+  icons: {
+    icon: '/ticketflow-logo-official.png',
+    shortcut: '/ticketflow-logo-official.png',
+    apple: '/ticketflow-logo-official.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

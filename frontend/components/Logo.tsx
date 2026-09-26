@@ -13,8 +13,8 @@ interface LogoProps {
 
 export default function Logo({ variant = 'full', className = 'h-14' }: LogoProps) {
   const [failed, setFailed] = useState(false);
-  const src = variant === 'icon' ? '/ticketflow-logo-mark.png' : '/ticketflow-logo.png';
-  const aspect = variant === 'icon' ? '220 / 126' : '280 / 225';
+  const src = '/ticketflow-logo-official.png';
+  const aspect = '280 / 225';
 
   if (failed) {
     return (
