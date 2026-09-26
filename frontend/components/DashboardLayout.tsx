@@ -19,7 +19,7 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
       <div className="mx-auto flex max-w-[1600px]">
         <aside className="sticky top-[var(--header-height)] hidden h-[calc(100vh-var(--header-height))] w-[260px] shrink-0 flex-col border-r border-line bg-white px-4 py-5 lg:flex">
           <div className="border-b border-line px-2 pb-5">
-            <Logo className="h-20" />
+            <Link href="/" aria-label="TicketFlow Kenya home"><Logo className="h-11" /></Link>
             <p className="mt-3 text-sm font-black text-navy-900">{user?.firstName} {user?.lastName}</p>
             <p className="mt-1 text-xs text-muted">{user?.role === 'ADMIN' ? 'Platform administration' : 'Organizer workspace'}</p>
           </div>
@@ -29,8 +29,8 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
               const active = pathname === item.href || pathname.startsWith(item.href + '/');
               return (
                 <Link key={item.href} href={item.href} className={clsx(
-                  'flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-extrabold transition',
-                  active ? 'bg-brand-50 text-brand-700' : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900',
+                  'flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-extrabold transition duration-200 hover:translate-x-0.5',
+                  active ? 'bg-brand-600 text-white shadow-glow' : 'text-navy-600 hover:bg-navy-50 hover:text-navy-900',
                 )}>
                   <item.icon className="h-[18px] w-[18px]" /> {item.label}
                 </Link>

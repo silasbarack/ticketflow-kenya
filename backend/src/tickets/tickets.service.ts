@@ -29,7 +29,7 @@ function loadTicketFlowLogo(): Buffer | null {
 function drawTicketFlowLogo(doc: any, x: number, y: number) {
   const logo = loadTicketFlowLogo();
   if (logo) {
-    doc.image(logo, x, y, { fit: [145, 80], align: 'left', valign: 'center' });
+    doc.image(logo, x, y, { fit: [210, 80], align: 'left', valign: 'center' });
     return;
   }
 

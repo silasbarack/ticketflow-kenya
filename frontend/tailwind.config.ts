@@ -78,9 +78,10 @@ const config: Config = {
         line: '#e5e7eb',
       },
       fontFamily: {
-        // Single family across the product — headings, body copy and figures.
-        // Hierarchy comes from weight, size and tracking, never from a second face.
+        // Noto Sans for body copy; Poppins for headings (h1–h3 in globals.css); Caveat for the brand's handwritten accents.
         sans: ['var(--font-noto-sans)', 'Arial', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-noto-sans)', 'Arial', 'sans-serif'],
+        script: ['var(--font-script)', 'cursive'],
       },
       borderRadius: {
         // Inputs/selects. Buttons opt into a full pill via `rounded-full`.

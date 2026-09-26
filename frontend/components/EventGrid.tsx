@@ -3,6 +3,7 @@
 import { CalendarSearch } from 'lucide-react';
 import { EventItem } from '@/types';
 import EventCard from '@/components/EventCard';
+import Reveal from '@/components/Reveal';
 import { EventCardSkeletonGrid } from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import ErrorState from '@/components/ui/ErrorState';
@@ -37,8 +38,12 @@ export default function EventGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-      {events.map((event, index) => <EventCard key={event.id} event={event} priority={index < 5} />)}
+    <div className="tf-event-grid">
+      {events.map((event, index) => (
+        <Reveal key={event.id} delay={(index % 5) * 70} className="flex">
+          <EventCard event={event} priority={index < 5} />
+        </Reveal>
+      ))}
     </div>
   );
 }
