@@ -3,10 +3,11 @@
 import { Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, MapPin, Search, SlidersHorizontal } from 'lucide-react';
+import { CalendarDays, SlidersHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
 import { EventItem } from '@/types';
 import EventGrid from '@/components/EventGrid';
+import HomeHero from '@/components/HomeHero';
 
 const categoryOptions = ['all', 'music', 'sports', 'nightlife', 'culture', 'festival', 'technology', 'entertainment', 'motoring'];
 
@@ -69,21 +70,15 @@ function EventsCatalog() {
   }, [data, q, city, category, date]);
 
   return (
-    <main className="events-page">
-      <section className="events-page-hero">
-        <div className="container-page">
-          <span className="section-eyebrow light tf-rise">Discover · TicketFlow Kenya</span>
-          <h1 className="tf-rise" style={{ '--d': '80ms' } as React.CSSProperties}>Find something worth <span className="text-brand-500">showing up</span> for.</h1>
-          <p className="tf-rise" style={{ '--d': '160ms' } as React.CSSProperties}>Concerts, festivals, theatre, sports and more across Kenya — pay with M-Pesa and get your QR ticket instantly.</p>
-          <form className="events-search tf-rise" style={{ '--d': '240ms' } as React.CSSProperties} action="/events">
-            <label><Search size={18} /><input name="q" defaultValue={params.get('q') || ''} placeholder="Search events, artists or venues" /></label>
-            <label><MapPin size={18} /><select name="city" defaultValue={params.get('city') || ''}><option value="">All cities</option><option>Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Eldoret</option><option>Thika</option></select></label>
-            {params.get('category') && <input type="hidden" name="category" value={params.get('category') || ''} />}
-            {params.get('date') && <input type="hidden" name="date" value={params.get('date') || ''} />}
-            <button type="submit">Search</button>
-          </form>
-        </div>
-      </section>
+    <main className="events-page tf-home">
+      <HomeHero
+        defaults={{
+          q: params.get('q') || undefined,
+          category: params.get('category') || undefined,
+          city: params.get('city') || undefined,
+          date: params.get('date') || undefined,
+        }}
+      />
 
       <section className="events-results">
         <div className="container-page">
