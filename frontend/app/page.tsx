@@ -11,8 +11,8 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { EventItem } from '@/types';
-import { getCuratedUpcoming } from '@/lib/curated-events';
 import Logo from '@/components/Logo';
+import SiteQrCode from '@/components/SiteQrCode';
 import EventCard from '@/components/EventCard';
 import Reveal, { CountUp } from '@/components/Reveal';
 import { EventCardSkeletonGrid } from '@/components/ui/Skeleton';
@@ -93,10 +93,8 @@ export default function HomePage() {
   });
 
   const events = useMemo(() => {
-    const curated = getCuratedUpcoming();
-    const live = (data?.events || []).filter((event) => Date.parse(event.endDateTime) >= Date.now());
-    const known = new Set(curated.map((event) => event.slug));
-    return [...curated, ...live.filter((event) => !known.has(event.slug))]
+    return (data?.events || [])
+      .filter((event) => Date.parse(event.endDateTime) >= Date.now())
       .sort((a, b) => Date.parse(a.startDateTime) - Date.parse(b.startDateTime));
   }, [data]);
 
@@ -175,7 +173,7 @@ export default function HomePage() {
               <div className="tf-phone-screen">
                 <span className="tf-phone-notch" />
                 <Logo variant="stacked" theme="light" />
-                <div className="tf-phone-qr"><QrCode size={92} strokeWidth={1.3} /></div>
+                <div className="tf-phone-qr"><SiteQrCode /></div>
                 <span className="tf-script">Good Events<br /><b>Brighter People</b></span>
                 <span className="tf-phone-chip">ADMIT ONE · VIP</span>
               </div>

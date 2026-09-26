@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, CalendarDays, CheckCircle2, Clock3, ExternalLink, MapPin, Minus, Plus, ShieldCheck, Ticket, Users } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CalendarDays, CheckCircle2, Clock3, MapPin, Minus, Plus, ShieldCheck, Ticket, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { EventItem, TicketType } from '@/types';
 import { useCart } from '@/hooks/useCart';
@@ -35,8 +35,7 @@ export default function EventDetailClient({ initialEvent }: { initialEvent: Even
     );
   }
 
-  const external = event.bookingMode === 'EXTERNAL' && event.bookingUrl;
-  const lowest = Math.min(...event.ticketTypes.map((item) => Number(item.price)), 0);
+  const lowest = event.ticketTypes.length ? Math.min(...event.ticketTypes.map((item) => Number(item.price))) : 0;
 
   const addTier = (tier: TicketType) => {
     const quantity = quantities[tier.id] || 1;
@@ -72,17 +71,10 @@ export default function EventDetailClient({ initialEvent }: { initialEvent: Even
             <div className="event-facts">
               <div><span><CalendarDays /></span><p><b>{eventDateLabel(event.startDateTime)}</b><small>{eventTimeLabel(event.startDateTime)} EAT</small></p></div>
               <div><span><MapPin /></span><p><b>{event.venue}</b><small>{event.address || event.city}</small></p></div>
-              <div><span><Ticket /></span><p><b>{lowest > 0 ? 'From ' + formatCurrency(lowest) : 'Ticket information available'}</b><small>{external ? 'External ticket source' : 'TicketFlow checkout'}</small></p></div>
+              <div><span><Ticket /></span><p><b>{lowest > 0 ? 'From ' + formatCurrency(lowest) : 'Ticket information available'}</b><small>TicketFlow checkout</small></p></div>
             </div>
-            {external ? (
-              <div className="external-booking-card">
-                <div><ShieldCheck size={20} /><span><b>Externally ticketed event</b><small>TicketFlow is displaying the calendar listing. Payment happens on the listed ticket provider.</small></span></div>
-                <a href={event.bookingUrl || '#'} target="_blank" rel="noreferrer">View official tickets <ExternalLink size={17} /></a>
-                {event.verificationSource && <p>Listing source: {event.verificationSource}{event.verifiedAt ? ' · checked 25 Sep 2026' : ''}</p>}
-              </div>
-            ) : (
-              <Link href="#tickets" className="primary-cta">Choose tickets <ArrowUpRight size={18} /></Link>
-            )}
+            <Link href="#tickets" className="primary-cta">Choose tickets <ArrowUpRight size={18} /></Link>
+            <p className="event-checkout-note"><ShieldCheck size={15} /> Tickets are sold only on TicketFlow Kenya — pay by M-Pesa and get your QR ticket instantly.</p>
           </div>
         </section>
 
@@ -98,31 +90,29 @@ export default function EventDetailClient({ initialEvent }: { initialEvent: Even
             </div>
           </article>
 
-          {!external && (
-            <aside id="tickets" className="ticket-panel">
-              <span className="section-eyebrow">Tickets</span>
-              <h2>Choose your experience</h2>
-              <div className="ticket-tier-list">
-                {event.ticketTypes.map((tier) => {
-                  const qty = quantities[tier.id] || 1;
-                  return (
-                    <div key={tier.id} className="ticket-tier">
-                      <div><b>{tier.name}</b><span>{formatCurrency(tier.price)}</span></div>
-                      <div className="tier-actions">
-                        <div className="qty-control">
-                          <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.max(1, qty - 1) }))} aria-label="Decrease quantity"><Minus size={15} /></button>
-                          <span>{qty}</span>
-                          <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.min(10, qty + 1) }))} aria-label="Increase quantity"><Plus size={15} /></button>
-                        </div>
-                        <button className="add-ticket-button" onClick={() => addTier(tier)}>Add</button>
+          <aside id="tickets" className="ticket-panel">
+            <span className="section-eyebrow">Tickets</span>
+            <h2>Choose your experience</h2>
+            <div className="ticket-tier-list">
+              {event.ticketTypes.map((tier) => {
+                const qty = quantities[tier.id] || 1;
+                return (
+                  <div key={tier.id} className="ticket-tier">
+                    <div><b>{tier.name}</b><span>{formatCurrency(tier.price)}</span></div>
+                    <div className="tier-actions">
+                      <div className="qty-control">
+                        <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.max(1, qty - 1) }))} aria-label="Decrease quantity"><Minus size={15} /></button>
+                        <span>{qty}</span>
+                        <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.min(10, qty + 1) }))} aria-label="Increase quantity"><Plus size={15} /></button>
                       </div>
+                      <button className="add-ticket-button" onClick={() => addTier(tier)}>Add</button>
                     </div>
-                  );
-                })}
-              </div>
-              <Link href="/cart" className="primary-cta full">Go to cart <ArrowUpRight size={18} /></Link>
-            </aside>
-          )}
+                  </div>
+                );
+              })}
+            </div>
+            <Link href="/cart" className="primary-cta full">Go to cart <ArrowUpRight size={18} /></Link>
+          </aside>
         </section>
       </div>
     </main>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Caveat, Noto_Sans, Poppins } from 'next/font/google';
+import { Noto_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Providers from './providers';
@@ -8,9 +8,9 @@ import Footer from '@/components/Footer';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 import { BG_COLOR_KEY, BLACK } from '@/lib/appearance';
 
-const notoSans = Noto_Sans({ subsets: ['latin'], variable: '--font-noto-sans' });
-const poppins = Poppins({ subsets: ['latin'], weight: ['500', '600', '700', '800'], variable: '--font-display' });
-const caveat = Caveat({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-script' });
+// Noto Sans is the only typeface: body, headings and accents all use it, with
+// Arial and the system sans-serif as fallbacks.
+const notoSans = Noto_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-noto-sans' });
 
 export const metadata: Metadata = {
   title: {
@@ -35,7 +35,7 @@ export const viewport: Viewport = { themeColor: '#e6002d' };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={[notoSans.variable, poppins.variable, caveat.variable].join(' ')} suppressHydrationWarning>
+    <html lang="en" className={notoSans.variable} suppressHydrationWarning>
       <head>
         <Script
           id="apply-bg-color"

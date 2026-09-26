@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
 import { API_URL } from '@/lib/api';
-import { getCuratedEvent } from '@/lib/curated-events';
 import { EventItem } from '@/types';
 import EventDetailClient from './EventDetailClient';
 
 async function getEvent(idOrSlug: string): Promise<EventItem | null> {
-  const curated = getCuratedEvent(idOrSlug);
-  if (curated) return curated;
   try {
     const response = await fetch(API_URL + '/events/' + encodeURIComponent(idOrSlug), { next: { revalidate: 60 } });
     if (!response.ok) return null;
