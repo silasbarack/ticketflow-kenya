@@ -62,10 +62,12 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"></head>
-<body style="margin:0;background:#f4f5f8;font-family:'Noto Sans',Arial,sans-serif;color:#1b1d22">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f8">
+<!-- Black page and card. The black backgrounds also carry a gradient
+     image so Gmail's dark mode leaves them alone, like the bands below. -->
+<body bgcolor="#000000" style="margin:0;background-color:#000000;background-image:linear-gradient(#000000,#000000);font-family:'Noto Sans',Arial,sans-serif;color:#f2f3f5">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#000000" style="padding:28px 14px;background-color:#000000;background-image:linear-gradient(#000000,#000000)">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #eceef2;border-radius:18px;overflow:hidden">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#000000" style="max-width:620px;background-color:#000000;background-image:linear-gradient(#000000,#000000);border:1px solid #26282d;border-radius:18px;overflow:hidden">
         <tr>
           <!-- White logo band across the full card width. Gmail's dark mode
                recolours plain background colours but leaves background images
@@ -82,19 +84,19 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
           </td>
         </tr>
         <tr>
-          <td style="padding:26px 24px 30px">
+          <td bgcolor="#000000" style="padding:26px 24px 30px;background-color:#000000;background-image:linear-gradient(#000000,#000000);color:#f2f3f5">
             ${body}
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid #eceef2">
-              <tr><td style="padding-top:18px;font-size:12px;line-height:1.7;color:#6b6f78">
-                Events make a <strong style="color:#e6002d">brighter Kenya</strong>.<br>
-                <strong style="color:#1b1d22">TicketFlow Kenya</strong> &middot;
-                <a href="mailto:support@ticketflow.co.ke" style="color:#e6002d;text-decoration:none">support@ticketflow.co.ke</a>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;border-top:1px solid #26282d">
+              <tr><td style="padding-top:18px;font-size:12px;line-height:1.7;color:#a3a7ae">
+                Events make a <strong style="color:#ff2a52">brighter Kenya</strong>.<br>
+                <strong style="color:#ffffff">TicketFlow Kenya</strong> &middot;
+                <a href="mailto:support@ticketflow.co.ke" style="color:#ff2a52;text-decoration:none">support@ticketflow.co.ke</a>
               </td></tr>
             </table>
           </td>
         </tr>
       </table>
-      <p style="margin:14px 0 0;font-size:11px;color:#9a9ea6">&copy; TicketFlow Kenya &middot; Nairobi, Kenya</p>
+      <p style="margin:14px 0 0;font-size:11px;color:#8b8f96">&copy; TicketFlow Kenya &middot; Nairobi, Kenya</p>
     </td></tr>
   </table>
 </body>
@@ -245,15 +247,15 @@ export class EmailService {
     const eventDateTime = escapeHtml(payload.eventDateTime);
 
     const details = `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e7e9ed;border-radius:12px;overflow:hidden">
-        <tr><td colspan="2" style="padding:11px 14px;background:#fff4f6;color:#e6002d;font-size:11px;font-weight:800;letter-spacing:1px">YOUR E-TICKET</td></tr>
-        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;width:120px;border-top:1px solid #eceef1">Event</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${event}</td></tr>
-        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Ticket</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${ticketType}</td></tr>
-        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Code</td><td style="padding:11px 14px;font-size:15px;font-weight:900;color:#e6002d;border-top:1px solid #eceef1;font-family:monospace">${ticketCode}</td></tr>
-        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Venue</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${venue}</td></tr>
-        <tr><td style="padding:11px 14px;color:#83878e;font-size:12px;border-top:1px solid #eceef1">Date</td><td style="padding:11px 14px;font-size:13px;font-weight:700;border-top:1px solid #eceef1">${eventDateTime}</td></tr>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #2a2c31;border-radius:12px;overflow:hidden">
+        <tr><td colspan="2" style="padding:11px 14px;background:#1a0a0e;color:#ff2a52;font-size:11px;font-weight:800;letter-spacing:1px">YOUR E-TICKET</td></tr>
+        <tr><td style="padding:11px 14px;color:#a3a7ae;font-size:12px;width:120px;border-top:1px solid #2a2c31">Event</td><td style="padding:11px 14px;font-size:13px;font-weight:700;color:#ffffff;border-top:1px solid #2a2c31">${event}</td></tr>
+        <tr><td style="padding:11px 14px;color:#a3a7ae;font-size:12px;border-top:1px solid #2a2c31">Ticket</td><td style="padding:11px 14px;font-size:13px;font-weight:700;color:#ffffff;border-top:1px solid #2a2c31">${ticketType}</td></tr>
+        <tr><td style="padding:11px 14px;color:#a3a7ae;font-size:12px;border-top:1px solid #2a2c31">Code</td><td style="padding:11px 14px;font-size:15px;font-weight:900;color:#ff2a52;border-top:1px solid #2a2c31;font-family:monospace">${ticketCode}</td></tr>
+        <tr><td style="padding:11px 14px;color:#a3a7ae;font-size:12px;border-top:1px solid #2a2c31">Venue</td><td style="padding:11px 14px;font-size:13px;font-weight:700;color:#ffffff;border-top:1px solid #2a2c31">${venue}</td></tr>
+        <tr><td style="padding:11px 14px;color:#a3a7ae;font-size:12px;border-top:1px solid #2a2c31">Date</td><td style="padding:11px 14px;font-size:13px;font-weight:700;color:#ffffff;border-top:1px solid #2a2c31">${eventDateTime}</td></tr>
       </table>
-      <p style="margin:18px 0 0;font-size:13px;line-height:1.7;color:#666b73">Your PDF ticket is attached. Keep the QR code private and present it at the entrance for verification.</p>
+      <p style="margin:18px 0 0;font-size:13px;line-height:1.7;color:#c4c7cc">Your PDF ticket is attached. Keep the QR code private and present it at the entrance for verification.</p>
     `;
 
     const html = emailFrame(
@@ -295,11 +297,11 @@ export class EmailService {
     const code = escapeHtml(payload.code);
 
     const body = `
-      <div style="padding:22px;border:1px solid #f0d5dc;border-radius:14px;background:#fff7f9;text-align:center">
-        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:#8b8f96;text-transform:uppercase">Verification code</div>
-        <div style="margin-top:10px;font-size:38px;font-weight:900;letter-spacing:10px;color:#e6002d;font-family:monospace">${code}</div>
+      <div style="padding:22px;border:1px solid #3a1a22;border-radius:14px;background:#1a0a0e;text-align:center">
+        <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:#a3a7ae;text-transform:uppercase">Verification code</div>
+        <div style="margin-top:10px;font-size:38px;font-weight:900;letter-spacing:10px;color:#ff2a52;font-family:monospace">${code}</div>
       </div>
-      <p style="margin:18px 0 0;font-size:13px;line-height:1.7;color:#666b73">This code expires in <strong>${payload.expiresInMinutes} minutes</strong> and can only be used once. Never share it with anyone.</p>
+      <p style="margin:18px 0 0;font-size:13px;line-height:1.7;color:#c4c7cc">This code expires in <strong>${payload.expiresInMinutes} minutes</strong> and can only be used once. Never share it with anyone.</p>
     `;
 
     const html = emailFrame(
