@@ -165,7 +165,7 @@ Festival), each with 5 ticket types (Early Bird, Regular, VIP, VVIP, Student).
   15-minute reset token that permits exactly one password change, after which every existing
   session for the account is revoked. Codes and tokens are only ever stored hashed, and the
   request endpoint answers identically for registered and unknown emails. Delivery uses the
-  existing `SMTP_*` settings; for local work without SMTP, set `PASSWORD_RESET_DEV_LOG_CODES=true`
+  email settings (`RESEND_API_KEY` in production, or `SMTP_*`); for local work without SMTP, set `PASSWORD_RESET_DEV_LOG_CODES=true`
   to print codes to the server console (ignored when `NODE_ENV=production`).
 - **Adding another payment provider**: see `backend/README.md` → "Adding another payment
   provider".

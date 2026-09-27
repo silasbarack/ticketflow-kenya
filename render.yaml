@@ -47,6 +47,15 @@ services:
         sync: false
       - key: MPESA_PASSKEY
         sync: false
+      # Ticket and password-reset emails go through Resend's HTTPS API, because
+      # Render's free tier blocks outbound SMTP. Create a key at resend.com.
+      - key: RESEND_API_KEY
+        sync: false
+      # e.g. "TicketFlow Kenya <tickets@your-verified-domain>" — the domain must be
+      # verified in Resend. "TicketFlow Kenya <onboarding@resend.dev>" works for
+      # testing but only delivers to your own Resend account's email address.
+      - key: EMAIL_FROM
+        sync: false
       # Set to the frontend service's public URL once it's deployed (used for CORS).
       - key: FRONTEND_URL
         sync: false
