@@ -16,6 +16,15 @@ import PDFDocument from 'pdfkit';
 
 let ticketFlowLogo: Buffer | null | undefined;
 
+/** Event times are shown in the event's own timezone (the server runs in UTC). */
+function formatEventDateTime(value: Date | string, timeZone?: string | null) {
+  const zone = timeZone || 'Africa/Nairobi';
+  const formatted = new Intl.DateTimeFormat('en-KE', {
+    dateStyle: 'full', timeStyle: 'short', timeZone: zone,
+  }).format(new Date(value));
+  return zone === 'Africa/Nairobi' ? `${formatted} EAT` : formatted;
+}
+
 function loadTicketFlowLogo(): Buffer | null {
   if (ticketFlowLogo !== undefined) return ticketFlowLogo;
   try {
@@ -117,9 +126,7 @@ export class TicketsService {
       const event = ticket.order.event;
       const user = ticket.user;
       const buyerName = `${user.firstName} ${user.lastName}`;
-      const formattedDate = new Intl.DateTimeFormat('en-KE', {
-        dateStyle: 'full', timeStyle: 'short',
-      }).format(new Date(event.startDateTime));
+      const formattedDate = formatEventDateTime(event.startDateTime, event.timezone);
 
       // ── Branded header ──────────────────────────────────────────────────────
       doc.rect(0, 0, W, 100).fill('#ffffff');
@@ -130,7 +137,7 @@ export class TicketsService {
       doc.fillColor(dark).fontSize(10).font('Helvetica-Bold')
         .text('OFFICIAL E-TICKET', 345, 30, { width: 210, align: 'right' });
       doc.fillColor(muted).fontSize(8).font('Helvetica')
-        .text(`Generated: ${new Date().toLocaleDateString('en-KE')}`, 345, 49, { width: 210, align: 'right' });
+        .text(`Generated: ${new Date().toLocaleDateString('en-KE', { timeZone: 'Africa/Nairobi' })}`, 345, 49, { width: 210, align: 'right' });
 
       // ── Event title strip ────────────────────────────────────────────────────
       doc.rect(0, 100, W, 52).fill(orange);
@@ -166,7 +173,7 @@ export class TicketsService {
       row('TICKET TYPE', `${ticket.ticketType.name} (${ticket.ticketType.category})`, light);
       row('PRICE', `KES ${Number(ticket.ticketType.price).toLocaleString('en-KE')}`);
       row('ORDER NO.', ticket.order.orderNumber, light);
-      row('PAYMENT', 'CONFIRMED ✓');
+      row('PAYMENT', 'CONFIRMED');
 
       // divider
       y += 8;
@@ -283,9 +290,7 @@ export class TicketsService {
     });
     const ttMap = Object.fromEntries(ticketTypes.map((tt) => [tt.id, tt]));
 
-    const eventDateTime = new Intl.DateTimeFormat('en-KE', {
-      dateStyle: 'full', timeStyle: 'short',
-    }).format(new Date(order.event.startDateTime));
+    const eventDateTime = formatEventDateTime(order.event.startDateTime, order.event.timezone);
 
     for (const ticket of tickets) {
       try {
@@ -362,7 +367,7 @@ export class TicketsService {
         status: 'USED',
         message: `TICKET ALREADY USED — scanned on ${
           ticket.checkIn?.checkedInAt
-            ? new Date(ticket.checkIn.checkedInAt).toLocaleString('en-KE')
+            ? new Date(ticket.checkIn.checkedInAt).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })
             : 'unknown date'
         }`,
         ticket: {
