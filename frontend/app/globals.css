@@ -434,6 +434,17 @@ h1, h2, h3, .font-display { font-family: var(--tf-display); }
 .ticket-tier > div:first-child b { display: block; font-size: 14px; color: var(--tf-ink); }
 .ticket-tier > div:first-child span { display: block; margin-top: 2px; font-family: var(--tf-display); font-size: 15px; font-weight: 800; color: var(--tf-red); }
 .tier-actions { display: flex; align-items: center; gap: 8px; }
+.ticket-tier > div:first-child em { display: block; margin-top: 4px; font-style: normal; font-size: 12px; line-height: 1.45; color: var(--tf-muted); }
+.ticket-tier.unavailable { opacity: .6; border-style: solid; border-color: var(--tf-line); background: var(--tf-soft); }
+.ticket-tier.unavailable:hover { transform: none; border-color: var(--tf-line); }
+.ticket-tier.unavailable > div:first-child span { color: var(--tf-muted); text-decoration: line-through; }
+.tier-status { flex: none; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--tf-muted); }
+.tier-chip { display: inline-block; margin-bottom: 6px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.tier-early_bird { background: #ecfdf5; color: #047857; }
+.tier-regular { background: #f0f9ff; color: #0369a1; }
+.tier-student { background: #fffbeb; color: #b45309; }
+.tier-vip { background: #f5f3ff; color: #6d28d9; }
+.tier-vvip { background: var(--tf-red-50); color: var(--tf-red-700); }
 .qty-control { display: flex; align-items: center; gap: 2px; border: 1px solid var(--tf-line); border-radius: 10px; background: #fff; }
 .qty-control button { width: 34px; height: 36px; display: grid; place-items: center; border: 0; background: transparent; color: var(--tf-ink); cursor: pointer; }
 .qty-control button:hover { color: var(--tf-red); }

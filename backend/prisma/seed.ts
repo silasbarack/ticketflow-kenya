@@ -334,7 +334,31 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'TikoHUB',
     verificationSourceUrl: 'https://www.tikohub.com/events/miles-of-melody-where-rhythm-roams',
     ticketTiers: [
-      { name: 'Entry ticket', category: TicketTypeCategory.REGULAR, price: 1000, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Entry ticket',
+        category: TicketTypeCategory.REGULAR,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Early bird entry',
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 700,
+        availabilityStatus: TicketAvailabilityStatus.SOLD_OUT,
+      },
+      {
+        name: 'Couple entry',
+        category: TicketTypeCategory.REGULAR,
+        price: 1800,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 2; not a per-person price.',
+      },
+      {
+        name: 'VIP — front seating & signed vinyl',
+        category: TicketTypeCategory.VIP,
+        price: 3000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
     ],
   },
   {
@@ -357,7 +381,32 @@ const eventSeeds: SeedEvent[] = [
     verificationSourceUrl: 'https://apps.little.africa/events/55',
     secondaryVerificationSourceUrl: 'https://nairobieventsguide.com/event/2026-africa-concours-delegance/',
     ticketTiers: [
-      { name: 'Advance adult', category: TicketTypeCategory.REGULAR, price: 1800, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Advance adult',
+        category: TicketTypeCategory.REGULAR,
+        price: 1800,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Child (6–12 years)',
+        category: TicketTypeCategory.STUDENT,
+        price: 500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Children under 6 enter free with a paying adult.',
+      },
+      {
+        name: 'Family pass — 2 adults & 2 children',
+        category: TicketTypeCategory.REGULAR,
+        price: 4500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 4; not a per-person price.',
+      },
+      {
+        name: 'VIP enclosure — lunch & grandstand',
+        category: TicketTypeCategory.VIP,
+        price: 7500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
     ],
   },
   {
@@ -379,7 +428,32 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'TikoHUB',
     verificationSourceUrl: 'https://tikohub.com/events/the-first-rhumba-vip-affair',
     ticketTiers: [
-      { name: 'VIP ticket', category: TicketTypeCategory.VIP, price: 3000, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Early bird VIP',
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 2500,
+        availabilityStatus: TicketAvailabilityStatus.SOLD_OUT,
+      },
+      {
+        name: 'VIP ticket',
+        category: TicketTypeCategory.VIP,
+        price: 3000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'VIP couple',
+        category: TicketTypeCategory.VIP,
+        price: 5500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 2; not a per-person price.',
+      },
+      {
+        name: 'VVIP table for 4 — with bottle',
+        category: TicketTypeCategory.VVIP,
+        price: 20000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 4; not a per-person price.',
+      },
     ],
   },
   {
@@ -401,7 +475,49 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'TikoHUB',
     verificationSourceUrl: 'https://tikohub.com/events/safari-7s-2026',
     ticketTiers: [
-      { name: 'Friday regular', category: TicketTypeCategory.REGULAR, price: 300, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Friday regular',
+        category: TicketTypeCategory.REGULAR,
+        price: 300,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Saturday regular',
+        category: TicketTypeCategory.REGULAR,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Sunday regular',
+        category: TicketTypeCategory.REGULAR,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Weekend pass (Fri–Sun)',
+        category: TicketTypeCategory.REGULAR,
+        price: 2000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Student weekend pass',
+        category: TicketTypeCategory.STUDENT,
+        price: 1200,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Valid student ID required at the gate.',
+      },
+      {
+        name: 'VIP weekend pass — covered stand',
+        category: TicketTypeCategory.VIP,
+        price: 7500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'VVIP hospitality — per person, all weekend',
+        category: TicketTypeCategory.VVIP,
+        price: 15000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
     ],
   },
   {
@@ -423,7 +539,37 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'KULTURE',
     verificationSourceUrl: 'https://kulture.ke/',
     ticketTiers: [
-      { name: 'Zone H', category: TicketTypeCategory.REGULAR, price: 2000, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Zone H',
+        category: TicketTypeCategory.REGULAR,
+        price: 2000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Zone E',
+        category: TicketTypeCategory.REGULAR,
+        price: 3500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Zone C — lower tier',
+        category: TicketTypeCategory.VIP,
+        price: 6000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Gold — Zone A front rows',
+        category: TicketTypeCategory.VIP,
+        price: 10000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Platinum table for 6 — red carpet & dinner',
+        category: TicketTypeCategory.VVIP,
+        price: 60000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 6; not a per-person price.',
+      },
     ],
   },
   {
@@ -445,7 +591,38 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'Tipsi Tickets',
     verificationSourceUrl: 'https://www.tipsitickets.com/',
     ticketTiers: [
-      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 1500, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Early bird',
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.SOLD_OUT,
+      },
+      {
+        name: 'Entry',
+        category: TicketTypeCategory.REGULAR,
+        price: 1500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Squad of 4',
+        category: TicketTypeCategory.REGULAR,
+        price: 5000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 4; not a per-person price.',
+      },
+      {
+        name: 'VIP — lounge access',
+        category: TicketTypeCategory.VIP,
+        price: 3500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'VIP table for 6 — with bottle',
+        category: TicketTypeCategory.VVIP,
+        price: 25000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 6; not a per-person price.',
+      },
     ],
   },
   {
@@ -467,7 +644,38 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'Tipsi Tickets',
     verificationSourceUrl: 'https://www.tipsitickets.com/',
     ticketTiers: [
-      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 1500, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Early bird',
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        salesEnd: '2026-10-05T23:59:00+03:00',
+      },
+      {
+        name: 'Entry',
+        category: TicketTypeCategory.REGULAR,
+        price: 1500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Group of 5',
+        category: TicketTypeCategory.REGULAR,
+        price: 6500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 5; not a per-person price.',
+      },
+      {
+        name: 'VIP',
+        category: TicketTypeCategory.VIP,
+        price: 4000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'VVIP — backstage & open bar',
+        category: TicketTypeCategory.VVIP,
+        price: 8000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
     ],
   },
   {
@@ -489,7 +697,38 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'Tipsi Tickets',
     verificationSourceUrl: 'https://www.tipsitickets.com/',
     ticketTiers: [
-      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 250, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Early bird',
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 200,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        salesEnd: '2026-10-10T23:59:00+03:00',
+      },
+      {
+        name: 'Entry',
+        category: TicketTypeCategory.REGULAR,
+        price: 250,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Friends pack of 5',
+        category: TicketTypeCategory.REGULAR,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 5; not a per-person price.',
+      },
+      {
+        name: 'Parent / guardian pass',
+        category: TicketTypeCategory.REGULAR,
+        price: 500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'VIP — fast-track entry & goodie bag',
+        category: TicketTypeCategory.VIP,
+        price: 800,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
     ],
   },
   {
@@ -511,7 +750,45 @@ const eventSeeds: SeedEvent[] = [
     verificationSource: 'Tipsi Tickets',
     verificationSourceUrl: 'https://www.tipsitickets.com/',
     ticketTiers: [
-      { name: 'Entry', category: TicketTypeCategory.REGULAR, price: 800, availabilityStatus: TicketAvailabilityStatus.AVAILABLE },
+      {
+        name: 'Early bird',
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 600,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        salesEnd: '2026-10-20T23:59:00+03:00',
+      },
+      {
+        name: 'Entry',
+        category: TicketTypeCategory.REGULAR,
+        price: 800,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Student',
+        category: TicketTypeCategory.STUDENT,
+        price: 400,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Valid student ID required at check-in.',
+      },
+      {
+        name: 'Professional — with lunch',
+        category: TicketTypeCategory.REGULAR,
+        price: 1500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: 'Team of 4 — build track',
+        category: TicketTypeCategory.REGULAR,
+        price: 2800,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: 'Total price for a group of 4; not a per-person price.',
+      },
+      {
+        name: 'VIP — workshop seat & speaker dinner',
+        category: TicketTypeCategory.VIP,
+        price: 3500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
     ],
   },
 ];
