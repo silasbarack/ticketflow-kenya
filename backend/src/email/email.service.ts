@@ -61,13 +61,16 @@ function loadLogoPng(): Buffer | null {
 function emailFrame(logoSrc: string, title: string, intro: string, body: string) {
   return `<!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"></head>
 <body style="margin:0;background:#f4f5f8;font-family:'Noto Sans',Arial,sans-serif;color:#1b1d22">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:28px 14px;background:#f4f5f8">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border:1px solid #eceef2;border-radius:18px;overflow:hidden">
         <tr>
-          <td style="padding:20px 24px;background:#ffffff">
+          <!-- White logo band across the full card width. Gmail's dark mode
+               recolours plain background colours but leaves background images
+               alone, so the gradient keeps it white (as with the red band). -->
+          <td bgcolor="#ffffff" style="padding:22px 24px;background-color:#ffffff;background-image:linear-gradient(#ffffff,#ffffff)">
             <img src="${logoSrc}" width="190" alt="TicketFlow Kenya" style="display:block;width:190px;height:auto;max-width:100%;border:0">
           </td>
         </tr>
