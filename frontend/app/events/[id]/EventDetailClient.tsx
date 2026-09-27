@@ -8,6 +8,7 @@ import { EventItem, TicketType } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/lib/format';
 import { useState } from 'react';
+import { getTierStatus, sortTiers, tierLabel } from '@/lib/tiers';
 
 function eventDateLabel(value: string) {
   return new Intl.DateTimeFormat('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Nairobi' }).format(new Date(value));
@@ -15,6 +16,16 @@ function eventDateLabel(value: string) {
 
 function eventTimeLabel(value: string) {
   return new Intl.DateTimeFormat('en-KE', { hour: 'numeric', minute: '2-digit', timeZone: 'Africa/Nairobi' }).format(new Date(value));
+}
+
+const TIER_STATUS_LABEL: Record<string, string> = {
+  SOLD_OUT: 'Sold out',
+  CLOSED: 'Sales closed',
+  NOT_YET_ON_SALE: 'Not yet on sale',
+};
+
+function tierDateLabel(value: string) {
+  return new Intl.DateTimeFormat('en-KE', { day: 'numeric', month: 'short', timeZone: 'Africa/Nairobi' }).format(new Date(value));
 }
 
 export default function EventDetailClient({ initialEvent }: { initialEvent: EventItem | null }) {
@@ -35,7 +46,9 @@ export default function EventDetailClient({ initialEvent }: { initialEvent: Even
     );
   }
 
-  const lowest = event.ticketTypes.length ? Math.min(...event.ticketTypes.map((item) => Number(item.price))) : 0;
+  const tiers = sortTiers(event.ticketTypes);
+  const onSale = tiers.filter((tier) => getTierStatus(tier) === 'AVAILABLE');
+  const lowest = onSale.length ? Math.min(...onSale.map((item) => Number(item.price))) : 0;
 
   const addTier = (tier: TicketType) => {
     const quantity = quantities[tier.id] || 1;
@@ -94,19 +107,31 @@ export default function EventDetailClient({ initialEvent }: { initialEvent: Even
             <span className="section-eyebrow">Tickets</span>
             <h2>Choose your experience</h2>
             <div className="ticket-tier-list">
-              {event.ticketTypes.map((tier) => {
+              {tiers.map((tier) => {
                 const qty = quantities[tier.id] || 1;
+                const status = getTierStatus(tier);
+                const available = status === 'AVAILABLE';
                 return (
-                  <div key={tier.id} className="ticket-tier">
-                    <div><b>{tier.name}</b><span>{formatCurrency(tier.price)}</span></div>
-                    <div className="tier-actions">
-                      <div className="qty-control">
-                        <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.max(1, qty - 1) }))} aria-label="Decrease quantity"><Minus size={15} /></button>
-                        <span>{qty}</span>
-                        <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.min(10, qty + 1) }))} aria-label="Increase quantity"><Plus size={15} /></button>
-                      </div>
-                      <button className="add-ticket-button" onClick={() => addTier(tier)}>Add</button>
+                  <div key={tier.id} className={'ticket-tier' + (available ? '' : ' unavailable')}>
+                    <div>
+                      <small className={'tier-chip tier-' + tier.category.toLowerCase()}>{tierLabel(tier.category)}</small>
+                      <b>{tier.name}</b>
+                      <span>{formatCurrency(tier.price)}</span>
+                      {tier.description && <em>{tier.description}</em>}
+                      {available && tier.salesEnd && <em>Sales end {tierDateLabel(tier.salesEnd)}</em>}
                     </div>
+                    {available ? (
+                      <div className="tier-actions">
+                        <div className="qty-control">
+                          <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.max(1, qty - 1) }))} aria-label="Decrease quantity"><Minus size={15} /></button>
+                          <span>{qty}</span>
+                          <button onClick={() => setQuantities((current) => ({ ...current, [tier.id]: Math.min(10, qty + 1) }))} aria-label="Increase quantity"><Plus size={15} /></button>
+                        </div>
+                        <button className="add-ticket-button" onClick={() => addTier(tier)}>Add</button>
+                      </div>
+                    ) : (
+                      <span className="tier-status">{TIER_STATUS_LABEL[status] ?? 'Unavailable'}</span>
+                    )}
                   </div>
                 );
               })}
