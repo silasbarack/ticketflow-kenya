@@ -1,11 +1,8 @@
 import {
-  Body,
   Controller,
   Get,
   Header,
-  Headers,
   Param,
-  Post,
   UseGuards,
 } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
@@ -24,20 +21,6 @@ export class TicketsController {
   @Get('my')
   findMine(@CurrentUser() user: AuthenticatedUser) {
     return this.ticketsService.findMine(user.userId);
-  }
-
-  /**
-   * TEMPORARY DELIVERY TEST. Protected with a server-side one-time token.
-   * Used only to verify production ticket-email delivery for an existing PAID ticket.
-   */
-  @Public()
-  @Post('test-email/:ticketId')
-  testPaidTicketEmail(
-    @Param('ticketId') ticketId: string,
-    @Headers('x-ticketflow-test-token') token: string,
-    @Body() body: { to?: string },
-  ) {
-    return this.ticketsService.testPaidTicketEmail(ticketId, token, body?.to);
   }
 
   /** Public ticket verification — used by organizer scanners and QR links. */
