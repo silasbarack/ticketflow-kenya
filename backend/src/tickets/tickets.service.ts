@@ -2,7 +2,6 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
-  OnModuleInit,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -51,7 +50,7 @@ function drawTicketFlowLogo(doc: any, x: number, y: number) {
 }
 
 @Injectable()
-export class TicketsService implements OnModuleInit {
+export class TicketsService {
   private readonly logger = new Logger(TicketsService.name);
 
   constructor(
@@ -59,23 +58,6 @@ export class TicketsService implements OnModuleInit {
     private emailService: EmailService,
     private configService: ConfigService,
   ) {}
-
-
-  async onModuleInit() {
-    const ticketId = this.configService.get<string>('EMAIL_TEST_TICKET_ID')?.trim();
-    const token = this.configService.get<string>('EMAIL_TEST_TOKEN')?.trim();
-    const to = this.configService.get<string>('EMAIL_TEST_TO')?.trim();
-    if (!ticketId || !token || !to) return;
-
-    try {
-      const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
-      if (!ticket || ticket.emailSentAt) return;
-      const result = await this.testPaidTicketEmail(ticketId, token, to);
-      this.logger.log(`Production email delivery test completed: ${JSON.stringify(result)}`);
-    } catch (error: any) {
-      this.logger.error(`Production email delivery test failed: ${error?.message}`);
-    }
-  }
 
   // ── QR helpers ──────────────────────────────────────────────────────────────
 
@@ -342,61 +324,6 @@ export class TicketsService implements OnModuleInit {
         this.logger.error(`Email/PDF failed for ticket ${ticket.ticketCode}: ${err?.message}`);
       }
     }
-  }
-
-
-  /**
-   * Temporary production delivery test for a ticket whose order is already PAID.
-   * Does not create or modify payments, orders, inventory, or ticket validity.
-   */
-  async testPaidTicketEmail(ticketId: string, token: string, overrideTo?: string) {
-    const expectedToken = this.configService.get<string>('EMAIL_TEST_TOKEN');
-    if (!expectedToken || token !== expectedToken) {
-      throw new ForbiddenException('Invalid email test token');
-    }
-
-    const ticket = await this.prisma.ticket.findUnique({
-      where: { id: ticketId },
-      include: {
-        ticketType: true,
-        order: { include: { event: true } },
-        user: true,
-      },
-    });
-    if (!ticket) throw new NotFoundException('Ticket not found');
-    if (ticket.order.status !== 'PAID') {
-      throw new ForbiddenException('Email test is only allowed for an already-paid ticket');
-    }
-
-    const to = (overrideTo || ticket.user.email || '').trim();
-    if (!to) throw new ForbiddenException('No recipient email is available');
-
-    const pdfBuffer = await this.buildPdf(ticket);
-    const sent = await this.emailService.sendTicketEmail({
-      to,
-      buyerName: `${ticket.user.firstName} ${ticket.user.lastName}`,
-      eventName: ticket.order.event.title,
-      ticketType: `${ticket.ticketType.name} (${ticket.ticketType.category})`,
-      ticketCode: ticket.ticketCode,
-      venue: `${ticket.order.event.venue}, ${ticket.order.event.city}`,
-      eventDateTime: formatEventDateTime(ticket.order.event.startDateTime, ticket.order.event.timezone),
-      pdfBuffer,
-    });
-
-    if (sent && to.toLowerCase() === ticket.user.email.toLowerCase()) {
-      await this.prisma.ticket.update({
-        where: { id: ticket.id },
-        data: { emailSentAt: new Date() },
-      });
-    }
-
-    return {
-      sent,
-      to,
-      ticketCode: ticket.ticketCode,
-      orderNumber: ticket.order.orderNumber,
-      paymentConfirmed: true,
-    };
   }
 
   // ── Verification endpoint ──────────────────────────────────────────────────
