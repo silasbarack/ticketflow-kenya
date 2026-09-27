@@ -22,6 +22,25 @@ export interface PasswordResetCodeEmailPayload {
   expiresInMinutes: number;
 }
 
+interface OutgoingAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+  /** Set for images referenced from the HTML as `cid:<contentId>`. */
+  contentId?: string;
+}
+
+interface OutgoingEmail {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+  attachments: OutgoingAttachment[];
+}
+
+const RESEND_API_URL = 'https://api.resend.com/emails';
+const RESEND_TIMEOUT_MS = 20_000;
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -83,11 +102,17 @@ function emailFrame(logoSrc: string, title: string, intro: string, body: string)
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
+  private readonly resendApiKey: string | null;
   private readonly logoPng = loadLogoPng();
 
   constructor(private configService: ConfigService) {
+    // Resend sends over HTTPS, so it works where outbound SMTP ports are
+    // blocked (Render's free tier). It takes precedence; SMTP remains for
+    // local development and other hosts.
+    this.resendApiKey = this.configService.get<string>('RESEND_API_KEY')?.trim() || null;
+
     const host = this.configService.get<string>('SMTP_HOST');
-    if (host) {
+    if (!this.resendApiKey && host) {
       this.transporter = nodemailer.createTransport({
         host,
         port: parseInt(this.configService.get<string>('SMTP_PORT') || '587', 10),
@@ -98,6 +123,27 @@ export class EmailService {
         },
       });
     }
+
+    this.logger.log(
+      this.resendApiKey
+        ? 'Email delivery: Resend API'
+        : this.transporter
+          ? 'Email delivery: SMTP'
+          : 'Email delivery: not configured (set RESEND_API_KEY or SMTP_HOST)',
+    );
+  }
+
+  /** True when either Resend or SMTP is set up. */
+  isConfigured() {
+    return Boolean(this.resendApiKey || this.transporter);
+  }
+
+  private fromAddress() {
+    return (
+      this.configService.get<string>('EMAIL_FROM')
+      || this.configService.get<string>('SMTP_FROM')
+      || 'TicketFlow Kenya <tickets@ticketflow.co.ke>'
+    );
   }
 
   private getLogoSrc() {
@@ -106,19 +152,85 @@ export class EmailService {
       || 'https://ticketflow-frontend-w47s.onrender.com/brand/ticketflow-logo-horizontal.png';
   }
 
-  private logoAttachment() {
+  private logoAttachment(): OutgoingAttachment[] {
     if (!this.logoPng) return [];
     return [{
       filename: 'ticketflow-logo.png',
       content: this.logoPng,
       contentType: 'image/png',
-      cid: 'ticketflow-logo',
+      contentId: 'ticketflow-logo',
     }];
   }
 
+  /** Sends through Resend or SMTP. Throws on failure; callers log it. */
+  private async deliver(message: OutgoingEmail): Promise<void> {
+    if (this.resendApiKey) {
+      await this.deliverViaResend(message);
+      return;
+    }
+    if (!this.transporter) throw new Error('Email delivery is not configured');
+    await this.transporter.sendMail({
+      from: this.fromAddress(),
+      to: message.to,
+      subject: message.subject,
+      html: message.html,
+      text: message.text,
+      attachments: message.attachments.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.contentType,
+        cid: attachment.contentId,
+      })),
+    });
+  }
+
+  private async deliverViaResend(message: OutgoingEmail): Promise<void> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), RESEND_TIMEOUT_MS);
+    try {
+      const response = await fetch(RESEND_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: this.fromAddress(),
+          to: [message.to],
+          subject: message.subject,
+          html: message.html,
+          ...(message.text ? { text: message.text } : {}),
+          attachments: message.attachments.map((attachment) => ({
+            filename: attachment.filename,
+            content: attachment.content.toString('base64'),
+            content_type: attachment.contentType,
+            ...(attachment.contentId ? { content_id: attachment.contentId } : {}),
+          })),
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        let detail = response.statusText;
+        try {
+          const body = (await response.json()) as { message?: string; name?: string };
+          detail = [body.name, body.message].filter(Boolean).join(': ') || detail;
+        } catch {
+          // Non-JSON error body; keep the status text.
+        }
+        throw new Error(`Resend rejected the email (${response.status}): ${detail}`);
+      }
+    } catch (error: any) {
+      if (error?.name === 'AbortError') throw new Error('Resend did not respond in time');
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   async sendTicketEmail(payload: TicketEmailPayload): Promise<boolean> {
-    if (!this.transporter) {
-      this.logger.warn('SMTP not configured — skipping ticket email for ' + payload.to);
+    if (!this.isConfigured()) {
+      this.logger.warn('Email not configured — skipping ticket email for ' + payload.to);
       return false;
     }
 
@@ -149,8 +261,7 @@ export class EmailService {
     );
 
     try {
-      await this.transporter.sendMail({
-        from: this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke',
+      await this.deliver({
         to: payload.to,
         subject: 'Your TicketFlow Kenya Ticket is Ready',
         html,
@@ -172,8 +283,8 @@ export class EmailService {
   }
 
   async sendPasswordResetCodeEmail(payload: PasswordResetCodeEmailPayload): Promise<boolean> {
-    if (!this.transporter) {
-      this.logger.warn('SMTP not configured — password reset code email not sent');
+    if (!this.isConfigured()) {
+      this.logger.warn('Email not configured — password reset code email not sent');
       return false;
     }
 
@@ -206,8 +317,7 @@ export class EmailService {
     ].join('\n');
 
     try {
-      await this.transporter.sendMail({
-        from: this.configService.get<string>('SMTP_FROM') || 'tickets@ticketflow.co.ke',
+      await this.deliver({
         to: payload.to,
         subject: 'TicketFlow Kenya Password Reset Code',
         text,
