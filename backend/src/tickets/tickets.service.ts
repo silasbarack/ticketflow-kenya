@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
+  OnModuleInit,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -50,7 +51,7 @@ function drawTicketFlowLogo(doc: any, x: number, y: number) {
 }
 
 @Injectable()
-export class TicketsService {
+export class TicketsService implements OnModuleInit {
   private readonly logger = new Logger(TicketsService.name);
 
   constructor(
@@ -58,6 +59,23 @@ export class TicketsService {
     private emailService: EmailService,
     private configService: ConfigService,
   ) {}
+
+
+  async onModuleInit() {
+    const ticketId = this.configService.get<string>('EMAIL_TEST_TICKET_ID')?.trim();
+    const token = this.configService.get<string>('EMAIL_TEST_TOKEN')?.trim();
+    const to = this.configService.get<string>('EMAIL_TEST_TO')?.trim();
+    if (!ticketId || !token || !to) return;
+
+    try {
+      const ticket = await this.prisma.ticket.findUnique({ where: { id: ticketId } });
+      if (!ticket || ticket.emailSentAt) return;
+      const result = await this.testPaidTicketEmail(ticketId, token, to);
+      this.logger.log(`Production email delivery test completed: ${JSON.stringify(result)}`);
+    } catch (error: any) {
+      this.logger.error(`Production email delivery test failed: ${error?.message}`);
+    }
+  }
 
   // ── QR helpers ──────────────────────────────────────────────────────────────
 
