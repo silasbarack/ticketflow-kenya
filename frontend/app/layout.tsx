@@ -3,7 +3,9 @@ import { Noto_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Providers from './providers';
+import { Suspense } from 'react';
 import Navbar from '@/components/Navbar';
+import NavigationProgress from '@/components/NavigationProgress';
 import Footer from '@/components/Footer';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 import { BG_COLOR_KEY, BLACK } from '@/lib/appearance';
@@ -47,6 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen font-sans text-navy-900 antialiased">
         <Providers>
+          {/* useSearchParams() inside needs a Suspense boundary. */}
+          <Suspense fallback={null}>
+            <NavigationProgress />
+          </Suspense>
           <Navbar />
           {children}
           <Footer />

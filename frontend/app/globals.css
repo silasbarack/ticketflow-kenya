@@ -554,3 +554,8 @@ h1, h2, h3, .font-display { font-family: var(--tf-display); }
 
 @keyframes tf-fade { from { opacity: 0; } to { opacity: 1; } }
 .tf-event-grid > .tf-reveal > * { width: 100%; }
+
+/* ---------- Connection-aware loading bar (components/NavigationProgress.tsx) ---------- */
+.tf-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 9999; pointer-events: none; transition: opacity .3s ease .1s; }
+.tf-progress-bar { height: 100%; background: var(--tf-red); box-shadow: 0 0 10px rgba(230, 0, 45, .6); transform-origin: left; transition: transform .2s ease-out; }
+html.tf-loading, html.tf-loading * { cursor: progress !important; }
