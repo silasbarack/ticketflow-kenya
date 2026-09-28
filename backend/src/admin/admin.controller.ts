@@ -5,6 +5,8 @@ import { CurrentUser, AuthenticatedUser } from '../common/decorators/current-use
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Role } from '../common/enums/roles.enum';
+import { OrganizersService } from '../organizers/organizers.service';
+import { ReviewOrganizerVerificationDto } from '../organizers/dto/organizer-verification.dto';
 
 @Controller('admin')
 @UseGuards(RolesGuard)
@@ -13,6 +15,7 @@ export class AdminController {
   constructor(
     private adminService: AdminService,
     private eventsService: EventsService,
+    private organizersService: OrganizersService,
   ) {}
 
   @Get('stats')
@@ -37,6 +40,48 @@ export class AdminController {
   @Patch('users/:id/activate')
   activateUser(@Param('id') id: string) {
     return this.adminService.suspendUser(id, true);
+  }
+
+  @Get('organizer-verifications')
+  getOrganizerVerifications(@Query('status') status?: string) {
+    return this.organizersService.listVerificationsForAdmin(status);
+  }
+
+  @Get('organizer-verifications/:id')
+  getOrganizerVerification(@Param('id') id: string) {
+    return this.organizersService.getVerificationForAdmin(id);
+  }
+
+  @Patch('organizer-verifications/:id/under-review')
+  markOrganizerVerificationUnderReview(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.organizersService.markUnderReview(user.userId, id);
+  }
+
+  @Patch('organizer-verifications/:id/approve')
+  approveOrganizerVerification(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ReviewOrganizerVerificationDto,
+  ) {
+    return this.organizersService.approveVerification(user.userId, id, dto.note);
+  }
+
+  @Patch('organizer-verifications/:id/request-changes')
+  requestOrganizerVerificationChanges(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ReviewOrganizerVerificationDto,
+  ) {
+    return this.organizersService.requestVerificationChanges(user.userId, id, dto.note);
+  }
+
+  @Patch('organizer-verifications/:id/reject')
+  rejectOrganizerVerification(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ReviewOrganizerVerificationDto,
+  ) {
+    return this.organizersService.rejectVerification(user.userId, id, dto.note);
   }
 
   @Get('events')
