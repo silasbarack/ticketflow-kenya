@@ -35,24 +35,27 @@ export default function RepresentativeVerificationPage() {
     });
   }, [query.data]);
 
-  async function persistDetails(documentType: DocumentType) {
+  async function saveRepresentative(documentType?: DocumentType) {
     if (!form.representativeFullName.trim() || !form.representativeRole.trim()) {
-      throw new Error('Enter the representative full name and role before starting document capture.');
+      throw new Error('Enter the representative full name and role before starting identity verification.');
     }
     await api.patch('/organizers/me/verification/representative', {
       representativeFullName: form.representativeFullName.trim(),
       representativeRole: form.representativeRole.trim(),
-      representativeDocumentType: documentType,
+      ...(documentType ? { representativeDocumentType: documentType } : {}),
     });
-    setForm((current) => ({ ...current, representativeDocumentType: documentType }));
+    if (documentType) {
+      setForm((current) => ({ ...current, representativeDocumentType: documentType }));
+    }
     await qc.invalidateQueries({ queryKey: ['organizer-verification'] });
   }
 
+  async function persistDetails(documentType: DocumentType) {
+    return saveRepresentative(documentType);
+  }
+
   const save = useMutation({
-    mutationFn: async () => {
-      if (!form.representativeDocumentType) throw new Error('Complete identity capture to select a document type.');
-      return persistDetails(form.representativeDocumentType);
-    },
+    mutationFn: async () => saveRepresentative(form.representativeDocumentType || undefined),
     onSuccess: () => toast.success('Representative details saved'),
     onError: (error) => toast.error(error instanceof Error ? error.message : getApiErrorMessage(error)),
   });
@@ -101,7 +104,7 @@ export default function RepresentativeVerificationPage() {
           <p className="mt-4 text-xs leading-5 text-muted">
             Your full ID number is not requested in this form. The identity document is captured separately in the protected camera flow below.
           </p>
-          {!locked && form.representativeDocumentType && (
+          {!locked && (
             <Button type="submit" className="mt-5" loading={save.isPending}>Save representative details</Button>
           )}
         </form>
@@ -110,6 +113,7 @@ export default function RepresentativeVerificationPage() {
           verified={verification?.representativeIdentityVerified}
           status={verification?.personaInquiryStatus}
           disabled={locked}
+          onBeforeStart={() => saveRepresentative(form.representativeDocumentType || undefined)}
           onUpdated={() => query.refetch()}
         />
 
