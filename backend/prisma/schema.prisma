@@ -25,6 +25,15 @@ enum OrganizerVerificationStatus {
   REJECTED
 }
 
+enum OrganizerVerificationDocumentKind {
+  INCORPORATION_CERTIFICATE
+  OFFICIAL_SEARCH
+  KRA_PIN_CERTIFICATE
+  REPRESENTATIVE_ID
+  AUTHORIZATION_LETTER
+  PAYOUT_PROOF
+}
+
 enum EventStatus {
   DRAFT
   PENDING_APPROVAL
@@ -155,13 +164,32 @@ model OrganizerProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  events Event[]
+  events                  Event[]
+  verificationDocuments   OrganizerVerificationDocument[]
 
   taxProfile      OrganizerTaxProfile?
   taxCalculations TaxCalculation[]
 
   @@index([verificationStatus])
   @@map("organizer_profiles")
+}
+
+model OrganizerVerificationDocument {
+  id          String                            @id @default(uuid())
+  organizerId String
+  organizer   OrganizerProfile                  @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  kind        OrganizerVerificationDocumentKind
+  fileName    String
+  mimeType    String
+  sizeBytes   Int
+  sha256      String
+  data        Bytes
+  uploadedAt  DateTime                          @default(now())
+  updatedAt   DateTime                          @updatedAt
+
+  @@unique([organizerId, kind])
+  @@index([organizerId])
+  @@map("organizer_verification_documents")
 }
 
 model EventCategory {
