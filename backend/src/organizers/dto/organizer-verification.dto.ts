@@ -27,7 +27,7 @@ export class UpdatePayoutVerificationDto {
   @IsString() @IsIn(['BANK','MPESA_PAYBILL','MPESA_TILL','OTHER']) payoutMethod: string;
   @IsString() @MinLength(2) payoutAccountName: string;
   @IsString() @MinLength(2) payoutReference: string;
-  @IsUrl({ protocols: ['https'], require_protocol: true }) payoutProofUrl: string;
+  @IsOptional() @IsUrl({ protocols: ['https'], require_protocol: true }) payoutProofUrl?: string;
 }
 
 export class ReviewOrganizerVerificationDto {
