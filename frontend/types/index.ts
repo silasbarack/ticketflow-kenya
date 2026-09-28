@@ -50,6 +50,9 @@ export type OrganizerVerificationDocumentKind =
   | 'OFFICIAL_SEARCH'
   | 'KRA_PIN_CERTIFICATE'
   | 'REPRESENTATIVE_ID'
+  | 'REPRESENTATIVE_SELFIE'
+  | 'REPRESENTATIVE_ID_FRONT'
+  | 'REPRESENTATIVE_ID_BACK'
   | 'AUTHORIZATION_LETTER'
   | 'PAYOUT_PROOF';
 
@@ -76,6 +79,7 @@ export interface OrganizerVerification {
   kraPinCertificateUrl?: string | null;
   representativeFullName?: string | null;
   representativeRole?: string | null;
+  representativeDocumentType?: 'NATIONAL_ID' | 'DRIVERS_LICENSE' | null;
   representativeIdLast4?: string | null;
   representativeIdDocumentUrl?: string | null;
   authorizationLetterUrl?: string | null;
