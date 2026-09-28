@@ -10,24 +10,24 @@ export class UpdateCompanyVerificationDto {
 }
 
 export class UpdateVerificationDocumentsDto {
-  @IsUrl({ require_protocol: true }) certificateOfIncorporationUrl: string;
-  @IsUrl({ require_protocol: true }) officialSearchUrl: string;
-  @IsUrl({ require_protocol: true }) kraPinCertificateUrl: string;
+  @IsUrl({ protocols: ['https'], require_protocol: true }) certificateOfIncorporationUrl: string;
+  @IsUrl({ protocols: ['https'], require_protocol: true }) officialSearchUrl: string;
+  @IsUrl({ protocols: ['https'], require_protocol: true }) kraPinCertificateUrl: string;
 }
 
 export class UpdateRepresentativeVerificationDto {
   @IsString() @MinLength(3) representativeFullName: string;
   @IsString() @MinLength(2) representativeRole: string;
   @IsString() @Length(2, 8) representativeIdLast4: string;
-  @IsUrl({ require_protocol: true }) representativeIdDocumentUrl: string;
-  @IsOptional() @IsUrl({ require_protocol: true }) authorizationLetterUrl?: string;
+  @IsUrl({ protocols: ['https'], require_protocol: true }) representativeIdDocumentUrl: string;
+  @IsOptional() @IsUrl({ protocols: ['https'], require_protocol: true }) authorizationLetterUrl?: string;
 }
 
 export class UpdatePayoutVerificationDto {
   @IsString() @IsIn(['BANK','MPESA_PAYBILL','MPESA_TILL','OTHER']) payoutMethod: string;
   @IsString() @MinLength(2) payoutAccountName: string;
   @IsString() @MinLength(2) payoutReference: string;
-  @IsUrl({ require_protocol: true }) payoutProofUrl: string;
+  @IsUrl({ protocols: ['https'], require_protocol: true }) payoutProofUrl: string;
 }
 
 export class ReviewOrganizerVerificationDto {
