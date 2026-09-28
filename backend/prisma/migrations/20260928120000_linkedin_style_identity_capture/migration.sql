@@ -1,0 +1,6 @@
+ALTER TYPE "OrganizerVerificationDocumentKind" ADD VALUE IF NOT EXISTS 'REPRESENTATIVE_SELFIE';
+ALTER TYPE "OrganizerVerificationDocumentKind" ADD VALUE IF NOT EXISTS 'REPRESENTATIVE_ID_FRONT';
+ALTER TYPE "OrganizerVerificationDocumentKind" ADD VALUE IF NOT EXISTS 'REPRESENTATIVE_ID_BACK';
+
+ALTER TABLE "organizer_profiles"
+ADD COLUMN IF NOT EXISTS "representativeDocumentType" TEXT;
