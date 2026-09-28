@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { UpdateOrganizerProfileDto } from './dto/create-organizer-profile.dto';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import {
   UpdateCompanyVerificationDto,
   UpdatePayoutVerificationDto,
@@ -12,7 +13,10 @@ const EDITABLE_STATUSES = ['NOT_STARTED','IN_PROGRESS','CHANGES_REQUIRED','REJEC
 
 @Injectable()
 export class OrganizersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auditLogs: AuditLogsService,
+  ) {}
 
   async getProfileByUserId(userId: string) {
     const profile = await this.prisma.organizerProfile.findUnique({ where: { userId } });
@@ -138,6 +142,13 @@ export class OrganizersService {
       where: { id: profile.id },
       data: { isVerified: false, verificationStatus: 'SUBMITTED', verificationSubmittedAt: new Date(), verificationReviewNote: null },
     });
+    await this.auditLogs.log({
+      actorId: userId,
+      action: 'ORGANIZER_VERIFICATION_SUBMITTED',
+      entityType: 'OrganizerProfile',
+      entityId: profile.id,
+      metadata: { verificationStatus: updated.verificationStatus },
+    });
     return this.view(updated);
   }
 
@@ -168,6 +179,12 @@ export class OrganizersService {
       where: { id: organizerId },
       data: { verificationStatus:'UNDER_REVIEW', verificationReviewedBy:adminId },
     });
+    await this.auditLogs.log({
+      actorId: adminId,
+      action: 'ORGANIZER_VERIFICATION_REVIEW_STARTED',
+      entityType: 'OrganizerProfile',
+      entityId: organizerId,
+    });
     return this.view(updated);
   }
 
@@ -179,23 +196,48 @@ export class OrganizersService {
       where: { id: organizerId },
       data: { verificationStatus:'VERIFIED', isVerified:true, verificationReviewedAt:new Date(), verificationReviewedBy:adminId, verificationReviewNote:note || null },
     });
+    await this.auditLogs.log({
+      actorId: adminId,
+      action: 'ORGANIZER_VERIFICATION_APPROVED',
+      entityType: 'OrganizerProfile',
+      entityId: organizerId,
+      metadata: { noteProvided: Boolean(note?.trim()) },
+    });
     return this.view(updated);
   }
 
   async requestVerificationChanges(adminId: string, organizerId: string, note?: string) {
     if (!note?.trim()) throw new BadRequestException('Explain what the organizer needs to change');
+    const profile = await this.prisma.organizerProfile.findUnique({ where: { id: organizerId } });
+    if (!profile) throw new NotFoundException('Organizer not found');
     const updated = await this.prisma.organizerProfile.update({
       where: { id: organizerId },
       data: { verificationStatus:'CHANGES_REQUIRED', isVerified:false, verificationReviewedAt:new Date(), verificationReviewedBy:adminId, verificationReviewNote:note.trim() },
+    });
+    await this.auditLogs.log({
+      actorId: adminId,
+      action: 'ORGANIZER_VERIFICATION_CHANGES_REQUESTED',
+      entityType: 'OrganizerProfile',
+      entityId: organizerId,
+      metadata: { note: note.trim() },
     });
     return this.view(updated);
   }
 
   async rejectVerification(adminId: string, organizerId: string, note?: string) {
     if (!note?.trim()) throw new BadRequestException('Provide a rejection reason');
+    const profile = await this.prisma.organizerProfile.findUnique({ where: { id: organizerId } });
+    if (!profile) throw new NotFoundException('Organizer not found');
     const updated = await this.prisma.organizerProfile.update({
       where: { id: organizerId },
       data: { verificationStatus:'REJECTED', isVerified:false, verificationReviewedAt:new Date(), verificationReviewedBy:adminId, verificationReviewNote:note.trim() },
+    });
+    await this.auditLogs.log({
+      actorId: adminId,
+      action: 'ORGANIZER_VERIFICATION_REJECTED',
+      entityType: 'OrganizerProfile',
+      entityId: organizerId,
+      metadata: { note: note.trim() },
     });
     return this.view(updated);
   }
