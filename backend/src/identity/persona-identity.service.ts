@@ -122,11 +122,7 @@ export class PersonaIdentityService {
 
     let inquiry: PersonaInquiry | null = null;
     if (profile.personaInquiryId) {
-      try {
-        inquiry = await this.fetchInquiry(profile.personaInquiryId);
-      } catch {
-        inquiry = null;
-      }
+      inquiry = await this.fetchInquiry(profile.personaInquiryId);
     }
 
     if (!inquiry) {
