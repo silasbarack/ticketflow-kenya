@@ -262,6 +262,12 @@ export class EventsService {
     const profile = await this.getOrganizerProfile(userId);
     const event = await this.getOwnedEvent(id, profile.id);
 
+    if (!profile.isVerified) {
+      throw new BadRequestException(
+        'Organizer verification is required before an event can be submitted for approval. Complete verification in your organizer workspace.',
+      );
+    }
+
     if (!['DRAFT', 'REJECTED'].includes(event.status)) {
       throw new BadRequestException('Only draft or rejected events can be submitted for approval');
     }
@@ -295,8 +301,14 @@ export class EventsService {
   // --- Admin actions ---
 
   async publish(adminId: string, id: string) {
-    const event = await this.prisma.event.findUnique({ where: { id } });
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: { organizer: { select: { isVerified: true } } },
+    });
     if (!event) throw new NotFoundException('Event not found');
+    if (!event.organizer.isVerified) {
+      throw new BadRequestException('The event organizer must be verified before this event can be published');
+    }
     if (event.status !== 'PENDING_APPROVAL') {
       throw new BadRequestException('Only events pending approval can be published');
     }

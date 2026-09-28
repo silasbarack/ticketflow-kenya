@@ -1,6 +1,7 @@
 import {
   EventBookingMode,
   EventStatus,
+  OrganizerVerificationStatus,
   PrismaClient,
   TicketAvailabilityStatus,
   TicketTypeCategory,
@@ -857,6 +858,7 @@ async function main() {
       description: 'Premier event production company based in Nairobi.',
       phone: '+254700000002',
       isVerified: true,
+      verificationStatus: OrganizerVerificationStatus.VERIFIED,
     },
   });
 
@@ -891,12 +893,13 @@ async function main() {
     // Verified, because tickets for this catalogue are now sold on TicketFlow
     // itself — `isEventBookable` and OrdersService both refuse an unverified
     // organizer.
-    update: { isVerified: true, companyName: LISTINGS_COMPANY, description: LISTINGS_DESCRIPTION },
+    update: { isVerified: true, verificationStatus: OrganizerVerificationStatus.VERIFIED, companyName: LISTINGS_COMPANY, description: LISTINGS_DESCRIPTION },
     create: {
       userId: listingsUser.id,
       companyName: LISTINGS_COMPANY,
       description: LISTINGS_DESCRIPTION,
       isVerified: true,
+      verificationStatus: OrganizerVerificationStatus.VERIFIED,
     },
   });
 

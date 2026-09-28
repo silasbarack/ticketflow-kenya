@@ -15,6 +15,16 @@ enum UserRole {
   ADMIN
 }
 
+enum OrganizerVerificationStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  UNDER_REVIEW
+  CHANGES_REQUIRED
+  VERIFIED
+  REJECTED
+}
+
 enum EventStatus {
   DRAFT
   PENDING_APPROVAL
@@ -111,14 +121,46 @@ model OrganizerProfile {
   description String?
   phone       String?
   isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  // KYB workflow. isVerified remains the final authorization switch used by ticket sales.
+  verificationStatus OrganizerVerificationStatus @default(NOT_STARTED)
+
+  legalBusinessName  String?
+  registrationNumber String?
+  businessAddress    String?
+  companyEmail       String?
+  companyPhone       String?
+
+  // References to access-controlled evidence; never store passwords, OTPs or account PINs.
+  certificateOfIncorporationUrl String?
+  officialSearchUrl              String?
+  kraPinCertificateUrl          String?
+
+  representativeFullName      String?
+  representativeRole          String?
+  representativeIdLast4       String?
+  representativeIdDocumentUrl String?
+  authorizationLetterUrl      String?
+
+  payoutMethod      String?
+  payoutAccountName String?
+  payoutReference   String?
+  payoutProofUrl    String?
+
+  verificationSubmittedAt DateTime?
+  verificationReviewedAt  DateTime?
+  verificationReviewedBy  String?
+  verificationReviewNote  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   events Event[]
 
   taxProfile      OrganizerTaxProfile?
   taxCalculations TaxCalculation[]
 
+  @@index([verificationStatus])
   @@map("organizer_profiles")
 }
 

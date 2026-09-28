@@ -1,5 +1,14 @@
 export type UserRole = 'CUSTOMER' | 'ORGANIZER' | 'ADMIN';
 
+export type OrganizerVerificationStatus =
+  | 'NOT_STARTED'
+  | 'IN_PROGRESS'
+  | 'SUBMITTED'
+  | 'UNDER_REVIEW'
+  | 'CHANGES_REQUIRED'
+  | 'VERIFIED'
+  | 'REJECTED';
+
 export type EventStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'PUBLISHED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
 
 export type EventBookingMode = 'INTERNAL' | 'EXTERNAL';
@@ -33,6 +42,46 @@ export interface OrganizerProfile {
   description?: string | null;
   phone?: string | null;
   isVerified: boolean;
+  verificationStatus?: OrganizerVerificationStatus;
+}
+
+export interface OrganizerVerification {
+  id: string;
+  companyName: string;
+  isVerified: boolean;
+  verificationStatus: OrganizerVerificationStatus;
+  legalBusinessName?: string | null;
+  registrationNumber?: string | null;
+  businessAddress?: string | null;
+  companyEmail?: string | null;
+  companyPhone?: string | null;
+  certificateOfIncorporationUrl?: string | null;
+  officialSearchUrl?: string | null;
+  kraPinCertificateUrl?: string | null;
+  representativeFullName?: string | null;
+  representativeRole?: string | null;
+  representativeIdLast4?: string | null;
+  representativeIdDocumentUrl?: string | null;
+  authorizationLetterUrl?: string | null;
+  payoutMethod?: string | null;
+  payoutAccountName?: string | null;
+  payoutReference?: string | null;
+  payoutProofUrl?: string | null;
+  verificationSubmittedAt?: string | null;
+  verificationReviewedAt?: string | null;
+  verificationReviewNote?: string | null;
+  steps: { company: boolean; documents: boolean; representative: boolean; payout: boolean };
+  canSubmit: boolean;
+}
+
+export interface AdminOrganizerVerification extends OrganizerVerification {
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string | null;
+    isActive: boolean;
+  };
 }
 
 export interface EventCategory {
