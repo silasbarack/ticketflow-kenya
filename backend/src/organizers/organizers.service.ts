@@ -212,6 +212,25 @@ export class OrganizersService {
       throw new BadRequestException('Verification documents must be 5 MB or smaller');
     }
 
+    const isPdf = file.buffer.subarray(0, 5).toString('ascii') === '%PDF-';
+    const isJpeg =
+      file.buffer.length >= 3 &&
+      file.buffer[0] === 0xff &&
+      file.buffer[1] === 0xd8 &&
+      file.buffer[2] === 0xff;
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const isPng =
+      file.buffer.length >= pngSignature.length &&
+      file.buffer.subarray(0, pngSignature.length).equals(pngSignature);
+
+    const signatureMatches =
+      (file.mimetype === 'application/pdf' && isPdf) ||
+      (file.mimetype === 'image/jpeg' && isJpeg) ||
+      (file.mimetype === 'image/png' && isPng);
+    if (!signatureMatches) {
+      throw new BadRequestException('The uploaded file content does not match its declared PDF/JPEG/PNG type');
+    }
+
     const safeName = (file.originalname || 'document')
       .replace(/[^a-zA-Z0-9._ -]/g, '_')
       .slice(0, 120);
