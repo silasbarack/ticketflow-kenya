@@ -122,7 +122,7 @@ export default function PersonaIdentityVerification({
       if (!window.Persona?.Client) throw new Error('Persona SDK did not initialize.');
 
       clientRef.current?.destroy();
-      let client: InstanceType<NonNullable<typeof window.Persona>['Client']>;
+      let client: any;
       client = new window.Persona.Client({
         inquiryId: data.inquiryId,
         environmentId: data.environmentId,
