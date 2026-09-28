@@ -20,6 +20,7 @@ import { AdminModule } from './admin/admin.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { HealthController } from './health/health.controller';
 import { TaxModule } from './tax/tax.module';
+import { PersonaIdentityModule } from './identity/persona-identity.module';
 
 @Module({
   controllers: [HealthController],
@@ -44,6 +45,7 @@ import { TaxModule } from './tax/tax.module';
     CheckinsModule,
     AdminModule,
     TaxModule,
+    PersonaIdentityModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

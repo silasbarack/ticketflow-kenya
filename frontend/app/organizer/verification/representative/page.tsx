@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import OrganizerVerificationShell, { useOrganizerVerification, verificationLocked } from '@/components/OrganizerVerificationShell';
 import LinkedInStyleIdentityCapture from '@/components/LinkedInStyleIdentityCapture';
+import PersonaIdentityVerification from '@/components/PersonaIdentityVerification';
 import VerificationDocumentUpload from '@/components/VerificationDocumentUpload';
 import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
@@ -19,6 +20,13 @@ export default function RepresentativeVerificationPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const query = useOrganizerVerification();
+  const personaConfig = useQuery({
+    queryKey: ['persona-configuration'],
+    queryFn: async () => {
+      const { data } = await api.get('/identity/persona/configuration');
+      return Boolean(data?.configured);
+    },
+  });
   const [form, setForm] = useState({
     representativeFullName: '',
     representativeRole: '',
@@ -34,24 +42,27 @@ export default function RepresentativeVerificationPage() {
     });
   }, [query.data]);
 
-  async function persistDetails(documentType: DocumentType) {
+  async function saveRepresentative(documentType?: DocumentType) {
     if (!form.representativeFullName.trim() || !form.representativeRole.trim()) {
-      throw new Error('Enter the representative full name and role before starting document capture.');
+      throw new Error('Enter the representative full name and role before starting identity verification.');
     }
     await api.patch('/organizers/me/verification/representative', {
       representativeFullName: form.representativeFullName.trim(),
       representativeRole: form.representativeRole.trim(),
-      representativeDocumentType: documentType,
+      ...(documentType ? { representativeDocumentType: documentType } : {}),
     });
-    setForm((current) => ({ ...current, representativeDocumentType: documentType }));
+    if (documentType) {
+      setForm((current) => ({ ...current, representativeDocumentType: documentType }));
+    }
     await qc.invalidateQueries({ queryKey: ['organizer-verification'] });
   }
 
+  async function persistDetails(documentType: DocumentType) {
+    return saveRepresentative(documentType);
+  }
+
   const save = useMutation({
-    mutationFn: async () => {
-      if (!form.representativeDocumentType) throw new Error('Complete identity capture to select a document type.');
-      return persistDetails(form.representativeDocumentType);
-    },
+    mutationFn: async () => saveRepresentative(form.representativeDocumentType || undefined),
     onSuccess: () => toast.success('Representative details saved'),
     onError: (error) => toast.error(error instanceof Error ? error.message : getApiErrorMessage(error)),
   });
@@ -100,18 +111,35 @@ export default function RepresentativeVerificationPage() {
           <p className="mt-4 text-xs leading-5 text-muted">
             Your full ID number is not requested in this form. The identity document is captured separately in the protected camera flow below.
           </p>
-          {!locked && form.representativeDocumentType && (
+          {!locked && (
             <Button type="submit" className="mt-5" loading={save.isPending}>Save representative details</Button>
           )}
         </form>
 
-        <LinkedInStyleIdentityCapture
-          documents={verification?.documents || []}
+        <PersonaIdentityVerification
+          verified={verification?.representativeIdentityVerified}
+          status={verification?.personaInquiryStatus}
           disabled={locked}
-          initialDocumentType={verification?.representativeDocumentType || null}
-          onPersistDetails={persistDetails}
+          onBeforeStart={() => saveRepresentative(form.representativeDocumentType || undefined)}
           onUpdated={() => query.refetch()}
         />
+
+        {!verification?.representativeIdentityVerified && personaConfig.data === false && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+              <span className="h-px flex-1 bg-line" />
+              Manual capture fallback
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            <LinkedInStyleIdentityCapture
+              documents={verification?.documents || []}
+              disabled={locked}
+              initialDocumentType={verification?.representativeDocumentType || null}
+              onPersistDetails={persistDetails}
+              onUpdated={() => query.refetch()}
+            />
+          </div>
+        )}
 
         <VerificationDocumentUpload
           kind="AUTHORIZATION_LETTER"

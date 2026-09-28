@@ -152,6 +152,16 @@ model OrganizerProfile {
   representativeRole          String?
   representativeDocumentType  String?
   representativeIdLast4       String?
+
+  // Persona-backed identity verification. Secrets and biometric media stay
+  // with Persona; TicketFlow stores only provider references and decision state.
+  identityProvider                 String?
+  representativeIdentityVerified  Boolean   @default(false)
+  personaInquiryId                 String?   @unique
+  personaInquiryStatus             String?
+  personaIdentityVerifiedAt        DateTime?
+  personaIdentityFailureReason     String?
+  personaLastEventAt               DateTime?
   representativeIdDocumentUrl String?
   authorizationLetterUrl      String?
 
@@ -170,12 +180,28 @@ model OrganizerProfile {
 
   events                  Event[]
   verificationDocuments   OrganizerVerificationDocument[]
+  personaWebhookEvents    PersonaWebhookEvent[]
 
   taxProfile      OrganizerTaxProfile?
   taxCalculations TaxCalculation[]
 
   @@index([verificationStatus])
   @@map("organizer_profiles")
+}
+
+model PersonaWebhookEvent {
+  id          String           @id @default(uuid())
+  eventId     String           @unique
+  eventName   String
+  inquiryId   String?
+  organizerId String?
+  organizer   OrganizerProfile? @relation(fields: [organizerId], references: [id], onDelete: SetNull)
+  processedAt DateTime         @default(now())
+  createdAt   DateTime         @default(now())
+
+  @@index([inquiryId])
+  @@index([organizerId])
+  @@map("persona_webhook_events")
 }
 
 model OrganizerVerificationDocument {

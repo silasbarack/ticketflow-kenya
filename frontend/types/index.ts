@@ -81,6 +81,12 @@ export interface OrganizerVerification {
   representativeRole?: string | null;
   representativeDocumentType?: 'NATIONAL_ID' | 'DRIVERS_LICENSE' | null;
   representativeIdLast4?: string | null;
+  identityProvider?: 'PERSONA' | string | null;
+  representativeIdentityVerified?: boolean;
+  personaInquiryId?: string | null;
+  personaInquiryStatus?: string | null;
+  personaIdentityVerifiedAt?: string | null;
+  personaIdentityFailureReason?: string | null;
   representativeIdDocumentUrl?: string | null;
   authorizationLetterUrl?: string | null;
   payoutMethod?: string | null;
