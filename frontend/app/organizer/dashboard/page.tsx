@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, Clock3, LayoutDashboard, Plus, PlusCircle, ReceiptText, ScanLine, Ticket, Wallet } from 'lucide-react';
+import { CalendarDays, Clock3, LayoutDashboard, Plus, PlusCircle, ReceiptText, ScanLine, ShieldCheck, Ticket, Wallet } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -18,6 +18,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 const NAV = [
   { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
   { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
+  { label: 'Verification', href: '/organizer/verification', icon: ShieldCheck },
   { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
 ];
 
