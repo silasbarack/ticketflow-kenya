@@ -18,7 +18,7 @@ export class UpdateVerificationDocumentsDto {
 export class UpdateRepresentativeVerificationDto {
   @IsString() @MinLength(3) representativeFullName: string;
   @IsString() @MinLength(2) representativeRole: string;
-  @IsString() @IsIn(['NATIONAL_ID', 'DRIVERS_LICENSE']) representativeDocumentType: string;
+  @IsOptional() @IsString() @IsIn(['NATIONAL_ID', 'DRIVERS_LICENSE']) representativeDocumentType?: string;
   @IsOptional() @IsString() @Length(2, 8) representativeIdLast4?: string;
   @IsOptional() @IsUrl({ protocols: ['https'], require_protocol: true }) representativeIdDocumentUrl?: string;
   @IsOptional() @IsUrl({ protocols: ['https'], require_protocol: true }) authorizationLetterUrl?: string;
