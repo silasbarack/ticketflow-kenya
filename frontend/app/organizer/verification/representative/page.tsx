@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import OrganizerVerificationShell, { useOrganizerVerification, verificationLocked } from '@/components/OrganizerVerificationShell';
 import LinkedInStyleIdentityCapture from '@/components/LinkedInStyleIdentityCapture';
@@ -20,6 +20,13 @@ export default function RepresentativeVerificationPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const query = useOrganizerVerification();
+  const personaConfig = useQuery({
+    queryKey: ['persona-configuration'],
+    queryFn: async () => {
+      const { data } = await api.get('/identity/persona/configuration');
+      return Boolean(data?.configured);
+    },
+  });
   const [form, setForm] = useState({
     representativeFullName: '',
     representativeRole: '',
@@ -117,7 +124,7 @@ export default function RepresentativeVerificationPage() {
           onUpdated={() => query.refetch()}
         />
 
-        {!verification?.representativeIdentityVerified && (
+        {!verification?.representativeIdentityVerified && personaConfig.data === false && (
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
               <span className="h-px flex-1 bg-line" />
