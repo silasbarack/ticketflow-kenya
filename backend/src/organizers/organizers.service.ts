@@ -45,11 +45,16 @@ export class OrganizersService {
     const documents = uploadedKinds.has(OrganizerVerificationDocumentKind.INCORPORATION_CERTIFICATE)
       && uploadedKinds.has(OrganizerVerificationDocumentKind.OFFICIAL_SEARCH)
       && uploadedKinds.has(OrganizerVerificationDocumentKind.KRA_PIN_CERTIFICATE);
+    const hasLegacyRepresentativeId = uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_ID);
+    const hasGuidedIdentityCapture =
+      Boolean(profile.representativeDocumentType)
+      && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_SELFIE)
+      && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_ID_FRONT)
+      && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_ID_BACK);
     const representative = Boolean(
       profile.representativeFullName
       && profile.representativeRole
-      && profile.representativeIdLast4
-      && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_ID),
+      && (hasLegacyRepresentativeId || hasGuidedIdentityCapture),
     );
     const payout = Boolean(
       profile.payoutMethod
@@ -72,6 +77,7 @@ export class OrganizersService {
       kraPinCertificateUrl: profile.kraPinCertificateUrl,
       representativeFullName: profile.representativeFullName,
       representativeRole: profile.representativeRole,
+      representativeDocumentType: profile.representativeDocumentType,
       representativeIdLast4: profile.representativeIdLast4,
       representativeIdDocumentUrl: profile.representativeIdDocumentUrl,
       authorizationLetterUrl: profile.authorizationLetterUrl,
@@ -148,7 +154,8 @@ export class OrganizersService {
     return this.updateVerification(profile.id, {
       representativeFullName: dto.representativeFullName.trim(),
       representativeRole: dto.representativeRole.trim(),
-      representativeIdLast4: dto.representativeIdLast4.trim(),
+      representativeDocumentType: dto.representativeDocumentType,
+      representativeIdLast4: dto.representativeIdLast4?.trim() || null,
       representativeIdDocumentUrl: dto.representativeIdDocumentUrl,
       authorizationLetterUrl: dto.authorizationLetterUrl || null,
     });

@@ -30,6 +30,9 @@ enum OrganizerVerificationDocumentKind {
   OFFICIAL_SEARCH
   KRA_PIN_CERTIFICATE
   REPRESENTATIVE_ID
+  REPRESENTATIVE_SELFIE
+  REPRESENTATIVE_ID_FRONT
+  REPRESENTATIVE_ID_BACK
   AUTHORIZATION_LETTER
   PAYOUT_PROOF
 }
@@ -147,6 +150,7 @@ model OrganizerProfile {
 
   representativeFullName      String?
   representativeRole          String?
+  representativeDocumentType  String?
   representativeIdLast4       String?
   representativeIdDocumentUrl String?
   authorizationLetterUrl      String?
