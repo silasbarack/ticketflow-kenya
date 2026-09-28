@@ -45,6 +45,22 @@ export interface OrganizerProfile {
   verificationStatus?: OrganizerVerificationStatus;
 }
 
+export type OrganizerVerificationDocumentKind =
+  | 'INCORPORATION_CERTIFICATE'
+  | 'OFFICIAL_SEARCH'
+  | 'KRA_PIN_CERTIFICATE'
+  | 'REPRESENTATIVE_ID'
+  | 'AUTHORIZATION_LETTER'
+  | 'PAYOUT_PROOF';
+
+export interface OrganizerVerificationDocument {
+  kind: OrganizerVerificationDocumentKind;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedAt: string;
+}
+
 export interface OrganizerVerification {
   id: string;
   companyName: string;
@@ -70,6 +86,7 @@ export interface OrganizerVerification {
   verificationSubmittedAt?: string | null;
   verificationReviewedAt?: string | null;
   verificationReviewNote?: string | null;
+  documents: OrganizerVerificationDocument[];
   steps: { company: boolean; documents: boolean; representative: boolean; payout: boolean };
   canSubmit: boolean;
 }

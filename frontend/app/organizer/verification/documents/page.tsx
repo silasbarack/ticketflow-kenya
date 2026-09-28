@@ -1,33 +1,77 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import OrganizerVerificationShell, { useOrganizerVerification, verificationLocked } from '@/components/OrganizerVerificationShell';
+import VerificationDocumentUpload from '@/components/VerificationDocumentUpload';
 import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
 import Skeleton from '@/components/ui/Skeleton';
-import { Input, Label } from '@/components/ui/Input';
-import { api, getApiErrorMessage } from '@/lib/api';
+import { OrganizerVerificationDocumentKind } from '@/types';
+
+const REQUIRED: Array<{ kind: OrganizerVerificationDocumentKind; label: string; hint: string }> = [
+  {
+    kind: 'INCORPORATION_CERTIFICATE',
+    label: 'Certificate of incorporation / business registration',
+    hint: 'Upload the original PDF where available, or a clear scan/photo showing the whole document.',
+  },
+  {
+    kind: 'OFFICIAL_SEARCH',
+    label: 'BRS Official Search / CR12',
+    hint: 'Use a recent official search document for a limited company.',
+  },
+  {
+    kind: 'KRA_PIN_CERTIFICATE',
+    label: 'KRA PIN Certificate',
+    hint: 'Upload the certificate only. Never provide your KRA password.',
+  },
+];
 
 export default function VerificationDocumentsPage() {
-  const router=useRouter(); const qc=useQueryClient(); const query=useOrganizerVerification();
-  const [form,setForm]=useState({certificateOfIncorporationUrl:'',officialSearchUrl:'',kraPinCertificateUrl:''});
-  useEffect(()=>{if(query.data)setForm({certificateOfIncorporationUrl:query.data.certificateOfIncorporationUrl||'',officialSearchUrl:query.data.officialSearchUrl||'',kraPinCertificateUrl:query.data.kraPinCertificateUrl||''});},[query.data]);
-  const save=useMutation({mutationFn:async()=>api.patch('/organizers/me/verification/documents',form),onSuccess:async()=>{await qc.invalidateQueries({queryKey:['organizer-verification']});toast.success('Verification documents saved');router.push('/organizer/verification/representative');},onError:e=>toast.error(getApiErrorMessage(e))});
-  if(query.isLoading)return <OrganizerVerificationShell><Skeleton className="h-72 rounded-card"/></OrganizerVerificationShell>;
-  const locked=verificationLocked(query.data?.verificationStatus);
-  return <OrganizerVerificationShell>
-    <PageHeader eyebrow="Verification · Step 2" title="Business documents" description="Provide secure links to the documents TicketFlow needs to review."/>
-    <form onSubmit={e=>{e.preventDefault();save.mutate();}} className="mt-7 max-w-3xl rounded-card border border-line bg-white p-5 shadow-soft sm:p-6">
-      <p className="mb-5 rounded-btn bg-navy-50 p-3 text-xs leading-5 text-muted">Use HTTPS links from storage you control. Do not place passwords, OTPs or PINs in filenames, URLs or notes. Native private-file uploads can be added once a protected document-storage provider is configured.</p>
-      <div className="space-y-4">
-        <div><Label htmlFor="incorporation">Certificate of incorporation / registration URL</Label><Input id="incorporation" type="url" required disabled={locked} placeholder="https://..." value={form.certificateOfIncorporationUrl} onChange={e=>setForm({...form,certificateOfIncorporationUrl:e.target.value})}/></div>
-        <div><Label htmlFor="search">BRS official search / CR12 URL</Label><Input id="search" type="url" required disabled={locked} placeholder="https://..." value={form.officialSearchUrl} onChange={e=>setForm({...form,officialSearchUrl:e.target.value})}/></div>
-        <div><Label htmlFor="kra">KRA PIN certificate URL</Label><Input id="kra" type="url" required disabled={locked} placeholder="https://..." value={form.kraPinCertificateUrl} onChange={e=>setForm({...form,kraPinCertificateUrl:e.target.value})}/></div>
+  const router = useRouter();
+  const query = useOrganizerVerification();
+
+  if (query.isLoading) {
+    return <OrganizerVerificationShell><Skeleton className="h-72 rounded-card" /></OrganizerVerificationShell>;
+  }
+
+  const verification = query.data;
+  const locked = verificationLocked(verification?.verificationStatus);
+  const findDocument = (kind: OrganizerVerificationDocumentKind) =>
+    verification?.documents?.find((document) => document.kind === kind);
+
+  return (
+    <OrganizerVerificationShell>
+      <PageHeader
+        eyebrow="Verification · Step 2"
+        title="Business documents"
+        description="Upload your official documents securely. PDF, JPG and PNG are accepted, up to 5 MB each."
+      />
+
+      <div className="mt-7 max-w-3xl space-y-4">
+        <div className="rounded-card border border-brand-100 bg-brand-50/50 p-4 text-sm leading-6 text-navy-800">
+          Digital PDFs from BRS/eCitizen/KRA are preferred. If you only have a paper copy, use <strong>Take photo</strong> on your phone. Make sure all text and document edges are clearly visible.
+        </div>
+
+        {REQUIRED.map((item) => (
+          <VerificationDocumentUpload
+            key={item.kind}
+            {...item}
+            document={findDocument(item.kind)}
+            disabled={locked}
+            onUploaded={() => query.refetch()}
+          />
+        ))}
+
+        {locked && <p className="text-sm text-muted">Documents are locked while the application is under review or verified.</p>}
+
+        <Button
+          type="button"
+          disabled={!verification?.steps.documents}
+          onClick={() => router.push('/organizer/verification/representative')}
+        >
+          Continue to representative
+        </Button>
       </div>
-      {!locked&&<Button type="submit" className="mt-5" loading={save.isPending}>Save and continue</Button>}
-    </form>
-  </OrganizerVerificationShell>;
+    </OrganizerVerificationShell>
+  );
 }

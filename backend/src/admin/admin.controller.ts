@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, StreamableFile, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { EventsService } from '../events/events.service';
 import { CurrentUser, AuthenticatedUser } from '../common/decorators/current-user.decorator';
@@ -50,6 +50,16 @@ export class AdminController {
   @Get('organizer-verifications/:id')
   getOrganizerVerification(@Param('id') id: string) {
     return this.organizersService.getVerificationForAdmin(id);
+  }
+
+  @Get('organizer-verifications/:id/documents/:kind/file')
+  async getOrganizerVerificationDocument(@Param('id') id: string, @Param('kind') kind: string) {
+    const document = await this.organizersService.getVerificationDocument(id, kind);
+    return new StreamableFile(document.data, {
+      type: document.mimeType,
+      disposition: `inline; filename="${document.fileName.replace(/"/g, '')}"`,
+      length: document.sizeBytes,
+    });
   }
 
   @Patch('organizer-verifications/:id/under-review')

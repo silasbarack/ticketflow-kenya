@@ -37,21 +37,33 @@ function ReviewPage(){
  if(query.isLoading)return <DashboardLayout items={NAV}><Skeleton className="h-96 rounded-card"/></DashboardLayout>;
  const v=query.data;
  if(!v)return <DashboardLayout items={NAV}><PageHeader eyebrow="KYB review" title="Organizer not found" description="This verification record is unavailable."/></DashboardLayout>;
- const evidence=[
-  ['Certificate of incorporation / registration',v.certificateOfIncorporationUrl],
-  ['BRS official search / CR12',v.officialSearchUrl],
-  ['KRA PIN certificate',v.kraPinCertificateUrl],
-  ['Representative ID / passport',v.representativeIdDocumentUrl],
-  ['Authorization letter',v.authorizationLetterUrl],
-  ['Payout ownership proof',v.payoutProofUrl],
- ].filter(([,url])=>Boolean(url));
+ const labels: Record<string,string> = {
+  INCORPORATION_CERTIFICATE: 'Certificate of incorporation / registration',
+  OFFICIAL_SEARCH: 'BRS Official Search / CR12',
+  KRA_PIN_CERTIFICATE: 'KRA PIN certificate',
+  REPRESENTATIVE_ID: 'Representative ID / passport',
+  AUTHORIZATION_LETTER: 'Authorization letter',
+  PAYOUT_PROOF: 'Payout ownership proof',
+ };
+ const evidence=(v.documents || []).map(document => ({ ...document, label: labels[document.kind] || document.kind }));
+
+ async function openEvidence(kind: string) {
+  try {
+   const response=await api.get('/admin/organizer-verifications/'+id+'/documents/'+kind+'/file',{responseType:'blob'});
+   const url=URL.createObjectURL(response.data);
+   window.open(url,'_blank','noopener,noreferrer');
+   window.setTimeout(()=>URL.revokeObjectURL(url),60_000);
+  } catch(error) {
+   toast.error(getApiErrorMessage(error));
+  }
+ }
  return <DashboardLayout items={NAV}>
   <PageHeader eyebrow="KYB review" title={v.companyName} description={v.user.firstName+' '+v.user.lastName+' · '+v.user.email}/>
   <div className="mt-7 grid gap-5 xl:grid-cols-2">
    <section className="rounded-card border border-line bg-white p-5 shadow-soft"><h2 className="section-title">Company</h2><dl className="mt-4 space-y-3 text-sm"><Row k="Legal name" v={v.legalBusinessName}/><Row k="Registration number" v={v.registrationNumber}/><Row k="Business address" v={v.businessAddress}/><Row k="Official email" v={v.companyEmail}/><Row k="Official phone" v={v.companyPhone}/></dl></section>
    <section className="rounded-card border border-line bg-white p-5 shadow-soft"><h2 className="section-title">Representative & payout</h2><dl className="mt-4 space-y-3 text-sm"><Row k="Representative" v={v.representativeFullName}/><Row k="Role" v={v.representativeRole}/><Row k="ID/passport ending" v={v.representativeIdLast4?('••••'+v.representativeIdLast4):null}/><Row k="Payout method" v={v.payoutMethod}/><Row k="Payout account name" v={v.payoutAccountName}/><Row k="Payout reference" v={v.payoutReference}/></dl></section>
   </div>
-  <section className="mt-5 rounded-card border border-line bg-white p-5 shadow-soft"><h2 className="section-title">Evidence</h2><div className="mt-4 grid gap-2 md:grid-cols-2">{evidence.map(([label,url])=><a key={label} href={url as string} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-btn border border-line p-3 text-sm font-semibold text-navy-800 hover:border-brand-300"><span>{label}</span><ExternalLink className="h-4 w-4 text-brand-600"/></a>)}</div></section>
+  <section className="mt-5 rounded-card border border-line bg-white p-5 shadow-soft"><h2 className="section-title">Evidence</h2><div className="mt-4 grid gap-2 md:grid-cols-2">{evidence.map(document=><button type="button" key={document.kind} onClick={()=>openEvidence(document.kind)} className="flex items-center justify-between rounded-btn border border-line p-3 text-left text-sm font-semibold text-navy-800 hover:border-brand-300"><span><span className="block">{document.label}</span><span className="mt-1 block text-xs font-normal text-muted">{document.fileName} · {(document.sizeBytes/1024/1024).toFixed(2)} MB</span></span><ExternalLink className="h-4 w-4 shrink-0 text-brand-600"/></button>)}</div>{evidence.length===0&&<p className="mt-4 text-sm text-muted">No private verification documents uploaded yet.</p>}</section>
   <section className="mt-5 rounded-card border border-line bg-white p-5 shadow-soft"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="page-kicker">Decision</p><h2 className="section-title mt-1">{v.verificationStatus.replaceAll('_',' ')}</h2></div>{v.verificationSubmittedAt&&<p className="text-xs text-muted">Submitted {new Date(v.verificationSubmittedAt).toLocaleString('en-KE')}</p>}</div>
    <Textarea className="mt-4" rows={4} value={note} onChange={e=>setNote(e.target.value)} placeholder="Review note. Required when requesting changes or rejecting."/>
    <div className="mt-4 flex flex-wrap gap-2">
