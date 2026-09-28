@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import OrganizerVerificationShell, { useOrganizerVerification, verificationLocked } from '@/components/OrganizerVerificationShell';
 import LinkedInStyleIdentityCapture from '@/components/LinkedInStyleIdentityCapture';
+import PersonaIdentityVerification from '@/components/PersonaIdentityVerification';
 import VerificationDocumentUpload from '@/components/VerificationDocumentUpload';
 import PageHeader from '@/components/ui/PageHeader';
 import Button from '@/components/ui/Button';
@@ -105,13 +106,29 @@ export default function RepresentativeVerificationPage() {
           )}
         </form>
 
-        <LinkedInStyleIdentityCapture
-          documents={verification?.documents || []}
+        <PersonaIdentityVerification
+          verified={verification?.representativeIdentityVerified}
+          status={verification?.personaInquiryStatus}
           disabled={locked}
-          initialDocumentType={verification?.representativeDocumentType || null}
-          onPersistDetails={persistDetails}
           onUpdated={() => query.refetch()}
         />
+
+        {!verification?.representativeIdentityVerified && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+              <span className="h-px flex-1 bg-line" />
+              Manual capture fallback
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            <LinkedInStyleIdentityCapture
+              documents={verification?.documents || []}
+              disabled={locked}
+              initialDocumentType={verification?.representativeDocumentType || null}
+              onPersistDetails={persistDetails}
+              onUpdated={() => query.refetch()}
+            />
+          </div>
+        )}
 
         <VerificationDocumentUpload
           kind="AUTHORIZATION_LETTER"
