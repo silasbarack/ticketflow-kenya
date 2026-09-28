@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { OrganizerVerificationDocumentKind } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { UpdateOrganizerProfileDto } from './dto/create-organizer-profile.dto';
@@ -18,6 +19,7 @@ export class OrganizersService {
   constructor(
     private prisma: PrismaService,
     private auditLogs: AuditLogsService,
+    private config: ConfigService,
   ) {}
 
   async getProfileByUserId(userId: string) {
@@ -51,10 +53,19 @@ export class OrganizersService {
       && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_SELFIE)
       && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_ID_FRONT)
       && uploadedKinds.has(OrganizerVerificationDocumentKind.REPRESENTATIVE_ID_BACK);
+    const personaConfigured = Boolean(
+      this.config.get<string>('PERSONA_API_KEY')
+      && this.config.get<string>('PERSONA_TEMPLATE_ID')
+      && this.config.get<string>('PERSONA_ENVIRONMENT_ID'),
+    );
+    const requirePersonaIdentity = personaConfigured && !profile.isVerified;
+    const identitySatisfied = requirePersonaIdentity
+      ? profile.representativeIdentityVerified
+      : (profile.representativeIdentityVerified || hasLegacyRepresentativeId || hasGuidedIdentityCapture);
     const representative = Boolean(
       profile.representativeFullName
       && profile.representativeRole
-      && (profile.representativeIdentityVerified || hasLegacyRepresentativeId || hasGuidedIdentityCapture),
+      && identitySatisfied,
     );
     const payout = Boolean(
       profile.payoutMethod
