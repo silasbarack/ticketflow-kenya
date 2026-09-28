@@ -244,10 +244,13 @@ export default function LinkedInStyleIdentityCapture({
 
       if (kind === 'REPRESENTATIVE_ID_FRONT') {
         setScanMessage('Front captured. Preparing the back…');
+        stopCamera();
         setStep('scanning');
         await wait(900);
         setStep('document-back');
-        setCameraReady(Boolean(streamRef.current));
+        await wait(80);
+        const ok = await startCamera('environment');
+        if (!ok) setStep('document-choice');
       } else {
         stopCamera();
         setScanMessage('Checking image quality and preparing your documents for review…');
