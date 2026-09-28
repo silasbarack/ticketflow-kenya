@@ -107,7 +107,11 @@ export class OrganizersService {
   async updateVerificationDocuments(userId: string, dto: UpdateVerificationDocumentsDto) {
     const profile = await this.getProfileByUserId(userId);
     this.assertEditable(profile.verificationStatus);
-    return this.updateVerification(profile.id, dto);
+    return this.updateVerification(profile.id, {
+      certificateOfIncorporationUrl: dto.certificateOfIncorporationUrl,
+      officialSearchUrl: dto.officialSearchUrl,
+      kraPinCertificateUrl: dto.kraPinCertificateUrl,
+    });
   }
 
   async updateVerificationRepresentative(userId: string, dto: UpdateRepresentativeVerificationDto) {
