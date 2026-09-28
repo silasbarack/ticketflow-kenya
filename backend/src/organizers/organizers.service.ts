@@ -219,7 +219,7 @@ export class OrganizersService {
       action: 'ORGANIZER_VERIFICATION_CHANGES_REQUESTED',
       entityType: 'OrganizerProfile',
       entityId: organizerId,
-      metadata: { note: note.trim() },
+      metadata: { noteProvided: true },
     });
     return this.view(updated);
   }
@@ -237,7 +237,7 @@ export class OrganizersService {
       action: 'ORGANIZER_VERIFICATION_REJECTED',
       entityType: 'OrganizerProfile',
       entityId: organizerId,
-      metadata: { note: note.trim() },
+      metadata: { noteProvided: true },
     });
     return this.view(updated);
   }
