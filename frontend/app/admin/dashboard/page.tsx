@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarCheck, CheckCircle2, CreditCard, LayoutDashboard, ReceiptText, ScanLine, Ticket, Users } from 'lucide-react';
+import { CalendarCheck, CheckCircle2, CreditCard, LayoutDashboard, ReceiptText, ScanLine, ShieldCheck, Ticket, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -16,6 +16,7 @@ import { formatCurrency } from '@/lib/format';
 const NAV = [
   { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
   { label: 'Event Approvals', href: '/admin/events', icon: CheckCircle2 },
+  { label: 'Organizer Verification', href: '/admin/organizers', icon: ShieldCheck },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
 ];
@@ -72,9 +73,10 @@ function AdminDashboardContent() {
             </div>
             <ReceiptText className="h-5 w-5 text-brand-600" aria-hidden="true" />
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {[
               { href: '/admin/events', label: 'Event approvals', detail: `${stats?.pendingEvents ?? 0} awaiting review` },
+              { href: '/admin/organizers', label: 'Organizer verification', detail: 'Review company KYB applications' },
               { href: '/admin/payments', label: 'Payment ledger', detail: `${stats?.totalOrders ?? 0} paid orders` },
               { href: '/admin/users', label: 'User access', detail: `${stats?.totalUsers ?? 0} accounts` },
             ].map((item) => (
