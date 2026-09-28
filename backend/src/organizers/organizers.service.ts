@@ -195,7 +195,11 @@ export class OrganizersService {
     return kind as OrganizerVerificationDocumentKind;
   }
 
-  async uploadVerificationDocument(userId: string, kindInput: string, file: Express.Multer.File) {
+  async uploadVerificationDocument(
+    userId: string,
+    kindInput: string,
+    file: { originalname: string; mimetype: string; size: number; buffer: Buffer },
+  ) {
     if (!file) throw new BadRequestException('Choose a document to upload');
     const profile = await this.getProfileByUserId(userId);
     this.assertEditable(profile.verificationStatus);
