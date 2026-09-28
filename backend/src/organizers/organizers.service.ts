@@ -54,7 +54,7 @@ export class OrganizersService {
     const representative = Boolean(
       profile.representativeFullName
       && profile.representativeRole
-      && (hasLegacyRepresentativeId || hasGuidedIdentityCapture),
+      && (profile.representativeIdentityVerified || hasLegacyRepresentativeId || hasGuidedIdentityCapture),
     );
     const payout = Boolean(
       profile.payoutMethod
