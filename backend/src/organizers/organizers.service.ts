@@ -160,8 +160,8 @@ export class OrganizersService {
     return this.updateVerification(profile.id, {
       representativeFullName: dto.representativeFullName.trim(),
       representativeRole: dto.representativeRole.trim(),
-      representativeDocumentType: dto.representativeDocumentType,
-      representativeIdLast4: dto.representativeIdLast4?.trim() || null,
+      ...(dto.representativeDocumentType !== undefined ? { representativeDocumentType: dto.representativeDocumentType } : {}),
+      representativeIdLast4: dto.representativeIdLast4?.trim() || profile.representativeIdLast4 || null,
       representativeIdDocumentUrl: dto.representativeIdDocumentUrl,
       authorizationLetterUrl: dto.authorizationLetterUrl || null,
     });
