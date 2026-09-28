@@ -9,7 +9,7 @@ import { installBigIntJsonPolyfill } from './tax/infrastructure/serializers/bigi
 installBigIntJsonPolyfill();
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
   const configService = app.get(ConfigService);
 
   // Behind a reverse proxy (Render), every request arrives from the proxy's
