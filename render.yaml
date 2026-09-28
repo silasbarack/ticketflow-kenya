@@ -70,6 +70,19 @@ services:
       - key: MPESA_RECONCILIATION_ENABLED
         value: "true"
 
+      # Persona identity verification. Configure these from the Persona Sandbox
+      # dashboard first, then replace with Production credentials after testing.
+      - key: PERSONA_API_KEY
+        sync: false
+      - key: PERSONA_TEMPLATE_ID
+        sync: false
+      - key: PERSONA_ENVIRONMENT_ID
+        sync: false
+      - key: PERSONA_WEBHOOK_SECRET
+        sync: false
+      - key: PERSONA_API_VERSION
+        value: "2025-10-27"
+
   - type: web
     name: ticketflow-frontend
     runtime: node
