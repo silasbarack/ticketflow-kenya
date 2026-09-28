@@ -46,7 +46,7 @@ export default function RegisterPage() {
     try {
       const user = await register(form);
       toast.success('Account created!');
-      if (user.role === 'ORGANIZER') router.push('/organizer/dashboard');
+      if (user.role === 'ORGANIZER') router.push('/organizer/verification');
       else router.push('/dashboard');
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : 'Registration failed');
