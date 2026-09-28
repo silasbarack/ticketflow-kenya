@@ -31,11 +31,13 @@ export default function PersonaIdentityVerification({
   verified,
   status,
   disabled,
+  onBeforeStart,
   onUpdated,
 }: {
   verified?: boolean;
   status?: string | null;
   disabled?: boolean;
+  onBeforeStart?: () => Promise<unknown> | unknown;
   onUpdated: () => Promise<unknown> | unknown;
 }) {
   const clientRef = useRef<{ destroy: () => void } | null>(null);
@@ -93,6 +95,7 @@ export default function PersonaIdentityVerification({
   async function startPersona() {
     setLoading(true);
     try {
+      if (onBeforeStart) await onBeforeStart();
       const [{ data }] = await Promise.all([
         api.post<PersonaSession>('/identity/persona/inquiry'),
         loadSdk(),
