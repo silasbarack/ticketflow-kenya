@@ -109,6 +109,16 @@ export class PasswordResetService implements OnModuleInit {
     return left.length === right.length && timingSafeEqual(left, right);
   }
 
+  /**
+   * "s***@gmail.com" — enough to match a log line to a support request without
+   * writing full addresses (including unregistered ones) into the logs.
+   */
+  private maskEmail(email: string): string {
+    const at = email.lastIndexOf('@');
+    if (at < 1) return '***';
+    return `${email[0]}***${email.slice(at)}`;
+  }
+
   private async holdUntil(startedAt: number, floorMs: number) {
     const remaining = floorMs - (Date.now() - startedAt);
     if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining));
@@ -129,12 +139,25 @@ export class PasswordResetService implements OnModuleInit {
   async requestCode(email: string) {
     const startedAt = Date.now();
     try {
+      // The caller always gets the same answer, so the reason no code went out
+      // is recorded here — the server log is the only place it can be seen.
       const user = await this.findUserByEmail(email);
-      if (!user || !user.isActive) return REQUEST_RESPONSE;
+      if (!user || !user.isActive) {
+        this.logger.warn(
+          `Password reset for ${this.maskEmail(email)}: no ${user ? 'active ' : ''}account with this email — no code sent`,
+        );
+        return REQUEST_RESPONSE;
+      }
 
       const code = this.generateCode();
       const issued = await this.issueCode(user.id, code);
-      if (!issued) return REQUEST_RESPONSE;
+      if (!issued) {
+        this.logger.warn(
+          `Password reset for ${this.maskEmail(user.email)}: requested within ${RESEND_COOLDOWN_SECONDS}s of the last code ` +
+            `or over ${MAX_CODES_PER_HOUR} codes this hour — no new code sent`,
+        );
+        return REQUEST_RESPONSE;
+      }
 
       await this.auditLogsService.log({
         actorId: user.id,
@@ -215,6 +238,13 @@ export class PasswordResetService implements OnModuleInit {
         code,
         expiresInMinutes: CODE_TTL_SECONDS / 60,
       });
+
+      if (!sent) {
+        this.logger.error(
+          `Password reset code email to ${this.maskEmail(email)} was not delivered — ` +
+            'check RESEND_API_KEY and that EMAIL_FROM is on a domain verified in Resend',
+        );
+      }
 
       // Local development without SMTP only, and only when explicitly asked for:
       // the code is a live credential and must never reach production logs.
