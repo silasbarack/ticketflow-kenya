@@ -27,7 +27,7 @@ type SelfieStage = 'CENTER' | 'FIRST_SIDE' | 'OTHER_SIDE';
 type FaceLandmark = { x: number; y: number; z?: number };
 
 const MEDIAPIPE_VERSION = '0.10.14';
-const MEDIAPIPE_MODULE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/vision_bundle.js`;
+const MEDIAPIPE_MODULE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/vision_bundle.mjs`;
 const MEDIAPIPE_WASM = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`;
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
 
@@ -187,10 +187,9 @@ export default function LinkedInStyleIdentityCapture({
     setTrackingMessage('Preparing natural face scan…');
 
     try {
-      // Keep MediaPipe out of the Next.js bundle. It loads only when the user
-      // explicitly starts the camera flow.
-      const dynamicImport = new Function('url', 'return import(url)') as (url: string) => Promise<any>;
-      const vision = await dynamicImport(MEDIAPIPE_MODULE);
+      // Load MediaPipe as the documented ES module. Avoid Function/eval-based
+      // imports because some mobile browsers and security policies reject them.
+      const vision = await import(/* webpackIgnore: true */ MEDIAPIPE_MODULE);
       const fileset = await vision.FilesetResolver.forVisionTasks(MEDIAPIPE_WASM);
 
       const options = {
@@ -221,7 +220,13 @@ export default function LinkedInStyleIdentityCapture({
     } catch (error) {
       console.error('Natural face tracking initialization failed', error);
       setTrackingReady(false);
-      setTrackingError('Face movement detection could not start. Check your connection and retry.');
+      const message = error instanceof Error ? error.message : String(error);
+      const networkLike = /fetch|network|load|module|wasm/i.test(message);
+      setTrackingError(
+        networkLike
+          ? 'The face scanner could not finish loading. Keep this page open and tap Retry face scanner.'
+          : 'Face movement detection could not start. Tap Retry face scanner.',
+      );
       setTrackingMessage('Movement scanner unavailable');
       return false;
     }
