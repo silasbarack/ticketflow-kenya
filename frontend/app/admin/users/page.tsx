@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { CheckCircle2, CreditCard, LayoutDashboard, Search, UserRoundX, Users } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -17,13 +17,18 @@ import Skeleton from '@/components/ui/Skeleton';
 import { Input } from '@/components/ui/Input';
 import { User, UserRole } from '@/types';
 import { formatDate } from '@/lib/format';
+import { ADMIN_NAV as NAV } from '@/lib/admin-nav';
 
-const NAV = [
-  { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Event Approvals', href: '/admin/events', icon: CheckCircle2 },
-  { label: 'Users', href: '/admin/users', icon: Users },
-  { label: 'Payments', href: '/admin/payments', icon: CreditCard },
-];
+function Avatar({ user }: { user: User }) {
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy-900/[0.06] text-[12px] font-extrabold text-navy-700 ring-1 ring-inset ring-navy-900/[0.06]">
+      {`${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()}
+    </span>
+  );
+}
+
+const ROLE_TONE = { ADMIN: 'navy', ORGANIZER: 'brand', CUSTOMER: 'neutral' } as const;
+
 
 type RoleFilter = '' | UserRole;
 const FILTERS: { value: RoleFilter; label: string }[] = [
@@ -111,12 +116,12 @@ function AdminUsersContent() {
                 <tbody>
                   {filtered.map((user) => (
                     <tr key={user.id}>
-                      <td className="font-bold text-navy-900">{user.firstName} {user.lastName}</td>
+                      <td><div className="flex items-center gap-3"><Avatar user={user} /><span className="font-bold text-navy-900">{user.firstName} {user.lastName}</span></div></td>
                       <td className="text-navy-700">{user.email}</td>
-                      <td className="text-navy-700">{user.role}</td>
+                      <td><Badge tone={ROLE_TONE[user.role] ?? 'neutral'}>{user.role.charAt(0) + user.role.slice(1).toLowerCase()}</Badge></td>
                       <td className="whitespace-nowrap text-muted">{formatDate(user.createdAt)}</td>
-                      <td><Badge tone={user.isActive ? 'success' : 'danger'}>{user.isActive ? 'Active' : 'Suspended'}</Badge></td>
-                      <td className="text-right">{user.role !== 'ADMIN' && <button type="button" onClick={() => accountAction(user)} className={user.isActive ? 'font-bold text-danger-700 hover:underline' : 'font-bold text-brand-700 hover:underline'}>{user.isActive ? 'Suspend' : 'Activate'}</button>}</td>
+                      <td><Badge tone={user.isActive ? 'success' : 'danger'}><span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />{user.isActive ? 'Active' : 'Suspended'}</Badge></td>
+                      <td className="text-right">{user.role !== 'ADMIN' && <button type="button" onClick={() => accountAction(user)} className={user.isActive ? 'rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-bold text-navy-700 shadow-soft transition hover:border-danger-200 hover:text-danger-700' : 'rounded-lg border border-brand-200 bg-brand-50 px-3 py-1.5 text-xs font-bold text-brand-700 transition hover:bg-brand-100'}>{user.isActive ? 'Suspend' : 'Activate'}</button>}</td>
                     </tr>
                   ))}
                 </tbody>

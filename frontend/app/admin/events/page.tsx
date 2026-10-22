@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { CalendarDays, CheckCircle2, CreditCard, LayoutDashboard, MapPin, ShieldAlert, Users } from 'lucide-react';
+import { CalendarDays, MapPin, UserRound } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -17,13 +17,11 @@ import Skeleton from '@/components/ui/Skeleton';
 import { Textarea } from '@/components/ui/Input';
 import { EventItem } from '@/types';
 import { formatDate } from '@/lib/format';
+import { ADMIN_NAV as NAV } from '@/lib/admin-nav';
 
-const NAV = [
-  { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Event Approvals', href: '/admin/events', icon: CheckCircle2 },
-  { label: 'Users', href: '/admin/users', icon: Users },
-  { label: 'Payments', href: '/admin/payments', icon: CreditCard },
-];
+const MONTH = new Intl.DateTimeFormat('en-KE', { month: 'short', timeZone: 'Africa/Nairobi' });
+const DAY = new Intl.DateTimeFormat('en-KE', { day: '2-digit', timeZone: 'Africa/Nairobi' });
+
 
 const STATUS_FILTERS = ['PENDING_APPROVAL', 'PUBLISHED', 'REJECTED', 'CANCELLED', 'DRAFT', 'COMPLETED'] as const;
 type EventStatusFilter = (typeof STATUS_FILTERS)[number];
@@ -95,28 +93,39 @@ function AdminEventsContent() {
           <EmptyState icon={<CalendarDays className="h-6 w-6" aria-hidden="true" />} title="No events in this queue" description={`There are no ${status.toLowerCase().replaceAll('_', ' ')} events right now.`} />
         ) : (
           events.map((event) => (
-            <article key={event.id} className="rounded-card border border-line bg-white p-5 shadow-soft sm:p-6">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
+            <article key={event.id} className="group overflow-hidden rounded-card border border-line bg-white shadow-soft transition duration-200 hover:shadow-card">
+              <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-center sm:p-5">
+                <div className="flex items-center gap-4 sm:contents">
+                  <div className="flex h-[72px] w-[72px] shrink-0 flex-col items-center justify-center rounded-2xl bg-ink-900 text-white shadow-card">
+                    <span className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand-400">{MONTH.format(new Date(event.startDateTime))}</span>
+                    <span className="tnum text-[26px] font-extrabold leading-none tracking-[-0.03em]">{DAY.format(new Date(event.startDateTime))}</span>
+                  </div>
+                  {event.posterUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={event.posterUrl} alt={event.posterAlt ?? ''} className="h-[72px] w-[72px] shrink-0 rounded-2xl object-cover ring-1 ring-inset ring-black/5 sm:w-24" loading="lazy" />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <h2 className="text-base font-extrabold text-navy-900">{event.title}</h2>
+                    <h2 className="text-[15px] font-extrabold tracking-[-0.01em] text-navy-900">{event.title}</h2>
                     <StatusBadge status={event.status} />
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-muted">
+                  <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-muted">
                     <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />{formatDate(event.startDateTime)}</span>
                     <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" />{event.venue}, {event.city}</span>
+                    <span className="flex items-center gap-1.5"><UserRound className="h-3.5 w-3.5 text-brand-600" aria-hidden="true" /><span className="font-semibold text-navy-700">{event.organizer?.user?.firstName} {event.organizer?.user?.lastName}</span></span>
                   </div>
-                  <p className="mt-3 text-xs text-muted">Organizer: <span className="font-semibold text-navy-700">{event.organizer?.user?.firstName} {event.organizer?.user?.lastName}</span></p>
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-2">
                   {event.status === 'PENDING_APPROVAL' && (
                     <>
-                      <Button variant="outline" size="sm" onClick={() => approve.mutate(event.id)} loading={approve.isPending}>Approve</Button>
-                      <Button variant="danger" size="sm" onClick={() => setPendingAction({ kind: 'reject', event })}>Reject</Button>
+                      <Button variant="primary" size="sm" onClick={() => approve.mutate(event.id)} loading={approve.isPending}>Approve</Button>
+                      <Button variant="outline" size="sm" onClick={() => setPendingAction({ kind: 'reject', event })}>Reject</Button>
                     </>
                   )}
-                  {event.status === 'PUBLISHED' && <Button variant="danger" size="sm" onClick={() => setPendingAction({ kind: 'suspend', event })}>Suspend</Button>}
+                  {event.status === 'PUBLISHED' && <Button variant="outline" size="sm" onClick={() => setPendingAction({ kind: 'suspend', event })}>Suspend</Button>}
                 </div>
               </div>
             </article>

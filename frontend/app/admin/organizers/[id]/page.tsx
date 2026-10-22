@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { CheckCircle2, CreditCard, ExternalLink, LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
 import PageHeader from '@/components/ui/PageHeader';
@@ -14,14 +14,8 @@ import Button from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Input';
 import { api, getApiErrorMessage } from '@/lib/api';
 import { AdminOrganizerVerification } from '@/types';
+import { ADMIN_NAV as NAV } from '@/lib/admin-nav';
 
-const NAV=[
- {label:'Overview',href:'/admin/dashboard',icon:LayoutDashboard},
- {label:'Event Approvals',href:'/admin/events',icon:CheckCircle2},
- {label:'Organizer Verification',href:'/admin/organizers',icon:ShieldCheck},
- {label:'Users',href:'/admin/users',icon:Users},
- {label:'Payments',href:'/admin/payments',icon:CreditCard},
-];
 
 function ReviewPage(){
  const {id}=useParams<{id:string}>(); const router=useRouter(); const qc=useQueryClient(); const [note,setNote]=useState('');

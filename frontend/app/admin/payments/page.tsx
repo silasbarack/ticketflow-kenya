@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, CreditCard, LayoutDashboard, ReceiptText, Search, Users } from 'lucide-react';
+import { ReceiptText, Search } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -14,13 +14,8 @@ import Skeleton from '@/components/ui/Skeleton';
 import { Input } from '@/components/ui/Input';
 import { Payment, PaymentStatus } from '@/types';
 import { formatCurrency, formatDateTime } from '@/lib/format';
+import { ADMIN_NAV as NAV } from '@/lib/admin-nav';
 
-const NAV = [
-  { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Event Approvals', href: '/admin/events', icon: CheckCircle2 },
-  { label: 'Users', href: '/admin/users', icon: Users },
-  { label: 'Payments', href: '/admin/payments', icon: CreditCard },
-];
 
 type PaymentFilter = '' | PaymentStatus;
 type AdminPayment = Payment & { order: { orderNumber: string; event: { title: string }; user: { firstName: string; lastName: string } } };
@@ -92,15 +87,15 @@ function AdminPaymentsContent() {
 
             <div className="table-shell hidden overflow-x-auto md:block">
               <table className="data-table min-w-[900px]">
-                <thead><tr><th>Order</th><th>Event</th><th>Customer</th><th>Amount</th><th>Provider</th><th>Status</th><th>Date</th></tr></thead>
+                <thead><tr><th>Order</th><th>Event</th><th>Customer</th><th className="num">Amount</th><th>Provider</th><th>Status</th><th>Date</th></tr></thead>
                 <tbody>
                   {filtered.map((payment) => (
                     <tr key={payment.id}>
-                      <td className="tnum font-bold text-navy-900">{payment.order.orderNumber}</td>
+                      <td className="tnum font-bold tracking-tight text-navy-900">{payment.order.orderNumber}</td>
                       <td className="max-w-[230px] truncate text-navy-700">{payment.order.event.title}</td>
                       <td className="text-navy-700">{payment.order.user.firstName} {payment.order.user.lastName}</td>
-                      <td className="tnum font-semibold text-navy-900">{formatCurrency(payment.amount)}</td>
-                      <td className="text-muted">{payment.provider}</td>
+                      <td className="num tnum font-extrabold text-navy-900">{formatCurrency(payment.amount)}</td>
+                      <td><span className="rounded-md bg-navy-900/[0.05] px-2 py-1 text-[11px] font-extrabold tracking-wider text-navy-600">{payment.provider}</span></td>
                       <td><StatusBadge status={payment.status} /></td>
                       <td className="whitespace-nowrap text-muted">{formatDateTime(payment.createdAt)}</td>
                     </tr>
