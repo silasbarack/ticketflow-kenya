@@ -29,6 +29,22 @@ npm run start:dev
 
 The API listens on `http://localhost:4000/api` by default.
 
+## Creating an admin account
+
+Production is never seeded, so the first admin is created with a script:
+
+```bash
+npm run create-admin -- --email you@example.com --first-name Jane --last-name Wanjiru
+```
+
+You are prompted for the password (hidden, entered twice); it must meet the normal password rules. To run without a terminal, set `ADMIN_PASSWORD` instead. If the email already belongs to an account, the script promotes it to an active admin and leaves its password unchanged, so you can also register on the site first and then run `npm run create-admin -- --email you@example.com`.
+
+The script uses `DATABASE_URL`. To create an admin on Render, run it from your own machine with `DATABASE_URL` set to the database's **External Database URL** (Render dashboard → `ticketflow-db` → Connect):
+
+```powershell
+$env:DATABASE_URL="<external database url>"; npm run create-admin -- --email you@example.com --first-name Jane --last-name Wanjiru
+```
+
 ## Project layout
 
 ```

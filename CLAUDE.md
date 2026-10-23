@@ -30,6 +30,7 @@ npm run lint             # eslint --fix
 npx prisma generate      # regenerate client after schema changes
 npx prisma migrate dev   # create/apply a migration
 npm run seed             # ts-node prisma/seed.ts (accounts + 5 events)
+npm run create-admin -- --email <email> [--first-name X --last-name Y]   # create or promote an admin
 npm run prisma:studio    # browse the DB
 ```
 
@@ -85,4 +86,4 @@ App Router pages under `app/` map to roles: public browse/checkout, `dashboard/`
 
 ### Deployment
 
-Deployed to Render via the `render.yaml` Blueprint (db + both services, free tier — services spin down when idle). The backend start command runs `npx prisma migrate deploy` before boot, so committed migrations are applied automatically on deploy. Env vars marked `sync: false` in `render.yaml` (M-Pesa creds, `FRONTEND_URL`, `MPESA_CALLBACK_URL`, `NEXT_PUBLIC_API_URL`) are set manually in the Render dashboard. Production is never seeded automatically.
+Deployed to Render via the `render.yaml` Blueprint (db + both services, free tier — services spin down when idle). The backend start command runs `npx prisma migrate deploy` before boot, so committed migrations are applied automatically on deploy. Env vars marked `sync: false` in `render.yaml` (M-Pesa creds, `FRONTEND_URL`, `MPESA_CALLBACK_URL`, `NEXT_PUBLIC_API_URL`) are set manually in the Render dashboard. Production is never seeded automatically. Create the first admin with `npm run create-admin` run locally against the database's external URL (see `backend/README.md`).
