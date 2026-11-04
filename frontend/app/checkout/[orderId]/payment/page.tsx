@@ -82,7 +82,7 @@ function PaymentProcessing() {
         // Seed the cache so the screen moves to "check your phone" without
         // waiting out a full poll interval.
         queryClient.setQueryData(['payment-status', next.paymentId], next);
-        if (next.checkoutRequestId) setStkSentAt(Date.now());
+        if (next.stkSent) setStkSentAt(Date.now());
       } catch (error) {
         setInitError(getApiErrorMessage(error));
       } finally {
@@ -128,7 +128,7 @@ function PaymentProcessing() {
         setPaymentId(latest.id);
         // The prompt was sent before this tab existed, so skip the
         // "check your phone" hold and go straight to waiting.
-        if (latest.checkoutRequestId) setStkSentAt(Date.now() - STK_SENT_HOLD_MS);
+        if (latest.stkSent) setStkSentAt(Date.now() - STK_SENT_HOLD_MS);
       })
       .catch(() => router.replace(`/checkout/${orderId}`));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,8 +136,8 @@ function PaymentProcessing() {
 
   /* ── A push accepted mid-poll still needs its "check your phone" moment ── */
   useEffect(() => {
-    if (status?.checkoutRequestId && stkSentAt === null) setStkSentAt(Date.now());
-  }, [status?.checkoutRequestId, stkSentAt]);
+    if (status?.stkSent && stkSentAt === null) setStkSentAt(Date.now());
+  }, [status?.stkSent, stkSentAt]);
 
   /* ── …and that moment ends on a timer, not on the next re-render ───────── */
   useEffect(() => {

@@ -21,6 +21,11 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { HealthController } from './health/health.controller';
 import { TaxModule } from './tax/tax.module';
 import { PersonaIdentityModule } from './identity/persona-identity.module';
+import { AiModule } from './ai/ai.module';
+import { AutomationModule } from './automation/automation.module';
+import { AiAssistModule } from './ai-assist/ai-assist.module';
+import { SupportModule } from './support/support.module';
+import { DiscoveryModule } from './discovery/discovery.module';
 
 @Module({
   controllers: [HealthController],
@@ -32,6 +37,8 @@ import { PersonaIdentityModule } from './identity/persona-identity.module';
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
     AuditLogsModule,
+    AiModule,
+    AutomationModule,
     AuthModule,
     UsersModule,
     OrganizersModule,
@@ -46,6 +53,9 @@ import { PersonaIdentityModule } from './identity/persona-identity.module';
     AdminModule,
     TaxModule,
     PersonaIdentityModule,
+    AiAssistModule,
+    SupportModule,
+    DiscoveryModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },

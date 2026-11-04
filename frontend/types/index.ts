@@ -208,7 +208,8 @@ export interface Payment {
   status: PaymentStatus;
   amount: string | number;
   phone?: string | null;
-  checkoutRequestId?: string | null;
+  /** Daraja accepted the STK prompt. Request ids are never sent to buyers. */
+  stkSent?: boolean;
   mpesaReceiptNumber?: string | null;
   resultDesc?: string | null;
   createdAt: string;
@@ -240,8 +241,8 @@ export interface PaymentStatusView {
   amount: number;
   /** Masked for display, e.g. "0712 *** 678". Never the full number. */
   phoneMasked: string | null;
-  checkoutRequestId: string | null;
-  merchantRequestId: string | null;
+  /** Daraja accepted the STK prompt. Request ids stay server-side. */
+  stkSent: boolean;
   mpesaReceiptNumber: string | null;
   resultCode: string | null;
   resultDesc: string | null;

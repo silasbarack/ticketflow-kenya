@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { CalendarDays, LayoutDashboard, MapPin, PlusCircle, ScanLine, Send, Ticket, Trash2, Users } from 'lucide-react';
+import { MapPin, PlusCircle, Send, Ticket, Trash2, Users } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
+import { ORGANIZER_NAV as NAV } from '@/lib/organizer-nav';
 import StatusBadge from '@/components/StatusBadge';
 import Button, { buttonVariants } from '@/components/ui/Button';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
@@ -19,11 +20,6 @@ import { Input, Label, Select } from '@/components/ui/Input';
 import { EventItem, TicketTypeCategory } from '@/types';
 import { formatCurrency, formatDateTime, formatTicketCategory } from '@/lib/format';
 
-const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
-  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
-];
 const CATEGORIES: TicketTypeCategory[] = ['REGULAR', 'VIP', 'VVIP', 'STUDENT', 'EARLY_BIRD'];
 type ConfirmAction = { kind: 'cancel' | 'delete-event' | 'delete-tier'; id?: string; label?: string } | null;
 

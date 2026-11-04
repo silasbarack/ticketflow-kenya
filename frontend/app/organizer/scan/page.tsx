@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { AlertTriangle, Ban, Camera, CheckCircle2, Keyboard, LayoutDashboard, PlusCircle, RotateCcw, ScanLine, ShieldX, UserCheck } from 'lucide-react';
+import { AlertTriangle, Ban, Camera, CheckCircle2, Keyboard, RotateCcw, ShieldX, UserCheck } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
+import { ORGANIZER_NAV as NAV } from '@/lib/organizer-nav';
 import QrScanner from '@/components/QrScanner';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
@@ -14,11 +15,6 @@ import PageHeader from '@/components/ui/PageHeader';
 import { Input, Label, Select } from '@/components/ui/Input';
 import { EventItem } from '@/types';
 
-const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
-  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
-];
 
 type ScanStatus = 'VALID' | 'USED' | 'INVALID' | 'CANCELLED' | 'REFUNDED' | 'PAYMENT_NOT_CONFIRMED';
 interface VerifyResult {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Ip, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { InitiateStkPushDto } from './dto/initiate-stk-push.dto';
 import { Public } from '../common/decorators/public.decorator';
@@ -19,10 +19,13 @@ export class PaymentsController {
   }
 
   // Public webhook — Safaricom calls this directly, so it cannot carry our JWT.
+  // Authenticity comes from `?token=` (MPESA_CALLBACK_TOKEN), an optional IP
+  // allowlist, and — failing those — confirming the outcome with Daraja.
   @Public()
+  @HttpCode(200)
   @Post('mpesa/callback')
-  handleCallback(@Body() body: any) {
-    return this.paymentsService.handleMpesaCallback(body);
+  handleCallback(@Body() body: any, @Query('token') token: string | undefined, @Ip() ip: string) {
+    return this.paymentsService.handleMpesaCallback(body, { token, sourceIp: ip });
   }
 
   // DEVELOPMENT ONLY: simulates a successful payment without a real M-Pesa callback.

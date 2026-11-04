@@ -32,8 +32,8 @@ export class TicketsController {
 
   @Roles(Role.CUSTOMER, Role.ORGANIZER, Role.ADMIN)
   @Get('code/:code')
-  findByCode(@Param('code') code: string) {
-    return this.ticketsService.findByCode(code);
+  findByCode(@CurrentUser() user: AuthenticatedUser, @Param('code') code: string) {
+    return this.ticketsService.findByCode(user.userId, user.role, code);
   }
 
   /** Stream the PDF ticket for download. */

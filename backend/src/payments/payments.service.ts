@@ -8,6 +8,20 @@ import { TicketsService } from '../tickets/tickets.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { InitiateStkPushDto } from './dto/initiate-stk-push.dto';
 import { FINAL_STAGES, maskPhone, PaymentStage, PaymentStatusView } from './payment-status';
+import { OperationalAlertsService } from '../automation/operational-alerts.service';
+import { AutomationQueueService } from '../automation/automation-queue.service';
+import { JOB_TYPES } from '../automation/job-types';
+import * as crypto from 'crypto';
+
+/** What the callback endpoint knows about where a callback came from. */
+export interface CallbackContext {
+  /** `?token=` from the callback URL. */
+  token?: string;
+  /** Client IP as Express resolved it (honours TRUST_PROXY). */
+  sourceIp?: string;
+}
+
+const ACK = { ResultCode: 0, ResultDesc: 'Accepted' };
 
 /** Buyer-facing copy per stage. Kept here so API and UI cannot drift apart. */
 const STAGE_MESSAGES: Record<PaymentStage, string> = {
@@ -31,6 +45,8 @@ export class PaymentsService {
     private ticketsService: TicketsService,
     private auditLogsService: AuditLogsService,
     private configService: ConfigService,
+    private alerts: OperationalAlertsService,
+    private queue: AutomationQueueService,
   ) {}
 
   // ── Timing knobs ──────────────────────────────────────────────────────────
@@ -189,15 +205,76 @@ export class PaymentsService {
   // ── Callback (the only path that may mint a SUCCESS) ──────────────────────
 
   /**
+   * Daraja does not sign STK callbacks, so anyone who learns a
+   * CheckoutRequestID can POST a convincing "ResultCode: 0". Two defences:
+   *
+   *  1. A shared secret in the callback URL (MPESA_CALLBACK_TOKEN, sent back as
+   *     `?token=`) and an optional source-IP allowlist. A callback that fails
+   *     either is ignored entirely.
+   *  2. A callback that cannot prove it came from Safaricom (no token is
+   *     configured) is only a *hint*: we ask Daraja's status query what really
+   *     happened and act on that answer, never on the callback's claim.
+   */
+  private authenticateCallback(ctx: CallbackContext): { accepted: boolean; authenticated: boolean; reason?: string } {
+    const allowList = (this.configService.get<string>('MPESA_CALLBACK_ALLOWED_IPS') || '')
+      .split(',')
+      .map((ip) => ip.trim())
+      .filter(Boolean);
+    if (allowList.length && (!ctx.sourceIp || !allowList.includes(ctx.sourceIp.replace(/^::ffff:/, '')))) {
+      return { accepted: false, authenticated: false, reason: 'SOURCE_IP_NOT_ALLOWED' };
+    }
+
+    const expected = this.configService.get<string>('MPESA_CALLBACK_TOKEN');
+    if (!expected) return { accepted: true, authenticated: false };
+    const supplied = Buffer.from(ctx.token || '');
+    const wanted = Buffer.from(expected);
+    const ok = supplied.length === wanted.length && crypto.timingSafeEqual(supplied, wanted);
+    return ok ? { accepted: true, authenticated: true } : { accepted: false, authenticated: false, reason: 'BAD_TOKEN' };
+  }
+
+  private get alwaysConfirmCallbacks(): boolean {
+    return this.configService.get<string>('MPESA_CALLBACK_REQUIRE_QUERY_CONFIRMATION') === 'true';
+  }
+
+  private callbackAmount(callbackMetadata: any): number | undefined {
+    const item = (callbackMetadata?.Item || []).find((i: any) => i.Name === 'Amount');
+    const value = item?.Value;
+    return value === undefined || value === null ? undefined : Number(value);
+  }
+
+  /**
    * Webhook receiver for Safaricom's STK push callback. This and the status
    * query in reconcile() are the ONLY places that may mark a payment SUCCESS —
    * the frontend's reported status is never trusted.
+   *
+   * Always acknowledges with ResultCode 0: Safaricom only needs to know we got
+   * it, and an error would just make it retry the same body.
    */
-  async handleMpesaCallback(body: any) {
+  async handleMpesaCallback(body: any, ctx: CallbackContext = {}) {
+    const auth = this.authenticateCallback(ctx);
+    if (!auth.accepted) {
+      this.logger.warn(`Rejected M-Pesa callback (${auth.reason})`);
+      await this.auditLogsService.log({
+        action: 'PAYMENT_CALLBACK_REJECTED',
+        entityType: 'Payment',
+        metadata: { reason: auth.reason, checkoutRequestId: body?.Body?.stkCallback?.CheckoutRequestID ?? null },
+      });
+      await this.alerts.raise({
+        kind: 'PAYMENT_CALLBACK_REJECTED',
+        severity: 'WARNING',
+        category: 'PAYMENT',
+        title: 'M-Pesa callback rejected by authenticity check',
+        // One alert per hour per reason, however many forged posts arrive.
+        dedupeKey: `callback-rejected:${auth.reason}:${new Date().toISOString().slice(0, 13)}`,
+        details: { reason: auth.reason, note: 'Either the callback URL token is misconfigured or someone is posting forged callbacks.' },
+      });
+      return ACK;
+    }
+
     const callback = body?.Body?.stkCallback;
     if (!callback) {
       this.logger.warn('Received malformed M-Pesa callback payload');
-      return { ResultCode: 0, ResultDesc: 'Accepted' };
+      return ACK;
     }
 
     const { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = callback;
@@ -205,10 +282,96 @@ export class PaymentsService {
     const payment = await this.prisma.payment.findFirst({ where: { checkoutRequestId: CheckoutRequestID } });
     if (!payment) {
       this.logger.warn(`No payment found for CheckoutRequestID ${CheckoutRequestID}`);
-      return { ResultCode: 0, ResultDesc: 'Accepted' };
+      if (auth.authenticated) {
+        await this.alerts.raise({
+          kind: 'PAYMENT_CALLBACK_UNMATCHED',
+          severity: 'WARNING',
+          category: 'PAYMENT',
+          title: 'Authenticated M-Pesa callback matched no payment',
+          dedupeKey: `callback-unmatched:${CheckoutRequestID}`,
+          details: { checkoutRequestId: CheckoutRequestID ?? null, resultCode: ResultCode ?? null },
+        });
+      }
+      return ACK;
     }
 
-    const outcome = this.mpesaService.classifyResultCode(ResultCode);
+    await this.auditLogsService.log({
+      action: 'PAYMENT_CALLBACK_RECEIVED',
+      entityType: 'Payment',
+      entityId: payment.id,
+      metadata: { resultCode: ResultCode ?? null, authenticated: auth.authenticated, priorStatus: payment.status },
+    });
+
+    let outcome = this.mpesaService.classifyResultCode(ResultCode);
+    const receipt = this.mpesaService.extractReceiptFromCallback(CallbackMetadata);
+
+    if (outcome.outcome === 'SUCCESS') {
+      // The amount is fixed by us at initiation, so a mismatch means the body
+      // is not describing this payment.
+      const paid = this.callbackAmount(CallbackMetadata);
+      const expected = Math.ceil(Number(payment.amount));
+      if (paid !== undefined && paid !== expected) {
+        await this.alerts.raise({
+          kind: 'PAYMENT_AMOUNT_MISMATCH',
+          severity: 'CRITICAL',
+          category: 'PAYMENT',
+          title: 'M-Pesa callback amount does not match the payment',
+          dedupeKey: `amount-mismatch:${payment.id}`,
+          entityType: 'Payment',
+          entityId: payment.id,
+          details: { paymentId: payment.id, orderId: payment.orderId, expectedAmount: expected, callbackAmount: paid },
+        });
+        return ACK;
+      }
+
+      if (receipt) {
+        const reused = await this.prisma.payment.findFirst({
+          where: { mpesaReceiptNumber: receipt, id: { not: payment.id } },
+          select: { id: true },
+        });
+        if (reused) {
+          await this.alerts.raise({
+            kind: 'PAYMENT_DUPLICATE_RECEIPT',
+            severity: 'CRITICAL',
+            category: 'PAYMENT',
+            title: 'M-Pesa receipt number already used by another payment',
+            dedupeKey: `duplicate-receipt:${payment.id}`,
+            entityType: 'Payment',
+            entityId: payment.id,
+            details: { paymentId: payment.id, otherPaymentId: reused.id },
+          });
+          return ACK;
+        }
+      }
+    }
+
+    // Unverified callbacks (and every callback, if so configured) are settled
+    // on Daraja's own answer rather than on the body's claim.
+    if (!auth.authenticated || this.alwaysConfirmCallbacks) {
+      const confirmation = await this.mpesaService.queryStkStatus(payment.checkoutRequestId!);
+      if (confirmation.unavailable || confirmation.outcome === 'PROCESSING') {
+        // Can't confirm right now. Leave it pending; the status poll and the
+        // reconciliation sweep will keep asking.
+        await this.prisma.payment.update({
+          where: { id: payment.id },
+          data: { isVerifying: payment.status === PaymentStatus.PENDING ? true : payment.isVerifying },
+        });
+        return ACK;
+      }
+      if (confirmation.outcome !== outcome.outcome) {
+        await this.alerts.raise({
+          kind: 'PAYMENT_CALLBACK_CONFLICT',
+          severity: outcome.outcome === 'SUCCESS' ? 'CRITICAL' : 'WARNING',
+          category: 'PAYMENT',
+          title: 'M-Pesa callback contradicts Safaricom status query',
+          dedupeKey: `callback-conflict:${payment.id}`,
+          entityType: 'Payment',
+          entityId: payment.id,
+          details: { paymentId: payment.id, callbackOutcome: outcome.outcome, queryOutcome: confirmation.outcome, queryResultCode: confirmation.resultCode ?? null },
+        });
+      }
+      outcome = { outcome: confirmation.outcome, message: confirmation.resultDesc || outcome.message };
+    }
 
     if (payment.status !== PaymentStatus.PENDING) {
       // Safaricom retries callbacks, and the reconciliation sweep may already
@@ -223,18 +386,25 @@ export class PaymentsService {
           where: { id: payment.id },
           data: { rawCallback: body, resultCode: String(ResultCode), resultDesc: ResultDesc, isVerifying: false },
         });
-        await this.markPaymentSuccess(payment.id, this.mpesaService.extractReceiptFromCallback(CallbackMetadata));
+        await this.alerts.raise({
+          kind: 'PAYMENT_LATE_SUCCESS',
+          severity: 'WARNING',
+          category: 'PAYMENT',
+          title: 'Payment succeeded after it had been written off',
+          dedupeKey: `late-success:${payment.id}`,
+          entityType: 'Payment',
+          entityId: payment.id,
+          details: { paymentId: payment.id, orderId: payment.orderId, previousStatus: payment.status },
+        });
+        await this.markPaymentSuccess(payment.id, receipt);
       } else if (outcome.outcome === 'SUCCESS' && !payment.mpesaReceiptNumber) {
         // Settled by status query, which does not carry a receipt number.
         await this.prisma.payment.update({
           where: { id: payment.id },
-          data: {
-            rawCallback: body,
-            mpesaReceiptNumber: this.mpesaService.extractReceiptFromCallback(CallbackMetadata),
-          },
+          data: { rawCallback: body, mpesaReceiptNumber: receipt },
         });
       }
-      return { ResultCode: 0, ResultDesc: 'Accepted' };
+      return ACK;
     }
 
     await this.prisma.payment.update({
@@ -244,7 +414,7 @@ export class PaymentsService {
 
     await this.applyOutcome(payment.id, outcome.outcome, outcome.message, CallbackMetadata);
 
-    return { ResultCode: 0, ResultDesc: 'Accepted' };
+    return ACK;
   }
 
   // ── Reconciliation ────────────────────────────────────────────────────────
@@ -398,6 +568,27 @@ export class PaymentsService {
     const payment = await this.prisma.payment.findUniqueOrThrow({ where: { id: paymentId } });
     if (claimed.count === 0) return payment;
 
+    // A second successful payment for one order means the buyer was charged
+    // twice (e.g. a written-off prompt succeeded after a retry was paid). The
+    // order still gets exactly one set of tickets; the extra charge needs a
+    // human to refund it.
+    const otherSuccess = await this.prisma.payment.findFirst({
+      where: { orderId: payment.orderId, status: PaymentStatus.SUCCESS, id: { not: payment.id } },
+      select: { id: true },
+    });
+    if (otherSuccess) {
+      await this.alerts.raise({
+        kind: 'PAYMENT_DOUBLE_CHARGE',
+        severity: 'CRITICAL',
+        category: 'PAYMENT',
+        title: 'Order has more than one successful payment',
+        dedupeKey: `double-charge:${payment.orderId}`,
+        entityType: 'Order',
+        entityId: payment.orderId,
+        details: { orderId: payment.orderId, paymentIds: [otherSuccess.id, payment.id], note: 'Customer likely needs a refund of one payment.' },
+      });
+    }
+
     await this.ordersService.markPaid(payment.orderId);
 
     const order = await this.prisma.order.findUnique({ where: { id: payment.orderId } });
@@ -414,6 +605,24 @@ export class PaymentsService {
     }
 
     await this.ticketsService.generateForOrder(payment.orderId);
+
+    // A late success re-reserves stock even if the tier filled up meanwhile.
+    const oversold = await this.prisma.$queryRaw<{ id: string; quantity: number; quantitySold: number }[]>`
+      SELECT tt.id, tt.quantity, tt."quantitySold" FROM ticket_types tt
+      JOIN order_items oi ON oi."ticketTypeId" = tt.id
+      WHERE oi."orderId" = ${payment.orderId} AND tt."quantitySold" > tt.quantity`.catch(() => []);
+    for (const tier of oversold) {
+      await this.alerts.raise({
+        kind: 'TICKET_TIER_OVERSOLD',
+        severity: 'WARNING',
+        category: 'PAYMENT',
+        title: 'Ticket tier is oversold after a late payment',
+        dedupeKey: `oversold:${tier.id}`,
+        entityType: 'TicketType',
+        entityId: tier.id,
+        details: { ticketTypeId: tier.id, quantity: tier.quantity, quantitySold: tier.quantitySold },
+      });
+    }
 
     await this.auditLogsService.log({
       action: 'PAYMENT_SUCCESS',
@@ -449,6 +658,18 @@ export class PaymentsService {
       await this.ordersService.markFailed(payment.orderId);
     }
 
+    // Only a genuine failure (wrong PIN, no balance…) is worth an email. A
+    // cancellation was the buyer's own choice and an expiry is shown on screen.
+    // Sent after a short delay and skipped if the buyer has paid since.
+    if (status === PaymentStatus.FAILED && releaseStock) {
+      await this.queue.enqueueSafely(
+        JOB_TYPES.PAYMENT_FAILED_NOTICE,
+        `payment-failed:${payment.id}`,
+        { paymentId: payment.id },
+        { runAt: new Date(Date.now() + 5 * 60_000), maxAttempts: 4 },
+      );
+    }
+
     await this.auditLogsService.log({
       action: `PAYMENT_${status}`,
       entityType: 'Payment',
@@ -467,7 +688,17 @@ export class PaymentsService {
     if (role !== 'ADMIN' && payment.order.userId !== userId) {
       throw new ForbiddenException('You do not have access to this payment');
     }
-    return payment;
+    return role === 'ADMIN' ? payment : this.toCustomerPayment(payment);
+  }
+
+  /**
+   * What a buyer may see of their own payment row. The Daraja request ids and
+   * the raw callback stay server-side: the CheckoutRequestID is exactly what a
+   * forged callback would need.
+   */
+  private toCustomerPayment<T extends Payment>(payment: T) {
+    const { checkoutRequestId, merchantRequestId, rawCallback, ...rest } = payment;
+    return { ...rest, stkSent: Boolean(checkoutRequestId) };
   }
 
   async findByOrder(userId: string, role: string, orderId: string) {
@@ -476,7 +707,8 @@ export class PaymentsService {
     if (role !== 'ADMIN' && order.userId !== userId) {
       throw new ForbiddenException('You do not have access to this order');
     }
-    return this.prisma.payment.findMany({ where: { orderId }, orderBy: { createdAt: 'desc' } });
+    const payments = await this.prisma.payment.findMany({ where: { orderId }, orderBy: { createdAt: 'desc' } });
+    return role === 'ADMIN' ? payments : payments.map((p) => this.toCustomerPayment(p));
   }
 
   /**
@@ -537,8 +769,7 @@ export class PaymentsService {
       isFinal: FINAL_STAGES.includes(stage),
       amount: Number(payment.amount),
       phoneMasked: maskPhone(payment.phone),
-      checkoutRequestId: payment.checkoutRequestId,
-      merchantRequestId: payment.merchantRequestId,
+      stkSent: Boolean(payment.checkoutRequestId),
       mpesaReceiptNumber: payment.mpesaReceiptNumber,
       resultCode: payment.resultCode,
       resultDesc: payment.resultDesc,

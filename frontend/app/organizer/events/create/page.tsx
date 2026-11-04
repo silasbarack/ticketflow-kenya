@@ -4,20 +4,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { CalendarClock, FileText, Image as ImageIcon, LayoutDashboard, MapPinned, PlusCircle, ScanLine, Send } from 'lucide-react';
+import { CalendarClock, FileText, Image as ImageIcon, MapPinned, Send } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
+import { ORGANIZER_NAV as NAV } from '@/lib/organizer-nav';
 import Button from '@/components/ui/Button';
 import PageHeader from '@/components/ui/PageHeader';
 import { Input, Label, Select, Textarea } from '@/components/ui/Input';
 import { EventCategory } from '@/types';
+import EventAssistantPanel from '@/components/ai/EventAssistantPanel';
 
-const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
-  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
-];
 
 const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
   'music & concerts': '/posters/generic/music-concerts.jpg',
@@ -90,6 +87,11 @@ function CreateEventContent() {
               <Field label="Event description" className="sm:col-span-2"><Textarea required rows={6} value={form.description} onChange={(event) => update('description', event.target.value)} placeholder="What should attendees expect? Include the experience, programme and important entry information." /></Field>
             </div>
           </FormSection>
+
+          <EventAssistantPanel
+            input={{ name: form.title, categoryId: form.categoryId, venue: form.venue, city: form.city, startDateTime: form.startDateTime, endDateTime: form.endDateTime, basicDescription: form.description }}
+            onAcceptDescription={(text) => update('description', text)}
+          />
 
           <FormSection icon={CalendarClock} eyebrow="Step 2" title="Date and time" description="Times are saved using the platform's configured timezone.">
             <div className="grid gap-4 sm:grid-cols-2">

@@ -13,9 +13,10 @@ import { MpesaService, StkQueryResult } from '../../src/mpesa/mpesa.service';
 type PaymentRow = Record<string, any>;
 
 const ORDER_ID = 'order-1';
+const CALLBACK_TOKEN = 'callback-secret-0123456789';
 const NOW = () => new Date();
 
-function makeFakes() {
+function makeFakes(configOverrides: Record<string, string> = {}) {
   const state = {
     order: {
       id: ORDER_ID,
@@ -31,6 +32,8 @@ function makeFakes() {
     reserved: 2,
     ticketsIssued: 0,
     audit: [] as string[],
+    alerts: [] as string[],
+    jobs: [] as string[],
     seq: 0,
   };
 
@@ -47,7 +50,9 @@ function makeFakes() {
           (p) =>
             (where.orderId ? p.orderId === where.orderId : true) &&
             (where.status ? p.status === where.status : true) &&
-            (where.checkoutRequestId ? p.checkoutRequestId === where.checkoutRequestId : true),
+            (where.checkoutRequestId ? p.checkoutRequestId === where.checkoutRequestId : true) &&
+            (where.mpesaReceiptNumber ? p.mpesaReceiptNumber === where.mpesaReceiptNumber : true) &&
+            (where.id?.not ? p.id !== where.id.not : true),
         );
         return matches.length ? { ...matches[matches.length - 1] } : null;
       },
@@ -97,6 +102,7 @@ function makeFakes() {
       },
     },
     platformCommission: { upsert: async () => ({}) },
+    $queryRaw: async () => [],
   };
 
   const orders: any = {
@@ -120,6 +126,8 @@ function makeFakes() {
 
   const tickets: any = { generateForOrder: async () => { state.ticketsIssued += 2; } };
   const audit: any = { log: async ({ action }: any) => { state.audit.push(action); } };
+  const alerts: any = { raise: async (a: any) => { state.alerts.push(a.kind); return a; } };
+  const queue: any = { enqueueSafely: async (type: string, key: string) => { state.jobs.push(`${type}:${key}`); return {}; } };
 
   const config = new ConfigService({
     MPESA_CONSUMER_KEY: 'k',
@@ -131,10 +139,12 @@ function makeFakes() {
     MPESA_STK_QUERY_AFTER_SECONDS: '8',
     MPESA_STK_QUERY_INTERVAL_MS: '4000',
     PLATFORM_COMMISSION_PERCENT: '9',
+    MPESA_CALLBACK_TOKEN: CALLBACK_TOKEN,
+    ...configOverrides,
   });
 
   const mpesa = new MpesaService(config);
-  const service = new PaymentsService(prisma, mpesa, orders, tickets, audit, config);
+  const service = new PaymentsService(prisma, mpesa, orders, tickets, audit, config, alerts, queue);
 
   return { state, prisma, mpesa, service };
 }
@@ -145,7 +155,11 @@ function ageBy(payment: PaymentRow, seconds: number) {
   if (payment.stkExpiresAt) payment.stkExpiresAt = new Date(payment.stkExpiresAt.getTime() - seconds * 1000);
 }
 
-function callbackBody(checkoutRequestId: string, resultCode: number, receipt?: string) {
+function callbackBody(checkoutRequestId: string, resultCode: number, receipt?: string, amount?: number) {
+  const items = [
+    ...(receipt ? [{ Name: 'MpesaReceiptNumber', Value: receipt }] : []),
+    ...(amount !== undefined ? [{ Name: 'Amount', Value: amount }] : []),
+  ];
   return {
     Body: {
       stkCallback: {
@@ -153,9 +167,7 @@ function callbackBody(checkoutRequestId: string, resultCode: number, receipt?: s
         CheckoutRequestID: checkoutRequestId,
         ResultCode: resultCode,
         ResultDesc: `Result ${resultCode}`,
-        ...(receipt
-          ? { CallbackMetadata: { Item: [{ Name: 'MpesaReceiptNumber', Value: receipt }] } }
-          : {}),
+        ...(items.length ? { CallbackMetadata: { Item: items } } : {}),
       },
     },
   };
@@ -178,6 +190,9 @@ describe('M-Pesa STK push flow', () => {
   afterEach(() => jest.restoreAllMocks());
 
   const initiate = () => ctx.service.initiateStkPush('user-1', { orderId: ORDER_ID, phone: '0712345678' });
+  /** The checkout request id lives server-side only; tests read it from state. */
+  const checkoutId = (paymentId: string) => ctx.state.payments.find((p) => p.id === paymentId)!.checkoutRequestId as string;
+  const callback = (body: any) => ctx.service.handleMpesaCallback(body, { token: CALLBACK_TOKEN });
   const stubQuery = (result: Partial<StkQueryResult>) =>
     jest
       .spyOn(ctx.mpesa, 'queryStkStatus')
@@ -188,7 +203,9 @@ describe('M-Pesa STK push flow', () => {
 
     expect(view.stage).toBe('AWAITING_CUSTOMER');
     expect(view.isFinal).toBe(false);
-    expect(view.checkoutRequestId).toBeTruthy();
+    expect(view.stkSent).toBe(true);
+    // The Daraja request id is what a forged callback would need — never sent to the buyer.
+    expect(JSON.stringify(view)).not.toContain(checkoutId(view.paymentId));
     expect(view.phoneMasked).toBe('0712 *** 678');
     expect(view.amount).toBe(3500);
     // The full number never leaves the backend on this endpoint.
@@ -199,7 +216,7 @@ describe('M-Pesa STK push flow', () => {
     const view = await initiate();
     expect(ctx.state.ticketsIssued).toBe(0);
 
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 0, 'QK12345678'));
+    await callback(callbackBody(checkoutId(view.paymentId), 0, 'QK12345678'));
 
     const settled = await ctx.service.getStatus('user-1', 'CUSTOMER', view.paymentId);
     expect(settled.stage).toBe('SUCCESS');
@@ -212,7 +229,7 @@ describe('M-Pesa STK push flow', () => {
   it('reports a customer cancellation and releases the reservation', async () => {
     const view = await initiate();
 
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 1032));
+    await callback(callbackBody(checkoutId(view.paymentId), 1032));
 
     const settled = await ctx.service.getStatus('user-1', 'CUSTOMER', view.paymentId);
     expect(settled.stage).toBe('CANCELLED');
@@ -225,7 +242,7 @@ describe('M-Pesa STK push flow', () => {
   it('reports a wrong PIN as a failure, not a cancellation', async () => {
     const view = await initiate();
 
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 2001));
+    await callback(callbackBody(checkoutId(view.paymentId), 2001));
 
     const settled = await ctx.service.getStatus('user-1', 'CUSTOMER', view.paymentId);
     expect(settled.stage).toBe('FAILED');
@@ -235,7 +252,7 @@ describe('M-Pesa STK push flow', () => {
   it('reports an unanswered prompt as expired', async () => {
     const view = await initiate();
 
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 1037));
+    await callback(callbackBody(checkoutId(view.paymentId), 1037));
 
     const settled = await ctx.service.getStatus('user-1', 'CUSTOMER', view.paymentId);
     expect(settled.stage).toBe('EXPIRED');
@@ -318,7 +335,7 @@ describe('M-Pesa STK push flow', () => {
 
   it('sends a fresh prompt when Try Again follows a cancelled payment', async () => {
     const first = await initiate();
-    await ctx.service.handleMpesaCallback(callbackBody(first.checkoutRequestId!, 1032));
+    await callback(callbackBody(checkoutId(first.paymentId), 1032));
     expect(ctx.state.reserved).toBe(0);
 
     const retry = await ctx.service.initiateStkPush('user-1', { orderId: ORDER_ID, phone: '0712345678' });
@@ -344,12 +361,12 @@ describe('M-Pesa STK push flow', () => {
 
   it('honours a success callback that lands after the payment was written off', async () => {
     const view = await initiate();
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 1037));
+    await callback(callbackBody(checkoutId(view.paymentId), 1037));
     expect(ctx.state.order.status).toBe('FAILED');
     expect(ctx.state.reserved).toBe(0);
 
     // Safaricom retries with the real outcome — the money did leave the account.
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 0, 'QK99999999'));
+    await callback(callbackBody(checkoutId(view.paymentId), 0, 'QK99999999'));
 
     const settled = await ctx.service.getStatus('user-1', 'CUSTOMER', view.paymentId);
     expect(settled.stage).toBe('SUCCESS');
@@ -365,7 +382,7 @@ describe('M-Pesa STK push flow', () => {
     stubQuery({ outcome: 'SUCCESS', resultCode: '0' });
 
     await Promise.all([
-      ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 0, 'QK55555555')),
+      callback(callbackBody(checkoutId(view.paymentId), 0, 'QK55555555')),
       ctx.service.reconcile(ctx.state.payments[0] as any),
     ]);
 
@@ -381,8 +398,150 @@ describe('M-Pesa STK push flow', () => {
 
   it('refuses to pay an order twice', async () => {
     const view = await initiate();
-    await ctx.service.handleMpesaCallback(callbackBody(view.checkoutRequestId!, 0, 'QK11111111'));
+    await callback(callbackBody(checkoutId(view.paymentId), 0, 'QK11111111'));
 
     await expect(initiate()).rejects.toThrow('already been paid for');
+  });
+
+  // ── Callback authenticity (forged callbacks must never mint tickets) ──────
+
+  it('ignores a callback with a missing or wrong token', async () => {
+    const view = await initiate();
+    const forged = callbackBody(checkoutId(view.paymentId), 0, 'QKFORGED01', 3500);
+
+    await ctx.service.handleMpesaCallback(forged);
+    await ctx.service.handleMpesaCallback(forged, { token: 'guess' });
+
+    expect(ctx.state.payments[0].status).toBe('PENDING');
+    expect(ctx.state.ticketsIssued).toBe(0);
+    expect(ctx.state.alerts).toContain('PAYMENT_CALLBACK_REJECTED');
+    expect(ctx.state.audit).toContain('PAYMENT_CALLBACK_REJECTED');
+  });
+
+  it('rejects callbacks from outside the IP allowlist', async () => {
+    ctx = makeFakes({ MPESA_CALLBACK_ALLOWED_IPS: '196.201.214.200' });
+    jest.spyOn(ctx.mpesa, 'initiateStkPush').mockResolvedValue({
+      merchantRequestId: 'm', checkoutRequestId: 'chk-ip', responseCode: '0', responseDescription: '', customerMessage: '',
+    });
+    const view = await initiate();
+
+    await ctx.service.handleMpesaCallback(callbackBody('chk-ip', 0, 'QKIP000001', 3500), { token: CALLBACK_TOKEN, sourceIp: '10.0.0.9' });
+    expect(ctx.state.ticketsIssued).toBe(0);
+
+    await ctx.service.handleMpesaCallback(callbackBody('chk-ip', 0, 'QKIP000001', 3500), { token: CALLBACK_TOKEN, sourceIp: '::ffff:196.201.214.200' });
+    const settled = await ctx.service.getStatus('user-1', 'CUSTOMER', view.paymentId);
+    expect(settled.stage).toBe('SUCCESS');
+  });
+
+  it('without a configured token, settles only on Daraja\'s own answer', async () => {
+    ctx = makeFakes({ MPESA_CALLBACK_TOKEN: '' });
+    jest.spyOn(ctx.mpesa, 'initiateStkPush').mockResolvedValue({
+      merchantRequestId: 'm', checkoutRequestId: 'chk-open', responseCode: '0', responseDescription: '', customerMessage: '',
+    });
+    await initiate();
+    // Daraja says the customer has not paid yet.
+    const query = jest.spyOn(ctx.mpesa, 'queryStkStatus').mockResolvedValue({ outcome: 'PROCESSING', unavailable: false });
+
+    await ctx.service.handleMpesaCallback(callbackBody('chk-open', 0, 'QKFAKE0001', 3500));
+
+    expect(query).toHaveBeenCalledWith('chk-open');
+    expect(ctx.state.payments[0].status).toBe('PENDING');
+    expect(ctx.state.ticketsIssued).toBe(0);
+  });
+
+  it('without a token, a forged success contradicted by Daraja is flagged, not honoured', async () => {
+    ctx = makeFakes({ MPESA_CALLBACK_TOKEN: '' });
+    jest.spyOn(ctx.mpesa, 'initiateStkPush').mockResolvedValue({
+      merchantRequestId: 'm', checkoutRequestId: 'chk-c', responseCode: '0', responseDescription: '', customerMessage: '',
+    });
+    await initiate();
+    jest.spyOn(ctx.mpesa, 'queryStkStatus').mockResolvedValue({ outcome: 'CANCELLED', resultCode: '1032', unavailable: false });
+
+    await ctx.service.handleMpesaCallback(callbackBody('chk-c', 0, 'QKFAKE0002', 3500));
+
+    expect(ctx.state.payments[0].status).toBe('CANCELLED');
+    expect(ctx.state.ticketsIssued).toBe(0);
+    expect(ctx.state.alerts).toContain('PAYMENT_CALLBACK_CONFLICT');
+  });
+
+  it('without a token, a success confirmed by Daraja is honoured', async () => {
+    ctx = makeFakes({ MPESA_CALLBACK_TOKEN: '' });
+    jest.spyOn(ctx.mpesa, 'initiateStkPush').mockResolvedValue({
+      merchantRequestId: 'm', checkoutRequestId: 'chk-ok', responseCode: '0', responseDescription: '', customerMessage: '',
+    });
+    await initiate();
+    jest.spyOn(ctx.mpesa, 'queryStkStatus').mockResolvedValue({ outcome: 'SUCCESS', resultCode: '0', unavailable: false });
+
+    await ctx.service.handleMpesaCallback(callbackBody('chk-ok', 0, 'QKREAL0001', 3500));
+
+    expect(ctx.state.payments[0].status).toBe('SUCCESS');
+    expect(ctx.state.payments[0].mpesaReceiptNumber).toBe('QKREAL0001');
+    expect(ctx.state.ticketsIssued).toBe(2);
+  });
+
+  it('refuses a success callback whose amount does not match the payment', async () => {
+    const view = await initiate();
+
+    await callback(callbackBody(checkoutId(view.paymentId), 0, 'QKAMOUNT01', 1));
+
+    expect(ctx.state.payments[0].status).toBe('PENDING');
+    expect(ctx.state.ticketsIssued).toBe(0);
+    expect(ctx.state.alerts).toContain('PAYMENT_AMOUNT_MISMATCH');
+  });
+
+  it('refuses a success callback that reuses another payment\'s receipt', async () => {
+    const view = await initiate();
+    ctx.state.payments.push({ id: 'pay-old', orderId: 'other', status: 'SUCCESS', mpesaReceiptNumber: 'QKREUSED01', createdAt: new Date(0) });
+
+    await callback(callbackBody(checkoutId(view.paymentId), 0, 'QKREUSED01', 3500));
+
+    expect(ctx.state.payments[0].status).toBe('PENDING');
+    expect(ctx.state.ticketsIssued).toBe(0);
+    expect(ctx.state.alerts).toContain('PAYMENT_DUPLICATE_RECEIPT');
+  });
+
+  it('flags a late success as a discrepancy while still honouring it', async () => {
+    const view = await initiate();
+    await callback(callbackBody(checkoutId(view.paymentId), 1037));
+    await callback(callbackBody(checkoutId(view.paymentId), 0, 'QKLATE0001', 3500));
+
+    expect(ctx.state.ticketsIssued).toBe(2);
+    expect(ctx.state.alerts).toContain('PAYMENT_LATE_SUCCESS');
+  });
+
+  it('processes a duplicated success callback exactly once', async () => {
+    const view = await initiate();
+    const body = callbackBody(checkoutId(view.paymentId), 0, 'QKDUP00001', 3500);
+
+    await Promise.all([callback(body), callback(body), callback(body)]);
+    await callback(body);
+
+    expect(ctx.state.ticketsIssued).toBe(2);
+    expect(ctx.state.audit.filter((a) => a === 'PAYMENT_SUCCESS')).toHaveLength(1);
+  });
+
+  it('queues a failure notice only for a genuine failure', async () => {
+    const first = await initiate();
+    await callback(callbackBody(checkoutId(first.paymentId), 1032)); // cancelled: no email
+    expect(ctx.state.jobs).toHaveLength(0);
+
+    const second = await initiate();
+    await callback(callbackBody(checkoutId(second.paymentId), 2001)); // wrong PIN: email
+    expect(ctx.state.jobs).toEqual([`PAYMENT_FAILED_NOTICE:payment-failed:${second.paymentId}`]);
+  });
+
+  it('never lets the client report a payment as successful', async () => {
+    // There is no API that accepts a client-reported status: the only writers
+    // of SUCCESS are the callback, the status query and the dev mock.
+    const saved = process.env.ENABLE_MOCK_PAYMENTS;
+    process.env.ENABLE_MOCK_PAYMENTS = 'false';
+    try {
+      const view = await initiate();
+      await expect(ctx.service.mockMarkSuccess(view.paymentId)).rejects.toThrow('Mock payments are disabled');
+      expect(ctx.state.ticketsIssued).toBe(0);
+    } finally {
+      if (saved === undefined) delete process.env.ENABLE_MOCK_PAYMENTS;
+      else process.env.ENABLE_MOCK_PAYMENTS = saved;
+    }
   });
 });
