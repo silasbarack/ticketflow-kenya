@@ -3,10 +3,11 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Download, LayoutDashboard, PlusCircle, ScanLine, Search, UserCheck } from 'lucide-react';
+import { Download, Search, UserCheck } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
+import { ORGANIZER_NAV as NAV } from '@/lib/organizer-nav';
 import StatusBadge from '@/components/StatusBadge';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
@@ -16,11 +17,6 @@ import { Input } from '@/components/ui/Input';
 import { Attendee } from '@/types';
 import { formatDateTime, formatTicketCategory } from '@/lib/format';
 
-const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
-  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
-];
 
 function toCsv(attendees: Attendee[]) {
   const header = ['Ticket Code', 'Name', 'Email', 'Phone', 'Ticket Type', 'Status', 'Checked In At', 'Purchased At'];

@@ -37,8 +37,8 @@ export interface PaymentStatusView {
   amount: number;
   /** Never the full number — see maskPhone(). */
   phoneMasked: string | null;
-  checkoutRequestId: string | null;
-  merchantRequestId: string | null;
+  /** The STK prompt was accepted by Daraja. Request ids stay server-side. */
+  stkSent: boolean;
   mpesaReceiptNumber: string | null;
   resultCode: string | null;
   resultDesc: string | null;

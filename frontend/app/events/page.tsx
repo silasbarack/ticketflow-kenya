@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { EventItem } from '@/types';
 import EventGrid from '@/components/EventGrid';
 import HomeHero from '@/components/HomeHero';
+import RecommendedEvents from '@/components/RecommendedEvents';
 
 const categoryOptions = ['all', 'music', 'sports', 'nightlife', 'culture', 'festival', 'technology', 'entertainment', 'motoring'];
 
@@ -82,6 +83,7 @@ function EventsCatalog() {
 
       <section className="events-results">
         <div className="container-page">
+          {!params.get('q') && !params.get('category') && !params.get('city') && !params.get('date') && <RecommendedEvents />}
           <div className="events-toolbar">
             <div>
               <span className="toolbar-label"><CalendarDays size={16} /> Upcoming calendar</span>

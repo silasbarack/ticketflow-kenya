@@ -22,6 +22,15 @@ export interface PasswordResetCodeEmailPayload {
   expiresInMinutes: number;
 }
 
+export interface NotificationEmailPayload {
+  to: string;
+  subject: string;
+  heading: string;
+  /** Plain text paragraphs; HTML-escaped before rendering. */
+  paragraphs: string[];
+  cta?: { label: string; url: string };
+}
+
 interface OutgoingAttachment {
   filename: string;
   content: Buffer;
@@ -335,5 +344,47 @@ export class EmailService {
       this.logger.error(`Failed to send password reset code email: ${error?.message}`);
       return false;
     }
+  }
+
+  /**
+   * Generic transactional notice used by the automation engine (payment
+   * failures, event reminders, verification nudges, admin alerts).
+   *
+   * Unlike the methods above it THROWS when delivery fails, so the job queue
+   * can retry with backoff. Returns false only when email is not configured
+   * at all — retrying cannot help that.
+   */
+  async sendNotificationEmail(payload: NotificationEmailPayload): Promise<boolean> {
+    if (!this.isConfigured()) {
+      this.logger.warn(`Email not configured — "${payload.subject}" not sent`);
+      return false;
+    }
+
+    const paragraphs = payload.paragraphs
+      .map((p) => `<p style="margin:0 0 14px;font-size:14px;line-height:1.7;color:#c4c7cc">${escapeHtml(p)}</p>`)
+      .join('');
+    const safeCtaUrl = payload.cta && /^https?:\/\//i.test(payload.cta.url) ? payload.cta.url : null;
+    const cta = payload.cta && safeCtaUrl
+      ? `<p style="margin:20px 0 0"><a href="${escapeHtml(safeCtaUrl)}" style="display:inline-block;padding:12px 22px;border-radius:10px;background:#e6002d;color:#ffffff;font-weight:800;font-size:14px;text-decoration:none">${escapeHtml(payload.cta.label)}</a></p>`
+      : '';
+
+    const html = emailFrame(this.getLogoSrc(), escapeHtml(payload.heading), '', paragraphs + cta);
+    const text = [
+      payload.heading,
+      '',
+      ...payload.paragraphs,
+      ...(payload.cta && safeCtaUrl ? ['', `${payload.cta.label}: ${safeCtaUrl}`] : []),
+      '',
+      'TicketFlow Kenya · support@ticketflow.co.ke',
+    ].join('\n');
+
+    await this.deliver({
+      to: payload.to,
+      subject: payload.subject,
+      html,
+      text,
+      attachments: this.logoAttachment(),
+    });
+    return true;
   }
 }

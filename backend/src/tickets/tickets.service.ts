@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -61,10 +62,30 @@ export class TicketsService {
 
   // ── QR helpers ──────────────────────────────────────────────────────────────
 
+  /**
+   * QR signing key. TICKET_QR_SECRET should always be set; without it we
+   * derive a key from JWT_SECRET rather than fall back to a constant anyone can
+   * read in this repository. Tickets keep their stored signature, so changing
+   * the key never invalidates tickets already issued (see verifyQrSignature).
+   */
+  private qrSecret(): string {
+    const explicit = this.configService.get<string>('TICKET_QR_SECRET');
+    if (explicit) return explicit;
+    const jwt = this.configService.get<string>('JWT_SECRET');
+    if (!this.warnedAboutQrSecret) {
+      this.warnedAboutQrSecret = true;
+      this.logger.warn('TICKET_QR_SECRET is not set — deriving the QR signing key from JWT_SECRET. Set a dedicated secret.');
+    }
+    if (jwt) return crypto.createHmac('sha256', jwt).update('ticketflow-qr-signing-v1').digest('hex');
+    this.logger.error('Neither TICKET_QR_SECRET nor JWT_SECRET is set — QR signatures are not secure');
+    return 'tfk-default-secret';
+  }
+
+  private warnedAboutQrSecret = false;
+
   private signQrPayload(ticketCode: string, eventId: string): string {
-    const secret = this.configService.get<string>('TICKET_QR_SECRET') || 'tfk-default-secret';
     const data = `${ticketCode}:${eventId}`;
-    return crypto.createHmac('sha256', secret).update(data).digest('hex');
+    return crypto.createHmac('sha256', this.qrSecret()).update(data).digest('hex');
   }
 
   private buildQrPayload(ticketCode: string, eventId: string): string {
@@ -72,8 +93,33 @@ export class TicketsService {
     return JSON.stringify({ code: ticketCode, eid: eventId, sig });
   }
 
-  verifyQrSignature(ticketCode: string, eventId: string, sig: string): boolean {
-    return this.signQrPayload(ticketCode, eventId) === sig;
+  /**
+   * Checks a scanned signature in constant time. The ticket's own stored
+   * signature is authoritative when present, so tickets signed under an older
+   * key stay valid; otherwise the signature is recomputed with today's key.
+   */
+  verifyQrSignature(ticketCode: string, eventId: string, sig: string, storedSignature?: string | null): boolean {
+    if (!sig || typeof sig !== 'string') return false;
+    const expected = storedSignature || this.signQrPayload(ticketCode, eventId);
+    const a = Buffer.from(sig);
+    const b = Buffer.from(expected);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  }
+
+  /**
+   * Who may see a ticket: its holder, an admin, or the organizer running the
+   * ticket's event. Before this, any organizer could open any ticket.
+   */
+  private async assertCanAccessTicket(ticket: { userId: string; order: { eventId: string } }, userId: string, role: string) {
+    if (role === 'ADMIN' || ticket.userId === userId) return;
+    if (role === 'ORGANIZER') {
+      const event = await this.prisma.event.findUnique({
+        where: { id: ticket.order.eventId },
+        select: { organizer: { select: { userId: true } } },
+      });
+      if (event?.organizer.userId === userId) return;
+    }
+    throw new ForbiddenException('You do not have access to this ticket');
   }
 
   private generateTicketCode(): string {
@@ -241,12 +287,15 @@ export class TicketsService {
     });
     if (!order) throw new NotFoundException('Order not found');
 
-    // Idempotency guard
-    const existing = await this.prisma.ticket.findMany({ where: { orderId } });
-    if (existing.length > 0) return existing;
+    // Issuance is only ever the consequence of a verified payment, which marks
+    // the order PAID first. Refusing anything else here means no other code
+    // path can mint tickets for an unpaid order, by mistake or otherwise.
+    if (order.status !== 'PAID') {
+      throw new BadRequestException(`Tickets can only be issued for a paid order (order is ${order.status})`);
+    }
 
-    const createdTickets: Awaited<ReturnType<typeof this.prisma.ticket.create>>[] = [];
-
+    // Build QR images outside the transaction — they are CPU work, not DB work.
+    const planned: { ticketCode: string; qrCodeData: string; sig: string; ticketTypeId: string; attendeeName: string }[] = [];
     for (const item of order.items) {
       const attendeeList: any[] = Array.isArray(item.attendeesJson) ? (item.attendeesJson as any[]) : [];
       for (let i = 0; i < item.quantity; i++) {
@@ -254,34 +303,83 @@ export class TicketsService {
         const qrPayload = this.buildQrPayload(ticketCode, order.eventId);
         const sig = this.signQrPayload(ticketCode, order.eventId);
         const qrCodeData = await QRCode.toDataURL(qrPayload);
-
         const attendee = attendeeList[i] as { firstName: string; lastName: string } | undefined;
         const attendeeName = attendee
           ? `${attendee.firstName} ${attendee.lastName}`
           : `${order.user.firstName} ${order.user.lastName}`;
-
-        const ticket = await this.prisma.ticket.create({
-          data: {
-            ticketCode,
-            qrCodeData,
-            qrSignature: sig,
-            orderId: order.id,
-            ticketTypeId: item.ticketTypeId,
-            userId: order.userId,
-            attendeeName,
-          },
-        });
-        createdTickets.push(ticket);
+        planned.push({ ticketCode, qrCodeData, sig, ticketTypeId: item.ticketTypeId, attendeeName });
       }
     }
 
-    // Send email with PDF (non-blocking — failure must not prevent ticket creation)
+    // All-or-nothing, and serialised per order with a transaction-scoped
+    // advisory lock: two concurrent callers cannot both pass the "already
+    // issued?" check, and a crash mid-way cannot leave half an order issued.
+    const { tickets: createdTickets, created } = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'ticket-issue:' + orderId}))`;
+      const existing = await tx.ticket.findMany({ where: { orderId } });
+      if (existing.length > 0) return { tickets: existing, created: false };
+
+      const rows: Awaited<ReturnType<typeof tx.ticket.create>>[] = [];
+      for (const p of planned) {
+        rows.push(
+          await tx.ticket.create({
+            data: {
+              ticketCode: p.ticketCode,
+              qrCodeData: p.qrCodeData,
+              qrSignature: p.sig,
+              orderId: order.id,
+              ticketTypeId: p.ticketTypeId,
+              userId: order.userId,
+              attendeeName: p.attendeeName,
+            },
+          }),
+        );
+      }
+      return { tickets: rows, created: true };
+    });
+
+    if (!created) return createdTickets;
+
+    // Send email with PDF (non-blocking — failure must not prevent ticket
+    // creation). Tickets whose email did not go out are retried by the
+    // automation engine's ticket-delivery sweep.
     this.sendTicketEmailsAsync(orderId, createdTickets, order).catch((err) =>
       this.logger.error(`Email sending failed for order ${orderId}: ${err?.message}`),
     );
 
     this.logger.log(`Generated ${createdTickets.length} ticket(s) for order ${orderId}`);
     return createdTickets;
+  }
+
+  /**
+   * Sends (or re-sends) one ticket's email. Throws when delivery fails so the
+   * job queue can retry with backoff; returns false when email is not set up.
+   * Idempotent: a ticket already emailed is skipped.
+   */
+  async deliverTicketEmail(ticketId: string, { force = false } = {}): Promise<boolean> {
+    if (!this.emailService.isConfigured()) return false;
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { id: ticketId },
+      include: { ticketType: true, order: { include: { event: true } }, user: true },
+    });
+    if (!ticket) throw new NotFoundException('Ticket not found');
+    if (ticket.emailSentAt && !force) return true;
+    if (ticket.order.status !== 'PAID' || ticket.status === 'CANCELLED' || ticket.status === 'REFUNDED') return false;
+
+    const pdfBuffer = await this.buildPdf(ticket);
+    const sent = await this.emailService.sendTicketEmail({
+      to: ticket.user.email,
+      buyerName: `${ticket.user.firstName} ${ticket.user.lastName}`,
+      eventName: ticket.order.event.title,
+      ticketType: `${ticket.ticketType.name} (${ticket.ticketType.category})`,
+      ticketCode: ticket.ticketCode,
+      venue: `${ticket.order.event.venue}, ${ticket.order.event.city}`,
+      eventDateTime: formatEventDateTime(ticket.order.event.startDateTime, ticket.order.event.timezone),
+      pdfBuffer,
+    });
+    if (!sent) throw new Error('Ticket email delivery failed');
+    await this.prisma.ticket.update({ where: { id: ticket.id }, data: { emailSentAt: new Date() } });
+    return true;
   }
 
   private async sendTicketEmailsAsync(_orderId: string, tickets: any[], order: any) {
@@ -390,7 +488,6 @@ export class TicketsService {
         eventVenue: `${ticket.order.event.venue}, ${ticket.order.event.city}`,
         eventDateTime: ticket.order.event.startDateTime,
         holderName: `${ticket.user.firstName} ${ticket.user.lastName}`,
-        holderEmail: ticket.user.email,
         ticketType: ticket.ticketType.name,
         category: ticket.ticketType.category,
         paymentStatus: ticket.order.status,
@@ -419,18 +516,22 @@ export class TicketsService {
       include: { ticketType: true, order: { include: { event: true } }, checkIn: true },
     });
     if (!ticket) throw new NotFoundException('Ticket not found');
-    if (role !== 'ADMIN' && role !== 'ORGANIZER' && ticket.userId !== userId) {
-      throw new ForbiddenException('You do not have access to this ticket');
-    }
+    await this.assertCanAccessTicket(ticket, userId, role);
     return ticket;
   }
 
-  async findByCode(code: string) {
+  async findByCode(userId: string, role: string, code: string) {
     const ticket = await this.prisma.ticket.findUnique({
       where: { ticketCode: code },
-      include: { ticketType: true, order: { include: { event: true, user: true } }, checkIn: true },
+      include: {
+        ticketType: true,
+        // Never the whole user row — that carried the buyer's password hash.
+        order: { include: { event: true, user: { select: { id: true, firstName: true, lastName: true } } } },
+        checkIn: true,
+      },
     });
     if (!ticket) throw new NotFoundException('Ticket not found');
+    await this.assertCanAccessTicket(ticket, userId, role);
     return ticket;
   }
 
@@ -440,9 +541,7 @@ export class TicketsService {
       include: { order: true },
     });
     if (!ticket) throw new NotFoundException('Ticket not found');
-    if (role !== 'ADMIN' && role !== 'ORGANIZER' && ticket.userId !== userId) {
-      throw new ForbiddenException('You do not have access to this ticket');
-    }
+    await this.assertCanAccessTicket(ticket, userId, role);
     const buf = await this.generatePdfBuffer(id);
     return new StreamableFile(buf, {
       type: 'application/pdf',

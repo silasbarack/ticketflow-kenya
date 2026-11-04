@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, LogOut, Palette, Ticket, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, LogOut, Palette, Ticket, User as UserIcon, Compass } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 function dashboardLabelAndHref(role: string | undefined) {
@@ -70,6 +70,9 @@ export default function UserMenu() {
             </MenuLink>
             <MenuLink href="/settings/appearance" icon={<Palette className="h-4 w-4" aria-hidden="true" />} onNavigate={() => setOpen(false)}>
               Appearance
+            </MenuLink>
+            <MenuLink href="/settings/discovery" icon={<Compass className="h-4 w-4" aria-hidden="true" />} onNavigate={() => setOpen(false)}>
+              Recommendations
             </MenuLink>
             <MenuLink href="/settings/account" icon={<UserIcon className="h-4 w-4" aria-hidden="true" />} onNavigate={() => setOpen(false)}>
               Account Settings

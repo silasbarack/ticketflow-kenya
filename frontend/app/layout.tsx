@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import NavigationProgress from '@/components/NavigationProgress';
 import Footer from '@/components/Footer';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
+import SupportChat from '@/components/SupportChat';
 import { BG_COLOR_KEY, BLACK } from '@/lib/appearance';
 
 // Noto Sans is the only typeface: body, headings and accents all use it, with
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <Footer />
           <CookieConsentBanner />
+          <SupportChat />
         </Providers>
       </body>
     </html>

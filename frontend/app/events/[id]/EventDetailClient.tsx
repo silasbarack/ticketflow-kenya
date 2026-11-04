@@ -7,7 +7,9 @@ import toast from 'react-hot-toast';
 import { EventItem, TicketType } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { formatCurrency } from '@/lib/format';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 import { getTierStatus, sortTiers, tierLabel } from '@/lib/tiers';
 
 function eventDateLabel(value: string) {
@@ -31,6 +33,12 @@ function tierDateLabel(value: string) {
 export default function EventDetailClient({ initialEvent }: { initialEvent: EventItem | null }) {
   const event = initialEvent;
   const { addToCart } = useCart();
+  const { user } = useAuth();
+
+  // Recorded only if the user opted in to personalisation (checked server-side).
+  useEffect(() => {
+    if (user && event?.id) api.post(`/discovery/me/views/${event.id}`).catch(() => undefined);
+  }, [user, event?.id]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   if (!event) {

@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, Clock3, LayoutDashboard, Plus, PlusCircle, ReceiptText, ScanLine, ShieldCheck, Ticket, Wallet } from 'lucide-react';
+import { CalendarDays, Clock3, Plus, ReceiptText, Ticket, Wallet } from 'lucide-react';
 import { api } from '@/lib/api';
 import RequireRole from '@/components/RequireRole';
 import DashboardLayout from '@/components/DashboardLayout';
+import { ORGANIZER_NAV as NAV } from '@/lib/organizer-nav';
 import StatusBadge from '@/components/StatusBadge';
 import MetricCard from '@/components/ui/MetricCard';
 import PageHeader from '@/components/ui/PageHeader';
@@ -15,12 +16,6 @@ import { buttonVariants } from '@/components/ui/Button';
 import { EventItem, OrganizerDashboardStats } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/format';
 
-const NAV = [
-  { label: 'Overview', href: '/organizer/dashboard', icon: LayoutDashboard },
-  { label: 'Create Event', href: '/organizer/events/create', icon: PlusCircle },
-  { label: 'Verification', href: '/organizer/verification', icon: ShieldCheck },
-  { label: 'Scan Tickets', href: '/organizer/scan', icon: ScanLine },
-];
 
 function OrganizerDashboardContent() {
   const statsQuery = useQuery({

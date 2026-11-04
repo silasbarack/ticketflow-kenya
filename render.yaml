@@ -83,6 +83,30 @@ services:
       - key: PERSONA_API_VERSION
         value: "2025-10-27"
 
+      # Signs ticket QR codes. Previously unset, so production fell back to a
+      # constant in the source. Existing tickets keep working: scans are checked
+      # against each ticket's stored signature.
+      - key: TICKET_QR_SECRET
+        generateValue: true
+
+      # M-Pesa callback authenticity. Set a long random value here AND append
+      # ?token=<same value> to MPESA_CALLBACK_URL. Without it, callbacks are
+      # still accepted but only settle after Daraja's status query confirms them.
+      - key: MPESA_CALLBACK_TOKEN
+        sync: false
+
+      # AI & automation (docs/AI_AUTOMATION.md). AI stays off until both of
+      # these are set AND an admin enables each feature under Admin → AI Settings.
+      - key: AI_ENABLED
+        value: "false"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: claude-opus-5-5
+      # Comma-separated admin addresses for CRITICAL alert emails.
+      - key: ADMIN_ALERT_EMAILS
+        sync: false
+
   - type: web
     name: ticketflow-frontend
     runtime: node

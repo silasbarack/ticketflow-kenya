@@ -126,13 +126,13 @@ model User {
 }
 
 model OrganizerProfile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String  @id @default(uuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyName String
   description String?
   phone       String?
-  isVerified  Boolean  @default(false)
+  isVerified  Boolean @default(false)
 
   // KYB workflow. isVerified remains the final authorization switch used by ticket sales.
   verificationStatus OrganizerVerificationStatus @default(NOT_STARTED)
@@ -145,25 +145,25 @@ model OrganizerProfile {
 
   // References to access-controlled evidence; never store passwords, OTPs or account PINs.
   certificateOfIncorporationUrl String?
-  officialSearchUrl              String?
+  officialSearchUrl             String?
   kraPinCertificateUrl          String?
 
-  representativeFullName      String?
-  representativeRole          String?
-  representativeDocumentType  String?
-  representativeIdLast4       String?
+  representativeFullName     String?
+  representativeRole         String?
+  representativeDocumentType String?
+  representativeIdLast4      String?
 
   // Persona-backed identity verification. Secrets and biometric media stay
   // with Persona; TicketFlow stores only provider references and decision state.
-  identityProvider                 String?
-  representativeIdentityVerified  Boolean   @default(false)
-  personaInquiryId                 String?   @unique
-  personaInquiryStatus             String?
-  personaIdentityVerifiedAt        DateTime?
-  personaIdentityFailureReason     String?
-  personaLastEventAt               DateTime?
-  representativeIdDocumentUrl String?
-  authorizationLetterUrl      String?
+  identityProvider               String?
+  representativeIdentityVerified Boolean   @default(false)
+  personaInquiryId               String?   @unique
+  personaInquiryStatus           String?
+  personaIdentityVerifiedAt      DateTime?
+  personaIdentityFailureReason   String?
+  personaLastEventAt             DateTime?
+  representativeIdDocumentUrl    String?
+  authorizationLetterUrl         String?
 
   payoutMethod      String?
   payoutAccountName String?
@@ -178,9 +178,9 @@ model OrganizerProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  events                  Event[]
-  verificationDocuments   OrganizerVerificationDocument[]
-  personaWebhookEvents    PersonaWebhookEvent[]
+  events                Event[]
+  verificationDocuments OrganizerVerificationDocument[]
+  personaWebhookEvents  PersonaWebhookEvent[]
 
   taxProfile      OrganizerTaxProfile?
   taxCalculations TaxCalculation[]
@@ -190,14 +190,14 @@ model OrganizerProfile {
 }
 
 model PersonaWebhookEvent {
-  id          String           @id @default(uuid())
-  eventId     String           @unique
+  id          String            @id @default(uuid())
+  eventId     String            @unique
   eventName   String
   inquiryId   String?
   organizerId String?
   organizer   OrganizerProfile? @relation(fields: [organizerId], references: [id], onDelete: SetNull)
-  processedAt DateTime         @default(now())
-  createdAt   DateTime         @default(now())
+  processedAt DateTime          @default(now())
+  createdAt   DateTime          @default(now())
 
   @@index([inquiryId])
   @@index([organizerId])
@@ -380,6 +380,8 @@ model Payment {
 
   @@index([orderId])
   @@index([checkoutRequestId])
+  // Duplicate-receipt detection in the discrepancy sweep.
+  @@index([mpesaReceiptNumber])
   // The reconciliation sweep scans for stale PENDING payments.
   @@index([status, createdAt])
   @@map("payments")
@@ -1102,4 +1104,223 @@ model TaxPermissionGrant {
 
   @@unique([userId, permission])
   @@map("tax_permission_grants")
+}
+
+// =====================================================================
+// AI & AUTOMATION (see docs/AI_AUTOMATION.md)
+//
+// Like the tax module, these tables reference existing rows by plain id and
+// add no Prisma relations to pre-existing models, so nothing above changes.
+//
+// Privacy: AI prompts and raw model responses are never persisted. Usage logs
+// hold token counts and cost only; drafts hold the organiser's own structured
+// event input and the validated output they asked for.
+// =====================================================================
+
+/// Per-feature kill switch and usage limits, editable by admins.
+model AiFeatureSetting {
+  feature           String   @id
+  enabled           Boolean  @default(false)
+  /// Requests allowed across the platform per UTC day.
+  dailyRequestLimit Int      @default(500)
+  /// Requests one user may make per UTC day.
+  perUserDailyLimit Int      @default(30)
+  /// Spend ceiling in US dollars per calendar month (UTC).
+  monthlyBudgetUsd  Decimal  @default(25) @db.Decimal(10, 2)
+  updatedById       String?
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+
+  @@map("ai_feature_settings")
+}
+
+/// One AI provider call (or a call refused before it reached the provider).
+model AiUsageLog {
+  id           String   @id @default(uuid())
+  feature      String
+  userId       String?
+  provider     String
+  model        String
+  /// SUCCESS | PROVIDER_ERROR | INVALID_OUTPUT | REFUSED | BLOCKED_DISABLED | BLOCKED_LIMIT | BLOCKED_BUDGET
+  status       String
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  costUsd      Decimal  @default(0) @db.Decimal(12, 6)
+  latencyMs    Int      @default(0)
+  errorCode    String?
+  createdAt    DateTime @default(now())
+
+  @@index([feature, createdAt])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("ai_usage_logs")
+}
+
+/// AI-generated content awaiting a human decision. Nothing in a draft is ever
+/// applied to an event automatically; the organiser accepts it into the form.
+model AiDraft {
+  id        String    @id @default(uuid())
+  feature   String
+  ownerId   String
+  eventId   String?
+  /// DRAFT | ACCEPTED | DISCARDED
+  status    String    @default("DRAFT")
+  language  String?
+  input     Json
+  output    Json
+  decidedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([ownerId, feature, createdAt])
+  @@index([eventId])
+  @@map("ai_drafts")
+}
+
+/// Durable background job. `idempotencyKey` is unique, so enqueuing the same
+/// logical job twice is a no-op. Failed jobs back off exponentially and land in
+/// DEAD (the dead-letter state) after `maxAttempts`.
+model AutomationJob {
+  id             String    @id @default(uuid())
+  type           String
+  idempotencyKey String    @unique
+  payload        Json
+  /// QUEUED | RUNNING | SUCCEEDED | DEAD | CANCELLED
+  status         String    @default("QUEUED")
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(5)
+  runAt          DateTime  @default(now())
+  lockedAt       DateTime?
+  lastError      String?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, runAt])
+  @@index([type, createdAt])
+  @@map("automation_jobs")
+}
+
+/// Something a human should look at: payment discrepancies, rules-based risk
+/// signals, stalled verifications. Alerts never act on their own — an admin
+/// records a decision (with a note) to close one.
+model OperationalAlert {
+  id           String    @id @default(uuid())
+  /// e.g. PAYMENT_LATE_SUCCESS, RISK_DUPLICATE_SCAN
+  kind         String
+  /// INFO | WARNING | CRITICAL
+  severity     String
+  /// PAYMENT | RISK | VERIFICATION | SUPPORT | SYSTEM
+  category     String
+  entityType   String?
+  entityId     String?
+  /// Same dedupeKey = same alert; repeated detections bump `occurrences`.
+  dedupeKey    String    @unique
+  title        String
+  details      Json
+  /// OPEN | ACKNOWLEDGED | RESOLVED | DISMISSED
+  status       String    @default("OPEN")
+  occurrences  Int       @default(1)
+  lastSeenAt   DateTime  @default(now())
+  aiSummary    String?
+  aiSummaryAt  DateTime?
+  decidedById  String?
+  decisionNote String?
+  decidedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, category, createdAt])
+  @@index([entityType, entityId])
+  @@map("operational_alerts")
+}
+
+model SupportConversation {
+  id              String   @id @default(uuid())
+  /// Null for signed-out visitors, who hold `accessTokenHash`'s secret instead.
+  userId          String?
+  accessTokenHash String?  @unique
+  /// OPEN | ESCALATED | CLOSED
+  status          String   @default("OPEN")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  messages SupportMessage[]
+
+  @@index([userId, updatedAt])
+  @@index([status, updatedAt])
+  @@map("support_conversations")
+}
+
+model SupportMessage {
+  id              String              @id @default(uuid())
+  conversationId  String
+  conversation    SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  /// USER | ASSISTANT | AGENT
+  role            String
+  content         String
+  /// Set when input screening flagged the message (e.g. injection attempt).
+  flagged         Boolean             @default(false)
+  flagReason      String?
+  /// 1 helpful, -1 unhelpful (assistant messages only).
+  feedback        Int?
+  feedbackNote    String?
+  /// Whether this answer was grounded in the user's own order records.
+  usedAccountData Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([feedback])
+  @@map("support_messages")
+}
+
+model SupportTicket {
+  id             String    @id @default(uuid())
+  reference      String    @unique
+  conversationId String?
+  userId         String?
+  contactEmail   String?
+  subject        String
+  description    String
+  /// PAYMENT | TICKET_ACCESS | REFUND | EVENT_INFO | ORGANIZER | ACCOUNT | OTHER
+  category       String    @default("OTHER")
+  /// OPEN | IN_PROGRESS | RESOLVED | CLOSED
+  status         String    @default("OPEN")
+  /// LOW | NORMAL | HIGH
+  priority       String    @default("NORMAL")
+  orderId        String?
+  assignedToId   String?
+  resolutionNote String?
+  resolvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@map("support_tickets")
+}
+
+/// Explicit discovery preferences. Personalisation from behaviour (purchases,
+/// views) only happens while `personalizationConsent` is true.
+model UserPreference {
+  userId                 String   @id
+  personalizationConsent Boolean  @default(false)
+  preferredCategoryIds   String[] @default([])
+  preferredCities        String[] @default([])
+  updatedAt              DateTime @updatedAt
+  createdAt              DateTime @default(now())
+
+  @@map("user_preferences")
+}
+
+/// Recorded only for signed-in users who have consented to personalisation.
+/// Cleared when consent is withdrawn.
+model EventView {
+  id       String   @id @default(uuid())
+  userId   String
+  eventId  String
+  viewedAt DateTime @default(now())
+
+  @@index([userId, viewedAt])
+  @@map("event_views")
 }
