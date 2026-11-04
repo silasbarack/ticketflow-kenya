@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
-import { LifeBuoy, MessageCircle, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
+import { LifeBuoy, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { api, getApiErrorMessage } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { AiBadge } from '@/components/ai/AiBits';
@@ -32,6 +32,8 @@ interface ChatReply {
 
 /** Signed-out conversations are resumable in this tab only (sessionStorage). */
 const STORE_KEY = 'tfk_support_chat';
+const AI_LOGO = '/brand/ticketflow-ai-logo.png';
+const AI_MARK = '/brand/ticketflow-ai-mark.png';
 const HIDDEN_ON = ['/admin', '/checkout'];
 
 function loadSession(): { conversationId: string; accessToken: string } | null {
@@ -145,10 +147,18 @@ export default function SupportChat() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="support-chat"
-        className="fixed bottom-4 right-4 z-40 flex h-14 items-center gap-2 rounded-full bg-ink-900 px-5 text-sm font-extrabold text-white shadow-elevated transition hover:-translate-y-0.5 sm:bottom-6 sm:right-6"
+        className={clsx(
+          'fixed bottom-4 right-4 z-40 flex h-14 items-center gap-2 rounded-full text-sm font-extrabold shadow-elevated transition hover:-translate-y-0.5 sm:bottom-6 sm:right-6',
+          open ? 'bg-ink-900 px-5 text-white' : 'border border-line bg-white pl-1.5 pr-1.5 text-navy-900 sm:pr-5',
+        )}
       >
-        {open ? <X className="h-5 w-5" aria-hidden="true" /> : <MessageCircle className="h-5 w-5" aria-hidden="true" />}
-        <span className="hidden sm:inline">{open ? 'Close' : 'Help'}</span>
+        {open ? (
+          <X className="h-5 w-5" aria-hidden="true" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={AI_MARK} alt="" width={44} height={44} className="h-11 w-11" />
+        )}
+        <span className="hidden sm:inline">{open ? 'Close' : 'Ask TicketFlow AI'}</span>
         <span className="sr-only sm:hidden">{open ? 'Close help' : 'Open help'}</span>
       </button>
 
@@ -158,12 +168,16 @@ export default function SupportChat() {
           aria-label="TicketFlow support"
           className="fixed inset-x-2 bottom-20 top-[calc(var(--header-height)+0.5rem)] z-40 flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-elevated sm:inset-x-auto sm:bottom-24 sm:right-6 sm:top-auto sm:max-h-[min(640px,calc(100dvh-var(--header-height)-8rem))] sm:w-[400px]"
         >
-          <header className="flex items-center justify-between gap-2 border-b border-line bg-ink-950 px-4 py-3 text-white">
-            <div>
-              <p className="text-sm font-extrabold">TicketFlow help</p>
-              <p className="text-[11px] text-white/60">{signedIn ? 'Signed in — I can check your own orders' : 'Sign in for help with a specific booking'}</p>
+          <header className="flex items-center justify-between gap-2 border-b-2 border-brand-600 bg-white px-4 py-2.5">
+            <div className="flex min-w-0 items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={AI_LOGO} alt="TicketFlow AI Kenya" width={77} height={56} className="h-14 w-auto shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-extrabold text-navy-900">Support assistant</p>
+                <p className="text-[11px] leading-snug text-muted">{signedIn ? 'Signed in — I can check your own orders' : 'Sign in for help with a specific booking'}</p>
+              </div>
             </div>
-            {messages.length > 0 && <button type="button" onClick={newChat} className="rounded-lg px-2 py-1 text-[11px] font-bold text-white/70 hover:bg-white/10 hover:text-white">New chat</button>}
+            {messages.length > 0 && <button type="button" onClick={newChat} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold text-navy-600 hover:bg-navy-900/5 hover:text-navy-900">New chat</button>}
           </header>
 
           <div ref={scrollRef} className="min-h-[220px] flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -178,7 +192,11 @@ export default function SupportChat() {
               </div>
             )}
             {messages.map((m) => (
-              <div key={m.id} className={clsx('flex flex-col', m.role === 'USER' ? 'items-end' : 'items-start')}>
+              <div key={m.id} className={clsx('relative flex flex-col', m.role === 'USER' ? 'items-end' : 'items-start', m.role === 'ASSISTANT' && 'pl-9')}>
+                {m.role === 'ASSISTANT' && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={AI_MARK} alt="" width={28} height={28} className="absolute left-0 top-0.5 h-7 w-7" />
+                )}
                 <div className={clsx('max-w-[88%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed', m.role === 'USER' ? 'bg-brand-600 text-white' : m.role === 'AGENT' ? 'bg-emerald-50 text-navy-900' : 'bg-navy-900/[0.05] text-navy-900')}>
                   {m.role === 'AGENT' && <span className="mb-1 block text-[11px] font-extrabold text-emerald-700">TicketFlow team</span>}
                   {m.content}
