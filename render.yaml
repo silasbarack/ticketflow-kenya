@@ -103,6 +103,10 @@ services:
         sync: false
       - key: AI_MODEL
         value: claude-opus-5-5
+      # Features switched on by default ("all" or a comma-separated list).
+      # Anything saved in Admin → AI Settings overrides this.
+      - key: AI_FEATURES_ENABLED
+        value: all
       # Comma-separated admin addresses for CRITICAL alert emails.
       - key: ADMIN_ALERT_EMAILS
         sync: false
