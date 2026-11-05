@@ -171,6 +171,27 @@ h1, h2, h3, .font-display { font-family: var(--tf-display); }
 }
 .tf-hero-lead { max-width: 560px; margin: 18px 0 0; font-size: 17px; line-height: 1.7; color: #5a5e67; }
 
+/* Night-event hero: a darkened concert photo behind the headline. The overlay
+   is darkest behind the text (left) so white copy stays readable. */
+.tf-hero--night { background: #0b0912; }
+.tf-hero-bg { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.tf-hero-bg img { object-fit: cover; object-position: center; }
+.tf-hero--night::before {
+  opacity: 1;
+  background:
+    linear-gradient(90deg, rgba(8,6,16,.88) 0%, rgba(8,6,16,.72) 45%, rgba(8,6,16,.45) 100%),
+    radial-gradient(40rem 24rem at 85% 25%, rgba(230,0,45,.25), transparent 60%);
+}
+.tf-hero--night .tf-kicker { color: rgba(255,255,255,.82); }
+.tf-hero--night h1 { color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.35); }
+.tf-hero--night h1 .red { background-image: linear-gradient(90deg, #ff4d6d, #ff2a52, #ff7a8f, #ff2a52); }
+.tf-hero--night .tf-hero-lead { color: rgba(255,255,255,.86); }
+.tf-hero--night .tf-benefits b { color: #fff; }
+.tf-hero--night .tf-benefits small { color: rgba(255,255,255,.72); }
+.tf-hero--night .tf-benefits svg { color: #ff4d6d; }
+.tf-hero--night .tf-hero-script-a,
+.tf-hero--night .tf-hero-script-b { color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.45); }
+
 .tf-search {
   margin-top: 28px; max-width: 640px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; align-items: stretch;
   border: 1px solid var(--tf-line); border-radius: 16px; background: #fff; box-shadow: var(--tf-shadow-lg); padding: 6px;

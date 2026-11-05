@@ -34,7 +34,11 @@ export default function HomeHero({ defaults = {} }: { defaults?: HeroSearchDefau
   return (
     <>
       {/* ---------------- Hero ---------------- */}
-      <section className="tf-hero">
+      <section className="tf-hero tf-hero--night">
+        {/* Night-event backdrop behind the headline; decorative, so no alt text. */}
+        <div className="tf-hero-bg" aria-hidden="true">
+          <Image src="/hero-party.jpg" alt="" fill priority sizes="100vw" />
+        </div>
         <div className="container-page tf-hero-grid">
           <div>
             <span className="tf-kicker tf-rise"><span className="tf-live-dot" /> Events bring us together</span>
@@ -96,7 +100,7 @@ export default function HomeHero({ defaults = {} }: { defaults?: HeroSearchDefau
           <div className="tf-hero-visual tf-rise" style={{ '--d': '200ms' } as React.CSSProperties}>
             <HeroSwoosh />
             <div className="tf-hero-photo">
-              <Image src="/hero-party.jpg" alt="Crowd celebrating at a live concert in Kenya" fill priority sizes="(max-width: 1080px) 80vw, 40vw" />
+              <Image src="/posters/generic/music-concerts.jpg" alt="Fan singing along at a live night event in Kenya" fill priority sizes="(max-width: 1080px) 80vw, 40vw" style={{ objectPosition: 'center 30%' }} />
             </div>
             <div className="tf-script tf-hero-script-a">Good Events<br /><b>Brighter People</b></div>
             <div className="tf-phone" aria-hidden="true">
