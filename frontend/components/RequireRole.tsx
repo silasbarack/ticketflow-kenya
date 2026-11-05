@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types';
+import { loginUrlFor } from '@/lib/safe-redirect';
 
 export default function RequireRole({ roles, children }: { roles: UserRole[]; children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -12,7 +13,7 @@ export default function RequireRole({ roles, children }: { roles: UserRole[]; ch
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      router.replace('/login');
+      router.replace(loginUrlFor(window.location.pathname + window.location.search));
       return;
     }
     if (!roles.includes(user.role)) {

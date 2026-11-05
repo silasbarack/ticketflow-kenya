@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthLayout from '@/components/AuthLayout';
 import { Input, Label } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
+import { safeNextPath } from '@/lib/safe-redirect';
 
 const PANEL_POINTS = [
   'Every ticket you have ever bought, in one place.',
@@ -28,7 +29,10 @@ export default function LoginPage() {
     try {
       const user = await login(email, password);
       toast.success('Welcome back!');
-      if (user.role === 'ADMIN') router.push('/admin/dashboard');
+      // Return to the page that sent them here (e.g. /admin), same-site only.
+      const next = safeNextPath(new URLSearchParams(window.location.search).get('next'));
+      if (next) router.push(next);
+      else if (user.role === 'ADMIN') router.push('/admin/dashboard');
       else if (user.role === 'ORGANIZER') router.push('/organizer/dashboard');
       else router.push('/dashboard');
     } catch (error: unknown) {
