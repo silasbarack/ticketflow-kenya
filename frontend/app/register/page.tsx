@@ -105,7 +105,7 @@ export default function RegisterPage() {
                     aria-hidden="true"
                   />
                   <span className="mt-2 block text-sm font-bold text-navy-900">{option.label}</span>
-                  <span className="mt-0.5 block text-[11px] leading-snug text-muted">{option.hint}</span>
+                  <span className="mt-0.5 block text-xs leading-snug text-muted">{option.hint}</span>
                 </button>
               );
             })}

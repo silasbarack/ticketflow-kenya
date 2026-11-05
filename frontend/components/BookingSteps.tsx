@@ -48,7 +48,7 @@ export default function BookingSteps({
             <span className="flex items-center gap-1.5">
               <span
                 className={clsx(
-                  'tnum flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
+                  'tnum flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold',
                   done ? 'bg-brand-500 text-white' : active ? 'bg-brand-600 text-white' : 'bg-navy-100 text-navy-500',
                 )}
               >
@@ -64,7 +64,7 @@ export default function BookingSteps({
                   {step.label}
                   {active && <span className="sr-only"> (current step)</span>}
                 </span>
-                <span className="hidden truncate text-[11px] text-muted sm:block">{step.hint}</span>
+                <span className="hidden truncate text-xs text-muted sm:block">{step.hint}</span>
               </span>
             </span>
           </li>

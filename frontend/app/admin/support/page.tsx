@@ -134,7 +134,7 @@ function TranscriptView({ id, reply = false }: { id: string; reply?: boolean }) 
     <div className="space-y-2 rounded-xl border border-line bg-navy-900/[0.02] p-3">
       {t.data?.messages.map((m) => (
         <div key={m.id} className={clsx('rounded-xl px-3 py-2 text-sm', m.role === 'USER' ? 'bg-white' : m.role === 'AGENT' ? 'bg-emerald-50' : 'bg-violet-50/60')}>
-          <p className="text-[11px] font-extrabold text-navy-500">
+          <p className="text-xs font-extrabold text-navy-500">
             {m.role === 'ASSISTANT' ? 'AI assistant' : m.role === 'AGENT' ? 'Agent' : 'Customer'} · {formatDateTime(m.createdAt)}
             {m.flagged && <span className="ml-2 inline-flex items-center gap-1 text-brand-700"><Flag className="h-3 w-3" aria-hidden="true" />{m.flagReason}</span>}
             {m.feedback === -1 && <span className="ml-2 text-amber-700">rated unhelpful{m.feedbackNote ? `: ${m.feedbackNote}` : ''}</span>}

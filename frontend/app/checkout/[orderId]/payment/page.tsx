@@ -233,7 +233,7 @@ function PaymentProcessing() {
                 className="h-5 w-auto"
               />
             </span>
-            {order && <p className="tnum mt-3 text-[11px] text-muted">Order {order.orderNumber}</p>}
+            {order && <p className="tnum mt-3 text-xs text-muted">Order {order.orderNumber}</p>}
           </div>
 
           {/* Status */}

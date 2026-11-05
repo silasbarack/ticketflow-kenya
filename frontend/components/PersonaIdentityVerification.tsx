@@ -323,7 +323,7 @@ export default function PersonaIdentityVerification({
               >
                 Not now
               </button>
-              <p className="mt-4 text-center text-[11px] leading-5 text-muted">
+              <p className="mt-4 text-center text-xs leading-5 text-muted">
                 Continuing opens Persona&apos;s secure embedded verification flow.
               </p>
             </div>

@@ -67,7 +67,7 @@ export default function RecommendedEvents() {
                 <p className="mt-1 text-xs text-muted">{formatDate(e.startDateTime)} · {e.city}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   {e.minPriceKes !== null && <span className="text-xs font-bold text-navy-800">From {formatCurrency(e.minPriceKes)}</span>}
-                  {e.reasons.slice(0, 1).map((r) => <span key={r} className="rounded-full bg-navy-900/5 px-2 py-0.5 text-[10.5px] font-semibold text-navy-600">{r}</span>)}
+                  {e.reasons.slice(0, 1).map((r) => <span key={r} className="rounded-full bg-navy-900/5 px-2 py-0.5 text-xs font-semibold text-navy-600">{r}</span>)}
                 </div>
               </div>
             </Link>

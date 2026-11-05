@@ -139,7 +139,7 @@ function MarketingStudioContent() {
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-navy-800">Anything to emphasise? (optional)</span>
               <Textarea rows={3} maxLength={1500} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. parking is available; family friendly" />
-              <span className="mt-1 block text-[11px] text-muted">Don&apos;t add performers, sponsors or offers unless they are confirmed.</span>
+              <span className="mt-1 block text-xs text-muted">Don&apos;t add performers, sponsors or offers unless they are confirmed.</span>
             </label>
 
             <Button type="button" fullWidth disabled={!canGenerate} loading={generate.isPending} onClick={() => generate.mutate()} className="bg-violet-700 shadow-none hover:bg-violet-800">
@@ -233,7 +233,7 @@ function PieceCard({ piece, editing, editBody, setEditBody, onEdit, onCancel, on
     <article className="flex flex-col rounded-card border border-line bg-white p-4 shadow-soft">
       <header className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-ink-900 px-2.5 py-1 text-[11px] font-extrabold text-white">{label}</span>
+          <span className="rounded-full bg-ink-900 px-2.5 py-1 text-xs font-extrabold text-white">{label}</span>
           <span className="text-[11px] font-bold uppercase text-muted">{piece.language === 'sw' ? 'Kiswahili' : 'English'}</span>
         </div>
         <div className="flex items-center">

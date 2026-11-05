@@ -29,7 +29,7 @@ export default function OrganizerCTA() {
           {items.map(({icon:Icon,title,text}, index) => (
             <div key={title} className="group flex gap-4 rounded-card border border-white/10 bg-white/[0.055] p-5 transition hover:border-brand-400/40 hover:bg-white/[0.08]">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow"><Icon className="h-5 w-5" aria-hidden="true" /></span>
-              <div><p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/40">0{index + 1}</p><h3 className="mt-1 text-base font-extrabold">{title}</h3><p className="mt-1.5 text-sm leading-6 text-white/60">{text}</p></div>
+              <div><p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/40">0{index + 1}</p><h3 className="mt-1 text-base font-extrabold">{title}</h3><p className="mt-1.5 text-sm leading-6 text-white/60">{text}</p></div>
             </div>
           ))}
         </div>

@@ -11,7 +11,7 @@ export function AiBadge({ className, label = 'AI-generated' }: { className?: str
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800',
+        'inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-800',
         className,
       )}
     >

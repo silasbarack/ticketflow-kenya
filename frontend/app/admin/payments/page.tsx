@@ -95,7 +95,7 @@ function AdminPaymentsContent() {
                       <td className="max-w-[230px] truncate text-navy-700">{payment.order.event.title}</td>
                       <td className="text-navy-700">{payment.order.user.firstName} {payment.order.user.lastName}</td>
                       <td className="num tnum font-extrabold text-navy-900">{formatCurrency(payment.amount)}</td>
-                      <td><span className="rounded-md bg-navy-900/[0.05] px-2 py-1 text-[11px] font-extrabold tracking-wider text-navy-600">{payment.provider}</span></td>
+                      <td><span className="rounded-md bg-navy-900/[0.05] px-2 py-1 text-xs font-extrabold tracking-wider text-navy-600">{payment.provider}</span></td>
                       <td><StatusBadge status={payment.status} /></td>
                       <td className="whitespace-nowrap text-muted">{formatDateTime(payment.createdAt)}</td>
                     </tr>
