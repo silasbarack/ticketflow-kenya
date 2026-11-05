@@ -174,10 +174,10 @@ export default function SupportChat() {
               <img src={AI_LOGO} alt="TicketFlow AI Kenya" width={77} height={56} className="h-14 w-auto shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-extrabold text-navy-900">Support assistant</p>
-                <p className="text-[11px] leading-snug text-muted">{signedIn ? 'Signed in — I can check your own orders' : 'Sign in for help with a specific booking'}</p>
+                <p className="text-xs leading-snug text-muted">{signedIn ? 'Signed in — I can check your own orders' : 'Sign in for help with a specific booking'}</p>
               </div>
             </div>
-            {messages.length > 0 && <button type="button" onClick={newChat} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold text-navy-600 hover:bg-navy-900/5 hover:text-navy-900">New chat</button>}
+            {messages.length > 0 && <button type="button" onClick={newChat} className="shrink-0 rounded-lg px-2 py-1 text-xs font-bold text-navy-600 hover:bg-navy-900/5 hover:text-navy-900">New chat</button>}
           </header>
 
           <div ref={scrollRef} className="min-h-[220px] flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -198,12 +198,12 @@ export default function SupportChat() {
                   <img src={AI_MARK} alt="" width={28} height={28} className="absolute left-0 top-0.5 h-7 w-7" />
                 )}
                 <div className={clsx('max-w-[88%] whitespace-pre-line rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed', m.role === 'USER' ? 'bg-brand-600 text-white' : m.role === 'AGENT' ? 'bg-emerald-50 text-navy-900' : 'bg-navy-900/[0.05] text-navy-900')}>
-                  {m.role === 'AGENT' && <span className="mb-1 block text-[11px] font-extrabold text-emerald-700">TicketFlow team</span>}
+                  {m.role === 'AGENT' && <span className="mb-1 block text-xs font-extrabold text-emerald-700">TicketFlow team</span>}
                   {m.content}
                 </div>
                 {m.role === 'ASSISTANT' && !m.id.startsWith('err-') && (
                   <div className="mt-1 flex items-center gap-1.5">
-                    {m.aiGenerated !== false ? <AiBadge className="!py-0.5" /> : <span className="text-[11px] font-semibold text-muted">From the help centre</span>}
+                    {m.aiGenerated !== false ? <AiBadge className="!py-0.5" /> : <span className="text-xs font-semibold text-muted">From the help centre</span>}
                     <button type="button" aria-label="Helpful" aria-pressed={m.feedback === 1} onClick={() => rate(m.id, 1)} className={clsx('rounded p-1', m.feedback === 1 ? 'text-emerald-600' : 'text-navy-300 hover:text-navy-700')}><ThumbsUp className="h-3.5 w-3.5" /></button>
                     <button type="button" aria-label="Not helpful" aria-pressed={m.feedback === -1} onClick={() => rate(m.id, -1)} className={clsx('rounded p-1', m.feedback === -1 ? 'text-brand-600' : 'text-navy-300 hover:text-navy-700')}><ThumbsDown className="h-3.5 w-3.5" /></button>
                   </div>
@@ -239,7 +239,7 @@ export default function SupportChat() {
               placeholder="Type your question…" className="max-h-32 min-h-[44px] resize-none" />
             <Button type="submit" size="sm" aria-label="Send" disabled={!draft.trim() || sending}><Send className="h-4 w-4" aria-hidden="true" /></Button>
           </form>
-          <p className="border-t border-line px-4 py-2 text-[10.5px] leading-snug text-muted">
+          <p className="border-t border-line px-4 py-2 text-xs leading-snug text-muted">
             Answers may be AI-generated and can be wrong. Never share your M-Pesa PIN. <Link href="/legal/privacy-policy" className="underline">Privacy</Link>
           </p>
         </section>

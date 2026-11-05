@@ -30,14 +30,14 @@ export default function DashboardLayout({ items, children }: { items: NavItem[];
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-extrabold text-navy-900">{user?.firstName} {user?.lastName}</p>
-              <p className="mt-1 inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+              <p className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-muted">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-600" aria-hidden="true" />
                 {isAdmin ? 'Platform administrator' : 'Organizer workspace'}
               </p>
             </div>
           </div>
 
-          <p className="mt-7 px-3.5 text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-navy-400">Workspace</p>
+          <p className="mt-7 px-3.5 text-[11px] font-extrabold uppercase tracking-[0.18em] text-navy-400">Workspace</p>
           <nav className="mt-2 flex flex-1 flex-col gap-1">
             {items.map((item) => {
               const active = pathname === item.href || pathname.startsWith(item.href + '/');

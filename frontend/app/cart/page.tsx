@@ -516,13 +516,13 @@ function BookingFlow() {
               <div className="flex justify-between text-navy-600">
                 <span className="flex items-center gap-1.5">
                   Service fee
-                  <span className="tnum rounded-full bg-brand-50 px-1.5 py-0.5 text-[11px] font-bold text-brand-700">
+                  <span className="tnum rounded-full bg-brand-50 px-1.5 py-0.5 text-xs font-bold text-brand-700">
                     {SERVICE_FEE_PERCENT}%
                   </span>
                 </span>
                 <span className="tnum">{formatCurrency(serviceFee)}</span>
               </div>
-              <p className="text-[11px] leading-relaxed text-muted">
+              <p className="text-xs leading-relaxed text-muted">
                 The {SERVICE_FEE_PERCENT}% platform commission covers secure M-Pesa processing and instant QR ticket
                 delivery. The organizer receives the full face value.
               </p>
@@ -533,7 +533,7 @@ function BookingFlow() {
               <span className="tnum text-2xl font-extrabold text-navy-900">{formatCurrency(finalTotal)}</span>
             </div>
 
-            <div className="flex flex-col gap-2.5 border-t border-line bg-cream/60 px-5 py-4 text-[11px] text-muted">
+            <div className="flex flex-col gap-2.5 border-t border-line bg-cream/60 px-5 py-4 text-xs text-muted">
               <span className="flex items-center gap-2">
                 <Image
                   src="/mpesa-logo.svg"
@@ -571,7 +571,7 @@ function BookingFlow() {
 function FlowNote({ index, text }: { index: number; text: string }) {
   return (
     <li className="flex items-start gap-2.5">
-      <span className="tnum mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-navy-900/[0.06] text-[11px] font-bold text-navy-700">
+      <span className="tnum mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-navy-900/[0.06] text-xs font-bold text-navy-700">
         {index}
       </span>
       {text}

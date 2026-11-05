@@ -108,7 +108,7 @@ function OpsContent() {
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-navy-400">Recommended actions</p>
                 <ul className="mt-2 space-y-2">
                   {report.data.report.recommendedActions.map((a) => (
-                    <li key={a.action} className="rounded-xl border border-line bg-white p-3"><span className="mr-2 rounded-full bg-navy-900/5 px-2 py-0.5 text-[10px] font-extrabold text-navy-600">{a.owner}</span><strong>{a.action}</strong><p className="mt-1 text-navy-600">{a.why}</p></li>
+                    <li key={a.action} className="rounded-xl border border-line bg-white p-3"><span className="mr-2 rounded-full bg-navy-900/5 px-2 py-0.5 text-xs font-extrabold text-navy-600">{a.owner}</span><strong>{a.action}</strong><p className="mt-1 text-navy-600">{a.why}</p></li>
                   ))}
                 </ul>
               </div>
@@ -221,7 +221,7 @@ function AlertCard({ alert, aiAvailable }: { alert: Alert; aiAvailable: boolean 
           ) : (
             <div className="space-y-2">
               <Textarea rows={2} maxLength={2000} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Decision note (required): what you checked and what you decided" aria-label="Decision note" />
-              <p className="text-[11px] text-muted">Recording a decision does not change any payment, ticket or account. Take those actions through the relevant admin page.</p>
+              <p className="text-xs text-muted">Recording a decision does not change any payment, ticket or account. Take those actions through the relevant admin page.</p>
               <div className="flex flex-wrap gap-2">
                 {alert.status === 'OPEN' && <Button type="button" size="sm" variant="outline" disabled={note.trim().length < 3} loading={decide.isPending && decide.variables === 'ACKNOWLEDGED'} onClick={() => decide.mutate('ACKNOWLEDGED')}>Acknowledge</Button>}
                 <Button type="button" size="sm" disabled={note.trim().length < 3} loading={decide.isPending && decide.variables === 'RESOLVED'} onClick={() => decide.mutate('RESOLVED')}>Resolve</Button>
@@ -249,7 +249,7 @@ function ActivityPanel() {
     <ol className="divide-y divide-line rounded-card border border-line bg-white shadow-soft">
       {feed.data.map((i) => (
         <li key={i.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm">
-          <span className={clsx('rounded-full px-2 py-0.5 text-[10px] font-extrabold', tone[i.source])}>{i.source}</span>
+          <span className={clsx('rounded-full px-2 py-0.5 text-xs font-extrabold', tone[i.source])}>{i.source}</span>
           <span className="font-semibold capitalize text-navy-900">{i.title}</span>
           <span className="text-xs text-muted">{i.status}</span>
           {i.detail && <span className="w-full truncate text-xs text-muted sm:w-auto">{i.detail}</span>}

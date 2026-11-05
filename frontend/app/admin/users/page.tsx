@@ -103,7 +103,7 @@ function AdminUsersContent() {
                     <Badge tone={user.isActive ? 'success' : 'danger'}>{user.isActive ? 'Active' : 'Suspended'}</Badge>
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
-                    <div><p className="text-xs font-semibold text-navy-700">{user.role}</p><p className="text-[11px] text-muted">Joined {formatDate(user.createdAt)}</p></div>
+                    <div><p className="text-xs font-semibold text-navy-700">{user.role}</p><p className="text-xs text-muted">Joined {formatDate(user.createdAt)}</p></div>
                     {user.role !== 'ADMIN' && <Button variant={user.isActive ? 'danger' : 'outline'} size="sm" onClick={() => accountAction(user)} loading={toggleActive.isPending}>{user.isActive ? 'Suspend' : 'Activate'}</Button>}
                   </div>
                 </li>

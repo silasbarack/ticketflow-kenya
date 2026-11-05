@@ -249,7 +249,7 @@ function DailyBars({ daily }: { daily: EventMetrics['daily'] }) {
           </button>
         ))}
       </div>
-      <div className="mt-1.5 flex justify-between text-[11px] text-muted">
+      <div className="mt-1.5 flex justify-between text-xs text-muted">
         <span>{formatDate(days[0].day)}</span>
         <span>Today</span>
       </div>

@@ -311,7 +311,7 @@ function CheckoutContent() {
             <p className="mt-0.5 text-xs text-muted">
               {formatDateTime(order.event.startDateTime)} · {order.event.venue}
             </p>
-            <p className="tnum mt-2 text-[11px] text-muted">Order {order.orderNumber}</p>
+            <p className="tnum mt-2 text-xs text-muted">Order {order.orderNumber}</p>
           </div>
 
           <div className="space-y-3 px-5 py-4 text-sm">
@@ -332,7 +332,7 @@ function CheckoutContent() {
             <div className="flex justify-between text-navy-600">
               <span className="flex items-center gap-1.5">
                 Service fee
-                <span className="tnum rounded-full bg-brand-50 px-1.5 py-0.5 text-[11px] font-bold text-brand-700">
+                <span className="tnum rounded-full bg-brand-50 px-1.5 py-0.5 text-xs font-bold text-brand-700">
                   {SERVICE_FEE_PERCENT}%
                 </span>
               </span>

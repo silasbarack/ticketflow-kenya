@@ -97,7 +97,7 @@ function AdminEventsContent() {
               <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-center sm:p-5">
                 <div className="flex items-center gap-4 sm:contents">
                   <div className="flex h-[72px] w-[72px] shrink-0 flex-col items-center justify-center rounded-2xl bg-ink-900 text-white shadow-card">
-                    <span className="text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-brand-400">{MONTH.format(new Date(event.startDateTime))}</span>
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-400">{MONTH.format(new Date(event.startDateTime))}</span>
                     <span className="tnum text-[26px] font-extrabold leading-none tracking-[-0.03em]">{DAY.format(new Date(event.startDateTime))}</span>
                   </div>
                   {event.posterUrl && (
