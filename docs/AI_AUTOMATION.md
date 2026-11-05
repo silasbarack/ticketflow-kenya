@@ -120,6 +120,7 @@ Prisma's diff also proposed dropping `tax_rules.effective_range`, a raw-SQL colu
 | Variable | Default | Purpose |
 |---|---|---|
 | `AI_ENABLED` | `false` | Global AI switch. Features also need an admin toggle. |
+| `AI_FEATURES_ENABLED` | (none) | Features on by default: `all` or a comma-separated list (e.g. `SUPPORT_CHAT,EVENT_ASSISTANT`). A setting saved in AI Settings overrides it. |
 | `AI_PROVIDER` | `anthropic` | Provider selection. Unknown values fail closed. |
 | `ANTHROPIC_API_KEY` | (none) | Server-side only, never exposed to the browser |
 | `AI_MODEL` | `claude-opus-5-5` | Model id |

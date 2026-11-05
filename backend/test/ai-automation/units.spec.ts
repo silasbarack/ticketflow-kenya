@@ -154,3 +154,42 @@ describe('verification explanation', () => {
     expect(e.authoritative).toMatch(/Persona/);
   });
 });
+
+describe('AI feature defaults from AI_FEATURES_ENABLED', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { AiService } = require('../../src/ai/ai.service');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { ConfigService } = require('@nestjs/config');
+  const provider = { name: 'fake', model: 'm', isConfigured: () => true, generateStructured: async () => ({}) };
+  const make = (env: string | undefined, row: unknown = null) => {
+    const saved = process.env.AI_FEATURES_ENABLED;
+    if (env === undefined) delete process.env.AI_FEATURES_ENABLED;
+    else process.env.AI_FEATURES_ENABLED = env;
+    const prisma = { aiFeatureSetting: { findUnique: async () => row } };
+    const svc = new AiService(prisma, new ConfigService({}), provider);
+    return { svc, restore: () => (saved === undefined ? delete process.env.AI_FEATURES_ENABLED : (process.env.AI_FEATURES_ENABLED = saved)) };
+  };
+
+  it('is off by default', async () => {
+    const { svc, restore } = make(undefined);
+    expect((await svc.getSettings('SUPPORT_CHAT')).enabled).toBe(false);
+    restore();
+  });
+
+  it('turns on listed features, or all of them', async () => {
+    let t = make('support_chat, EVENT_ASSISTANT');
+    expect((await t.svc.getSettings('SUPPORT_CHAT')).enabled).toBe(true);
+    expect((await t.svc.getSettings('EVENT_ASSISTANT')).enabled).toBe(true);
+    expect((await t.svc.getSettings('ADMIN_COPILOT')).enabled).toBe(false);
+    t.restore();
+    t = make('all');
+    expect((await t.svc.getSettings('ADMIN_COPILOT')).enabled).toBe(true);
+    t.restore();
+  });
+
+  it('lets an admin-saved setting override the default', async () => {
+    const { svc, restore } = make('all', { enabled: false, dailyRequestLimit: 5, perUserDailyLimit: 1, monthlyBudgetUsd: 10 });
+    expect((await svc.getSettings('SUPPORT_CHAT')).enabled).toBe(false);
+    restore();
+  });
+});

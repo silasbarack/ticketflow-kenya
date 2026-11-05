@@ -75,6 +75,22 @@ export class AiService {
     @Inject(AI_PROVIDER) private readonly provider: AiProvider,
   ) {}
 
+  /**
+   * Features switched on by default from the environment
+   * (AI_FEATURES_ENABLED=all, or a comma-separated list of feature keys).
+   * A setting an admin has saved in AI Settings always takes precedence, so a
+   * feature can still be turned off there.
+   */
+  private defaultEnabled(feature: AiFeature): boolean {
+    const raw = (this.config.get<string>('AI_FEATURES_ENABLED') || '').trim();
+    if (!raw) return DEFAULT_SETTINGS.enabled;
+    if (raw.toLowerCase() === 'all') return true;
+    return raw
+      .split(',')
+      .map((f) => f.trim().toUpperCase())
+      .includes(feature);
+  }
+
   private get globallyEnabled(): boolean {
     return this.config.get<string>('AI_ENABLED') === 'true';
   }
@@ -87,7 +103,7 @@ export class AiService {
     const row = await this.prisma.aiFeatureSetting.findUnique({ where: { feature } });
     return {
       feature,
-      enabled: row?.enabled ?? DEFAULT_SETTINGS.enabled,
+      enabled: row ? row.enabled : this.defaultEnabled(feature),
       dailyRequestLimit: row?.dailyRequestLimit ?? DEFAULT_SETTINGS.dailyRequestLimit,
       perUserDailyLimit: row?.perUserDailyLimit ?? DEFAULT_SETTINGS.perUserDailyLimit,
       monthlyBudgetUsd: row ? Number(row.monthlyBudgetUsd) : DEFAULT_SETTINGS.monthlyBudgetUsd,
