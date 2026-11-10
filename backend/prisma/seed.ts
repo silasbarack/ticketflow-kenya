@@ -61,9 +61,12 @@ type SeedEvent = {
   posterUrl: string;
   posterAlt: string;
   posterSourceUrl?: string;
-  verificationSource: string;
-  verificationSourceUrl: string;
+  /** Third-party listing the event was verified against; absent for TicketFlow's own listings. */
+  verificationSource?: string;
+  verificationSourceUrl?: string;
   secondaryVerificationSourceUrl?: string;
+  /** TicketFlow's own sample listing — refused at checkout when MPESA_ENV=production. */
+  isDemo?: boolean;
   ticketTiers: SeedTier[];
 };
 
@@ -792,6 +795,339 @@ const eventSeeds: SeedEvent[] = [
       },
     ],
   },
+  // ---- Upcoming season (Nov 2026 – Feb 2027) --------------------------------
+  // TicketFlow's own sample listings: invented events at real venues, each with
+  // a TicketFlow-branded poster (logo + motto) rendered by
+  // frontend/scripts/event-posters. `isDemo` keeps them out of real customers'
+  // money: OrdersService refuses them when MPESA_ENV=production.
+  {
+    slug: "afro-house-sunset-sessions-2026",
+    title: "Afro-House Sunset Sessions",
+    subtitle: "Eight hours of Afro-house, amapiano and deep grooves on the lawn",
+    description:
+      "An open-air sundowner on the Ngong Racecourse lawn with a rotating line-up of Nairobi Afro-house and amapiano DJs from golden hour into the night. Food trucks, a craft-drinks bar and a covered VIP deck. Strictly 18+.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "Ngong Racecourse",
+    city: "Nairobi",
+    county: "Nairobi",
+    address: "Ngong Road, Nairobi",
+    categoryIndex: 0,
+    startAt: '2026-11-21T15:00:00+03:00',
+    endAt: '2026-11-21T23:00:00+03:00',
+    posterUrl: '/events/posters/afro-house-sunset-sessions-2026.jpg',
+    posterAlt:
+      "Afro-House Sunset Sessions poster with a setting sun, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Early bird",
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 1500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        salesEnd: '2026-11-14T23:59:00+03:00',
+      },
+      {
+        name: "General admission",
+        category: TicketTypeCategory.REGULAR,
+        price: 2500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "VIP deck",
+        category: TicketTypeCategory.VIP,
+        price: 6000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Covered deck, dedicated bar and fast-lane entry.",
+      },
+    ],
+  },
+  {
+    slug: "nairobi-startup-innovation-summit-2026",
+    title: "Nairobi Startup & Innovation Summit",
+    subtitle: "Founders, investors and builders shaping East Africa's next decade",
+    description:
+      "A one-day summit at KICC with keynotes, founder panels, an investor pitch stage and an expo floor for East African startups. Includes lunch and networking sessions throughout the day.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "KICC",
+    city: "Nairobi",
+    county: "Nairobi",
+    address: "Kenyatta International Convention Centre, Harambee Avenue, Nairobi",
+    categoryIndex: 1,
+    startAt: '2026-11-26T08:00:00+03:00',
+    endAt: '2026-11-26T17:30:00+03:00',
+    posterUrl: '/events/posters/nairobi-startup-innovation-summit-2026.jpg',
+    posterAlt:
+      "Nairobi Startup & Innovation Summit poster with a blue network pattern, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Student",
+        category: TicketTypeCategory.STUDENT,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Valid student ID required at check-in.",
+      },
+      {
+        name: "Delegate",
+        category: TicketTypeCategory.REGULAR,
+        price: 4500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Full-day access with lunch.",
+      },
+      {
+        name: "VIP delegate",
+        category: TicketTypeCategory.VIP,
+        price: 9500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Front-row seating, speaker lounge and evening reception.",
+      },
+    ],
+  },
+  {
+    slug: "swahili-coast-jazz-night-2026",
+    title: "Swahili Coast Jazz Night",
+    subtitle: "Live jazz, taarab and Afro-soul under the stars of Old Town",
+    description:
+      "An evening of live jazz, taarab and Afro-soul in the historic courtyard of Fort Jesus, with coastal cuisine from local kitchens. Seating is unreserved for regular tickets; VIP tickets include a reserved table seat.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "Fort Jesus",
+    city: "Mombasa",
+    county: "Mombasa",
+    address: "Nkrumah Road, Old Town, Mombasa",
+    categoryIndex: 0,
+    startAt: '2026-12-05T18:00:00+03:00',
+    endAt: '2026-12-05T23:30:00+03:00',
+    posterUrl: '/events/posters/swahili-coast-jazz-night-2026.jpg',
+    posterAlt:
+      "Swahili Coast Jazz Night poster with a gold vinyl record, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Regular",
+        category: TicketTypeCategory.REGULAR,
+        price: 2000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "VIP table seat",
+        category: TicketTypeCategory.VIP,
+        price: 5000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Reserved table seat near the stage.",
+      },
+    ],
+  },
+  {
+    slug: "jamhuri-day-family-fun-fair-2026",
+    title: "Jamhuri Day Family Fun Fair",
+    subtitle: "Rides, games, food stalls and live performances for the whole family",
+    description:
+      "Celebrate Jamhuri Day at Uhuru Gardens with fairground rides, a kids' zone, face painting, food stalls and live performances from Kenyan artists and school choirs. Children under 3 enter free.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "Uhuru Gardens",
+    city: "Nairobi",
+    county: "Nairobi",
+    address: "Lang'ata Road, Nairobi",
+    categoryIndex: 4,
+    startAt: '2026-12-12T10:00:00+03:00',
+    endAt: '2026-12-12T18:00:00+03:00',
+    posterUrl: '/events/posters/jamhuri-day-family-fun-fair-2026.jpg',
+    posterAlt:
+      "Jamhuri Day Family Fun Fair poster in the Kenyan flag colours with the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Child (3–12)",
+        category: TicketTypeCategory.REGULAR,
+        price: 500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "For children aged 3 to 12; under-3s enter free.",
+      },
+      {
+        name: "Adult",
+        category: TicketTypeCategory.REGULAR,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "Family of 4",
+        category: TicketTypeCategory.REGULAR,
+        price: 3200,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Total price for 2 adults and 2 children; not a per-person price.",
+      },
+    ],
+  },
+  {
+    slug: "a-nairobi-christmas-carol-2026",
+    title: "A Nairobi Christmas Carol",
+    subtitle: "The classic holiday tale, retold on the streets of the city in the sun",
+    description:
+      "A fresh stage adaptation of the classic Christmas story, set in present-day Nairobi, with live music and a cast of Kenyan actors. Suitable for ages 8 and up. Running time about 2 hours 30 minutes including an interval.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "Kenya National Theatre",
+    city: "Nairobi",
+    county: "Nairobi",
+    address: "Harry Thuku Road, Nairobi",
+    categoryIndex: 3,
+    startAt: '2026-12-18T19:00:00+03:00',
+    endAt: '2026-12-18T21:30:00+03:00',
+    posterUrl: '/events/posters/a-nairobi-christmas-carol-2026.jpg',
+    posterAlt:
+      "A Nairobi Christmas Carol poster with gold stars and festive lights, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Student",
+        category: TicketTypeCategory.STUDENT,
+        price: 800,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Valid student ID required at check-in.",
+      },
+      {
+        name: "Regular",
+        category: TicketTypeCategory.REGULAR,
+        price: 1500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "Premium front rows",
+        category: TicketTypeCategory.VIP,
+        price: 3000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+    ],
+  },
+  {
+    slug: "countdown-2027-new-years-eve-festival",
+    title: "Countdown 2027",
+    subtitle: "New Year's Eve festival — live acts, DJs and a midnight fireworks show",
+    description:
+      "See in 2027 at The Carnivore Grounds with live performances, two DJ stages, food courts and a midnight fireworks show. Gates open at 6 PM. Strictly 18+.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "The Carnivore Grounds",
+    city: "Nairobi",
+    county: "Nairobi",
+    address: "Lang'ata Road, Nairobi",
+    categoryIndex: 4,
+    startAt: '2026-12-31T18:00:00+03:00',
+    endAt: '2027-01-01T03:00:00+03:00',
+    posterUrl: '/events/posters/countdown-2027-new-years-eve-festival.jpg',
+    posterAlt:
+      "Countdown 2027 poster with fireworks over a purple night sky, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Early bird",
+        category: TicketTypeCategory.EARLY_BIRD,
+        price: 2000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        salesEnd: '2026-12-15T23:59:00+03:00',
+      },
+      {
+        name: "Regular",
+        category: TicketTypeCategory.REGULAR,
+        price: 3000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "VIP",
+        category: TicketTypeCategory.VIP,
+        price: 7500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "VIP enclosure with dedicated bar and washrooms.",
+      },
+      {
+        name: "VVIP lounge",
+        category: TicketTypeCategory.VVIP,
+        price: 15000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Lounge seating, complimentary drinks and best fireworks view.",
+      },
+    ],
+  },
+  {
+    slug: "nakuru-lakeside-10k-fun-run-2027",
+    title: "Nakuru Lakeside 10K & Fun Run",
+    subtitle: "Timed 10K race and a 5K fun run for every pace",
+    description:
+      "A chip-timed 10K road race and an untimed 5K fun run starting and finishing at Nakuru Athletic Club. Every entry includes a race T-shirt, finisher's medal and post-race refreshments. Bib collection opens at 5:30 AM on race day.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "Nakuru Athletic Club",
+    city: "Nakuru",
+    county: "Nakuru",
+    address: "Nakuru Athletic Club, Nakuru",
+    categoryIndex: 2,
+    startAt: '2027-01-17T06:30:00+03:00',
+    endAt: '2027-01-17T12:00:00+03:00',
+    posterUrl: '/events/posters/nakuru-lakeside-10k-fun-run-2027.jpg',
+    posterAlt:
+      "Nakuru Lakeside 10K & Fun Run poster with green running-track lines, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Student 5K",
+        category: TicketTypeCategory.STUDENT,
+        price: 600,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Valid student ID required at bib collection.",
+      },
+      {
+        name: "5K fun run",
+        category: TicketTypeCategory.REGULAR,
+        price: 1000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "10K timed race",
+        category: TicketTypeCategory.REGULAR,
+        price: 1500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Chip-timed, with results published after the race.",
+      },
+    ],
+  },
+  {
+    slug: "love-and-laughter-valentines-comedy-night-2027",
+    title: "Love & Laughter",
+    subtitle: "A Valentine's comedy night with Nairobi's sharpest stand-up acts",
+    description:
+      "Spend the eve of Valentine's Day laughing with a line-up of Nairobi stand-up comedians, hosted at the Alliance Française auditorium. Adult humour, 16+.",
+    organizerName: LISTINGS_COMPANY,
+    venue: "Alliance Française de Nairobi",
+    city: "Nairobi",
+    county: "Nairobi",
+    address: "Loita Street, Nairobi",
+    categoryIndex: 3,
+    startAt: '2027-02-13T19:30:00+03:00',
+    endAt: '2027-02-13T22:30:00+03:00',
+    posterUrl: '/events/posters/love-and-laughter-valentines-comedy-night-2027.jpg',
+    posterAlt:
+      "Love & Laughter Valentine's comedy night poster with hearts under a spotlight, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+    isDemo: true,
+    ticketTiers: [
+      {
+        name: "Single",
+        category: TicketTypeCategory.REGULAR,
+        price: 2000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+      },
+      {
+        name: "Couple",
+        category: TicketTypeCategory.REGULAR,
+        price: 3500,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Total price for 2 people; not a per-person price.",
+      },
+      {
+        name: "VIP couple",
+        category: TicketTypeCategory.VIP,
+        price: 6000,
+        availabilityStatus: TicketAvailabilityStatus.AVAILABLE,
+        description: "Total for 2 people: front tables and a welcome drink each.",
+      },
+    ],
+  },
 ];
 
 async function main() {
@@ -927,12 +1263,12 @@ async function main() {
       // outbound booking URL, so nothing can route a buyer off-site.
       bookingMode: EventBookingMode.INTERNAL,
       bookingUrl: null,
-      verificationSource: seedEvent.verificationSource,
-      verificationSourceUrl: seedEvent.verificationSourceUrl,
+      verificationSource: seedEvent.verificationSource ?? null,
+      verificationSourceUrl: seedEvent.verificationSourceUrl ?? null,
       secondaryVerificationSourceUrl: seedEvent.secondaryVerificationSourceUrl ?? null,
-      verifiedAt: VERIFIED_AT,
+      verifiedAt: seedEvent.verificationSource ? VERIFIED_AT : null,
       salesEnabled: true,
-      isDemo: false,
+      isDemo: seedEvent.isDemo ?? false,
     };
 
     const event = await prisma.event.upsert({
@@ -1002,7 +1338,7 @@ async function main() {
     console.log(`Archived stale listing "${event.title}".`);
   }
 
-  console.log(`Seed complete: ${eventSeeds.length} verified events are published and bookable on TicketFlow.`);
+  console.log(`Seed complete: ${eventSeeds.length} events are published and bookable on TicketFlow.`);
   console.log('--- Login credentials ---');
   console.log('Admin:     admin@ticketflow.co.ke / Admin@123');
   console.log('Organizer: organizer@ticketflow.co.ke / Organizer@123');

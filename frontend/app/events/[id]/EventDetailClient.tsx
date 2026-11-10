@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, CalendarDays, CheckCircle2, Clock3, MapPin, Minus, Plus, ShieldCheck, Ticket, Users } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CalendarDays, CheckCircle2, Clock3, Info, MapPin, Minus, Plus, ShieldCheck, Ticket, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { EventItem, TicketType } from '@/types';
 import { useCart } from '@/hooks/useCart';
@@ -96,6 +96,9 @@ export default function EventDetailClient({ initialEvent }: { initialEvent: Even
             </div>
             <Link href="#tickets" className="primary-cta">Choose tickets <ArrowUpRight size={18} /></Link>
             <p className="event-checkout-note"><ShieldCheck size={15} /> Tickets are sold only on TicketFlow Kenya — pay by M-Pesa and get your QR ticket instantly.</p>
+            {event.isDemo && (
+              <p className="event-checkout-note"><Info size={15} /> TicketFlow sample listing — a showcase event, not yet a confirmed booking.</p>
+            )}
           </div>
         </section>
 

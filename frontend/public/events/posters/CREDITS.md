@@ -14,3 +14,10 @@ seller. TicketFlow does not claim authorship or ownership of this artwork.
 
 The event records also preserve these pages in `posterSourceUrl` so source
 provenance travels with the data rather than depending on this document alone.
+
+## TicketFlow originals
+
+The `*.jpg` posters in this directory (upcoming-season sample listings) are
+original TicketFlow Kenya artwork rendered by
+`frontend/scripts/event-posters/generate.js`. They use only the TicketFlow
+logo from `public/brand/` and the Noto Sans typeface.
