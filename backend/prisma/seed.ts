@@ -816,7 +816,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2026-11-21T23:00:00+03:00',
     posterUrl: '/events/posters/afro-house-sunset-sessions-2026.jpg',
     posterAlt:
-      "Afro-House Sunset Sessions poster with a setting sun, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Afro-House Sunset Sessions poster with a concert crowd under stage lights, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -857,7 +857,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2026-11-26T17:30:00+03:00',
     posterUrl: '/events/posters/nairobi-startup-innovation-summit-2026.jpg',
     posterAlt:
-      "Nairobi Startup & Innovation Summit poster with a blue network pattern, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Nairobi Startup & Innovation Summit poster with a conference audience, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -899,7 +899,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2026-12-05T23:30:00+03:00',
     posterUrl: '/events/posters/swahili-coast-jazz-night-2026.jpg',
     posterAlt:
-      "Swahili Coast Jazz Night poster with a gold vinyl record, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Swahili Coast Jazz Night poster with a saxophonist playing live, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -933,7 +933,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2026-12-12T18:00:00+03:00',
     posterUrl: '/events/posters/jamhuri-day-family-fun-fair-2026.jpg',
     posterAlt:
-      "Jamhuri Day Family Fun Fair poster in the Kenyan flag colours with the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Jamhuri Day Family Fun Fair poster with a fairground swing ride, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -974,7 +974,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2026-12-18T21:30:00+03:00',
     posterUrl: '/events/posters/a-nairobi-christmas-carol-2026.jpg',
     posterAlt:
-      "A Nairobi Christmas Carol poster with gold stars and festive lights, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "A Nairobi Christmas Carol poster with actors silhouetted against a red stage curtain, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -1014,7 +1014,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2027-01-01T03:00:00+03:00',
     posterUrl: '/events/posters/countdown-2027-new-years-eve-festival.jpg',
     posterAlt:
-      "Countdown 2027 poster with fireworks over a purple night sky, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Countdown 2027 poster with fireworks lighting the night sky, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -1062,7 +1062,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2027-01-17T12:00:00+03:00',
     posterUrl: '/events/posters/nakuru-lakeside-10k-fun-run-2027.jpg',
     posterAlt:
-      "Nakuru Lakeside 10K & Fun Run poster with green running-track lines, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Nakuru Lakeside 10K & Fun Run poster with runners on a city road, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {
@@ -1103,7 +1103,7 @@ const eventSeeds: SeedEvent[] = [
     endAt: '2027-02-13T22:30:00+03:00',
     posterUrl: '/events/posters/love-and-laughter-valentines-comedy-night-2027.jpg',
     posterAlt:
-      "Love & Laughter Valentine's comedy night poster with hearts under a spotlight, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
+      "Love & Laughter Valentine's comedy night poster with a stage microphone under spotlights, the TicketFlow Kenya logo and the motto Good Events. Brighter People.",
     isDemo: true,
     ticketTiers: [
       {

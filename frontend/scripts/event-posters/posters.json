@@ -8,7 +8,10 @@
     "time": "3:00 PM – 11:00 PM",
     "venue": "Ngong Racecourse, Nairobi",
     "price": "From KES 1,500",
-    "theme": "sunset"
+    "photo": "1516450360452-9312f5e86fc7",
+    "photoPosition": "center 40%",
+    "tint": "#ff6a2b",
+    "accent": "#ffb347"
   },
   {
     "slug": "nairobi-startup-innovation-summit-2026",
@@ -19,7 +22,10 @@
     "time": "8:00 AM – 5:30 PM",
     "venue": "KICC, Nairobi",
     "price": "From KES 1,000",
-    "theme": "tech"
+    "photo": "1540575467063-178a50c2df87",
+    "photoPosition": "center 60%",
+    "tint": "#1d4ed8",
+    "accent": "#38bdf8"
   },
   {
     "slug": "swahili-coast-jazz-night-2026",
@@ -30,7 +36,10 @@
     "time": "6:00 PM – 11:30 PM",
     "venue": "Fort Jesus, Mombasa",
     "price": "From KES 2,000",
-    "theme": "jazz"
+    "photo": "1415201364774-f6f0bb35f28f",
+    "photoPosition": "30% center",
+    "tint": "#0f766e",
+    "accent": "#f5c451"
   },
   {
     "slug": "jamhuri-day-family-fun-fair-2026",
@@ -41,7 +50,12 @@
     "time": "10:00 AM – 6:00 PM",
     "venue": "Uhuru Gardens, Nairobi",
     "price": "From KES 500",
-    "theme": "flag"
+    "photo": "1513889961551-628c1e5e2ee9",
+    "photoPosition": "center 30%",
+    "tint": "#006b3f",
+    "accent": "#4ade80",
+    "photoScale": 1.4,
+    "photoOrigin": "right top"
   },
   {
     "slug": "a-nairobi-christmas-carol-2026",
@@ -52,7 +66,10 @@
     "time": "7:00 PM – 9:30 PM",
     "venue": "Kenya National Theatre, Nairobi",
     "price": "From KES 800",
-    "theme": "christmas"
+    "photo": "1503095396549-807759245b35",
+    "photoPosition": "center 60%",
+    "tint": "#7f1d1d",
+    "accent": "#facc15"
   },
   {
     "slug": "countdown-2027-new-years-eve-festival",
@@ -63,7 +80,12 @@
     "time": "6:00 PM – 3:00 AM",
     "venue": "The Carnivore Grounds, Nairobi",
     "price": "From KES 2,000",
-    "theme": "nye"
+    "photo": "1498931299472-f7a63a5a1cfa",
+    "photoPosition": "30% 40%",
+    "tint": "#4c1d95",
+    "accent": "#fcd34d",
+    "photoScale": 1.6,
+    "photoOrigin": "25% 30%"
   },
   {
     "slug": "nakuru-lakeside-10k-fun-run-2027",
@@ -74,7 +96,10 @@
     "time": "6:30 AM – 12:00 PM",
     "venue": "Nakuru Athletic Club, Nakuru",
     "price": "From KES 600",
-    "theme": "run"
+    "photo": "1452626038306-9aae5e071dd3",
+    "photoPosition": "center 55%",
+    "tint": "#14532d",
+    "accent": "#a3e635"
   },
   {
     "slug": "love-and-laughter-valentines-comedy-night-2027",
@@ -85,6 +110,9 @@
     "time": "7:30 PM – 10:30 PM",
     "venue": "Alliance Française, Nairobi",
     "price": "From KES 2,000",
-    "theme": "comedy"
+    "photo": "1507676184212-d03ab07a01bf",
+    "photoPosition": "center center",
+    "tint": "#9d174d",
+    "accent": "#fda4af"
   }
 ]

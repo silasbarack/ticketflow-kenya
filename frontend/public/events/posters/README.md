@@ -6,8 +6,8 @@ event's official ticket seller. The API returns that artwork through
 sources are documented in `CREDITS.md` and in the Prisma seed beside each event.
 
 TicketFlow's own listings (the November 2026 – February 2027 season, flagged
-`isDemo`) use the `*.jpg` posters in this directory. They are original
-TicketFlow artwork — drawn gradients and SVG, no stock imagery — and every one
+`isDemo`) use the `*.jpg` posters in this directory. Each is a
+TicketFlow design over an Unsplash photograph (credited in `CREDITS.md`) and
 carries the TicketFlow Kenya logo and the motto **"Good Events. Brighter
 People."** Regenerate them from `frontend/` after editing
 `scripts/event-posters/posters.json`:
